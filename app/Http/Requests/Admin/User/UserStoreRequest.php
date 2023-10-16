@@ -61,4 +61,14 @@ class UserStoreRequest extends FormRequest
             'avatar.dimensions' => 'Avatar should have such dimensions: width[50px - 2000px], height[50px - 2000px]!',
         ];
     }
+
+    public function response(array $errors)
+    {
+        return response()->json([
+            'code' => 422,
+            'status' => 'error',
+            'message' => 'Validation failed',
+            'data' => $errors,
+        ], 422);
+    }
 }
