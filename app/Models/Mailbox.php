@@ -20,6 +20,10 @@ class Mailbox extends Model
         "app_password",
         "for_linkedin",
         "email_provider_id",
+        "token",
+        "refresh_token",
+        "refresh_token",
+        "expires_in"
     ];
 
     public function email_provider()
