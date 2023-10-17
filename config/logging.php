@@ -51,6 +51,13 @@ return [
     */
 
     'channels' => [
+        'development' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/development_logs/laravel.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],
