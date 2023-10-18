@@ -15,13 +15,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware("auth:sanctum")->group(function() {
+Route::prefix('')->group(function() {
+    Route::group(['prefix' => 'google'], function () {
+        Route::get('/login', [\App\Http\Controllers\Api\Google\GoogleController::class, 'login']);
+        Route::get('/callback', [\App\Http\Controllers\Api\Google\GoogleController::class, 'callback']);
+//        Route::get('/', [\App\Http\Controllers\Admin\Google\GoogleController::class, 'getClient']);
+    });
+
+    Route::group(['prefix' => 'users'], function () {
+        Route::get('/', [\App\Http\Controllers\Api\User\UserController::class, 'index']);
+        Route::get('/create', [\App\Http\Controllers\Api\User\UserController::class, 'create']);
+        Route::post('/', [\App\Http\Controllers\Api\User\UserController::class, 'store']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\User\UserController::class, 'show']);
+        Route::get('/{id}/edit', [\App\Http\Controllers\Api\User\UserController::class, 'edit']);
+        Route::put('/{id}', [\App\Http\Controllers\Api\User\UserController::class, 'update']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\User\UserController::class, 'destroy']);
+    });
+
+
     Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 
-    Route::apiResource('users', \App\Http\Controllers\Api\User\UserController::class);
+//    Route::apiResource('users', \App\Http\Controllers\Api\User\UserController::class);
 
     Route::prefix('profile')->group(function () {
         Route::post('/update-password/{user}', [\App\Http\Controllers\Api\Profile\ProfileController::class, 'update']);
