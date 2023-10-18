@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Admin\Google;
 
 use App\Http\Controllers\Controller;
 use Google_Service_Gmail_Message;
-use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Google\Service\Gmail;
 use PHPUnit\Framework\Error;
