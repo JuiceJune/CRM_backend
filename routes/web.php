@@ -101,4 +101,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::put('/{id}', [\App\Http\Controllers\Admin\Project\ProjectController::class, 'update'])->name('admin.projects.update');
         Route::delete('/{id}', [\App\Http\Controllers\Admin\Project\ProjectController::class, 'destroy'])->name('admin.projects.destroy');
     });
+
+    Route::group(['prefix' => 'google'], function () {
+        Route::get('/', [\App\Http\Controllers\Admin\Google\GoogleController::class, 'index'])->name('admin.google.index');
+        Route::get('/login', [\App\Http\Controllers\Admin\Google\GoogleController::class, 'login'])->name('admin.google.login');
+        Route::get('/callback', [\App\Http\Controllers\Admin\Google\GoogleController::class, 'callback'])->name('admin.google.callback');
+    });
 });
