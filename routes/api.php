@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('')->group(function() {
+Route::middleware('auth:sanctum')->group(function() {
     Route::group(['prefix' => 'google'], function () {
         Route::get('/login', [\App\Http\Controllers\Api\Google\GoogleController::class, 'login']);
         Route::get('/callback', [\App\Http\Controllers\Api\Google\GoogleController::class, 'callback']);
