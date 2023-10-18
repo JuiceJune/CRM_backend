@@ -28,6 +28,9 @@
                     <div class="card-header">
                         <a href="{{ route("admin.mailboxes.create") }}" class="btn btn-secondary">Add Mailbox</a>
                     </div>
+                    <div class="card-header">
+                        <a href="{{ route("admin.google.login") }}" class="btn btn-secondary">Connect Gmail</a>
+                    </div>
                     <div class="card-body" id="datatable-wrapper">
                         <table id="datatable" class="datatable1 table table-bordered table-striped">
                             <thead>
@@ -79,7 +82,7 @@
                                     </td>
                                     <td class="align-middle">
                                         <a href="{{route('admin.mailboxes.show', $mailbox->id)}}">
-                                            {{ $mailbox->app_password }}
+                                            {{ $mailbox->token }}
                                         </a>
                                     </td>
                                     <td class="align-middle">
