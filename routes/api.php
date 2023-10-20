@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
+Route::get('/google/callback', [\App\Http\Controllers\Api\Google\GoogleController::class, 'callback']);
 Route::middleware('auth:sanctum')->group(function() {
     Route::group(['prefix' => 'google'], function () {
         Route::get('/login', [\App\Http\Controllers\Api\Google\GoogleController::class, 'login']);
-        Route::get('/callback', [\App\Http\Controllers\Api\Google\GoogleController::class, 'callback']);
+//        Route::get('/callback', [\App\Http\Controllers\Api\Google\GoogleController::class, 'callback']);
 //        Route::get('/', [\App\Http\Controllers\Admin\Google\GoogleController::class, 'getClient']);
     });
 
