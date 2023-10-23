@@ -15,14 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string("email");
             $table->string("name");
-            $table->string("phone")->nullable();
-            $table->string("avatar");
             $table->string("domain");
-            $table->string("password");
-            $table->date("create_date");
+            $table->string("avatar_url");
+            $table->string("phone")->nullable();
+            $table->string("password")->nullable();
             $table->string("app_password")->nullable();
-            $table->boolean("for_linkedin")->default(false);
-            $table->foreignId("email_provider_id")->constrained();
+            $table->string("email_provider")->nullable();
+            $table->string('token')->nullable();
+            $table->string('refresh_token')->nullable();
+            $table->string('expires_in')->nullable();
             $table->timestamps();
         });
     }
