@@ -4,28 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        "name",
         "logo",
+        "name",
         "client_id",
         "start_date",
         "end_date",
-        "period",
         "price",
-        "description",
     ];
 
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class);
+    }
     public function mailboxes() {
         return $this->belongsToMany(Mailbox::class, 'mailboxes_projects', 'project_id', 'mailbox_id');
-    }
-
-    public function linkedin_accounts() {
-        return $this->belongsToMany(Linkedin::class, 'linkedin_accounts_projects', 'project_id', 'linkedin_id');
     }
 
     public function users() {

@@ -24,14 +24,12 @@ class ProjectFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->company,
             'logo' => "projects/logos/default.png",
+            'name' => fake()->company,
             'client_id' => fake()->numberBetween(1, 20),
             'start_date' => fake()->date,
             'end_date' => fake()->date,
-            'period' => fake()->randomElement(['Month', 'Year', 'Quarter']),
             'price' => fake()->numberBetween(1000, 10000),
-            'description' => fake()->text,
         ];
     }
     public function configure()
@@ -40,10 +38,6 @@ class ProjectFactory extends Factory
             $mailbox1 = fake()->numberBetween(1, 30);
             $mailbox2 = fake()->numberBetween(1, 30);
             $project->mailboxes()->attach([$mailbox1, $mailbox2]);
-
-            $linkedinAccount1 = fake()->numberBetween(1, 30);
-            $linkedinAccount2 = fake()->numberBetween(1, 30);
-            $project->linkedin_accounts()->attach([$linkedinAccount1, $linkedinAccount2]);
 
             $user1 = fake()->numberBetween(1, 30);
             $user2 = fake()->numberBetween(1, 30);

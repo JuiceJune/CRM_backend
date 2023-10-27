@@ -7,7 +7,6 @@ use App\Http\Requests\Admin\Project\ProjectStoreRequest;
 use App\Http\Requests\Admin\Project\ProjectUpdateRequest;
 use App\Models\Client;
 use App\Models\User;
-use App\Models\Linkedin;
 use App\Models\Mailbox;
 use App\Models\Project;
 use Illuminate\Support\Facades\File;
@@ -29,22 +28,10 @@ class ProjectController extends Controller
     public function create()
     {
         $mailboxes = Mailbox::all();
-        $linkedin_accounts = Linkedin::all();
         $users = User::all();
         $clients = Client::all();
-        $periods = [
-            [
-                "title" => "Month"
-            ],
-            [
-                "title" => "Quarter"
-            ],
-            [
-                "title" => "Year"
-            ],
-        ];
         return view('admin.project.create',
-            compact('mailboxes', 'linkedin_accounts', 'clients', 'periods', 'users'));
+            compact('mailboxes', 'clients', 'users'));
     }
 
     /**
@@ -64,9 +51,6 @@ class ProjectController extends Controller
 
         if ($validated['mailboxes'])
             $project->mailboxes()->attach($validated['mailboxes']);
-
-        if ($validated['linkedin_accounts'])
-            $project->linkedin_accounts()->attach($validated['linkedin_accounts']);
 
         return redirect()->route('admin.projects.index')->with('success', 'Project created successfully.');
     }
@@ -88,22 +72,9 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
 
         $mailboxes = Mailbox::all();
-        $linkedin_accounts = Linkedin::all();
         $users = User::all();
         $clients = Client::all();
-        $periods = [
-            [
-                "title" => "Month"
-            ],
-            [
-                "title" => "Quarter"
-            ],
-            [
-                "title" => "Year"
-            ],
-        ];
-        return view('admin.project.edit', compact('project', 'mailboxes', 'linkedin_accounts',
-            'clients', 'periods', 'users'));
+        return view('admin.project.edit', compact('project', 'mailboxes', 'clients', 'users'));
     }
 
     /**
@@ -128,8 +99,6 @@ class ProjectController extends Controller
         $project->users()->sync($validated['users'] ?? []);
 
         $project->mailboxes()->sync($validated['mailboxes'] ?? []);
-
-        $project->linkedin_accounts()->sync($validated['linkedin_accounts'] ?? []);
 
         return redirect()->route('admin.projects.index')->with('success', 'Project updated successfully.');
     }

@@ -5,32 +5,34 @@ namespace App\Http\Controllers\Api\Project;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Project\ProjectStoreRequest;
 use App\Http\Requests\Admin\Project\ProjectUpdateRequest;
-use App\Http\Resources\MailboxResource;
-use App\Http\Resources\UserResource;
 use App\Http\Resources\ProjectResource;
 use App\Models\Client;
 use App\Models\User;
-use App\Models\Linkedin;
 use App\Models\Mailbox;
 use App\Models\Project;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use PHPUnit\Exception;
 
 class ProjectController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
+        try {
+            $limit = $request->input('limit', 10);
+            $offset = $request->input('offset', 0);
 
-        if ($user->isAdmin()) {
-            $projects = Project::all();
-        } else {
-            $projects = $user->projects()->get();
+            $query = Project::skip($offset)->take($limit);
+
+            $projects = $query->get();
+
+            return response(ProjectResource::collection($projects));
+        } catch (Exception $error) {
+            return response($error, 400);
         }
-        return response()->json(ProjectResource::collection($projects));
     }
 
     public function getAllByUser(User $user)
@@ -49,17 +51,6 @@ class ProjectController extends Controller
         $linkedin_accounts = Linkedin::all();
         $users = User::all();
         $clients = Client::all();
-        $periods = [
-            [
-                "title" => "Month"
-            ],
-            [
-                "title" => "Quarter"
-            ],
-            [
-                "title" => "Year"
-            ],
-        ];
         return view('admin.project.create',
             compact('mailboxes', 'linkedin_accounts', 'clients', 'periods', 'users'));
     }
@@ -93,7 +84,12 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        return new ProjectResource($project);
+        try {
+            $currentProject = new ProjectResource($project);
+            return response()->json($currentProject);
+        } catch (Exception $error) {
+            return response($error, 400);
+        }
     }
 
     /**

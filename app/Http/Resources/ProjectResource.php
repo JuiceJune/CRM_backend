@@ -27,7 +27,7 @@ class ProjectResource extends JsonResource
             'client' => new ClientResource($this->client),
 
             'mailboxes' => $this->mailboxes ? MailboxResource::collection($this->mailboxes) : null,
-            'linkedin_accounts' => $this->linkedin_accounts ? LinkedinResource::collection($this->linkedin_accounts) : null,
+            'campaigns' => $this->campaigns ? CampaignResource::collection($this->campaigns) : null,
 
             'csm' => $csm ? new UserResource($csm) : null,
             'research_manager' => $research_manager ? new UserResource($research_manager) : null,
@@ -36,7 +36,6 @@ class ProjectResource extends JsonResource
             'researchers' => $researchers ? UserResource::collection($researchers) : null,
 
             'start_date' => $this->start_date,
-            'period' => $this->period,
             'price' => $this->price,
         ];
     }
