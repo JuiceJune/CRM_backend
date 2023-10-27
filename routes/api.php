@@ -14,22 +14,23 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+
 Route::get('/google/callback', [\App\Http\Controllers\Api\Google\GoogleController::class, 'callback']);
+
 Route::middleware('auth:sanctum')->group(function() {
     Route::group(['prefix' => 'google'], function () {
         Route::get('/login', [\App\Http\Controllers\Api\Google\GoogleController::class, 'login']);
-//        Route::get('/callback', [\App\Http\Controllers\Api\Google\GoogleController::class, 'callback']);
-//        Route::get('/', [\App\Http\Controllers\Admin\Google\GoogleController::class, 'getClient']);
     });
 
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', [\App\Http\Controllers\Api\User\UserController::class, 'index']);
         Route::get('/create', [\App\Http\Controllers\Api\User\UserController::class, 'create']);
         Route::post('/', [\App\Http\Controllers\Api\User\UserController::class, 'store']);
-        Route::get('/{id}', [\App\Http\Controllers\Api\User\UserController::class, 'show']);
-        Route::get('/{id}/edit', [\App\Http\Controllers\Api\User\UserController::class, 'edit']);
-        Route::put('/{id}', [\App\Http\Controllers\Api\User\UserController::class, 'update']);
-        Route::delete('/{id}', [\App\Http\Controllers\Api\User\UserController::class, 'destroy']);
+        Route::get('/{user}', [\App\Http\Controllers\Api\User\UserController::class, 'show']);
+        Route::get('/{user}/edit', [\App\Http\Controllers\Api\User\UserController::class, 'edit']);
+        Route::put('/{user}', [\App\Http\Controllers\Api\User\UserController::class, 'update']);
+        Route::delete('/{user}', [\App\Http\Controllers\Api\User\UserController::class, 'destroy']);
     });
 
 
@@ -37,8 +38,6 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-
-//    Route::apiResource('users', \App\Http\Controllers\Api\User\UserController::class);
 
     Route::prefix('profile')->group(function () {
         Route::post('/update-password/{user}', [\App\Http\Controllers\Api\Profile\ProfileController::class, 'update']);
@@ -51,22 +50,33 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::put('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'update']);
         Route::delete('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'destroy']);
     });
-    Route::prefix('linkedin-accounts')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Linkedin\LinkedinController::class, 'index']);
-        Route::middleware("linkedin.access")->get('/{linkedin}', [\App\Http\Controllers\Api\Linkedin\LinkedinController::class, 'show']);
-        Route::post('/', [\App\Http\Controllers\Api\Linkedin\LinkedinController::class, 'store']);
-        Route::put('/{linkedin}', [\App\Http\Controllers\Api\Linkedin\LinkedinController::class, 'update']);
-        Route::delete('/{linkedin}', [\App\Http\Controllers\Api\Linkedin\LinkedinController::class, 'destroy']);
-    });
     Route::prefix('projects')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Project\ProjectController::class, 'index']);
-        Route::middleware("project.access")->get('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'show']);
+//        Route::middleware("project.access")->get('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'show']);
+        Route::get('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'show']);
         Route::post('/', [\App\Http\Controllers\Api\Project\ProjectController::class, 'store']);
         Route::put('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'update']);
         Route::delete('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'destroy']);
     });
+    Route::prefix('campaigns')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'index']);
+        Route::get('/create', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'create']);
+        Route::post('/', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'store']);
+        Route::get('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'show']);
+        Route::get('/{campaign}/edit', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'edit']);
+        Route::put('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'update']);
+        Route::delete('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'destroy']);
+        Route::post('/sendTestEmail', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'sendTestEmail']);
+    });
+    Route::prefix('prospects')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'index']);
+        Route::get('/create', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'create']);
+        Route::post('/', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'store']);
+        Route::get('/{prospect}', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'show']);
+        Route::get('/{prospect}/edit', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'edit']);
+        Route::put('/{prospect}', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'update']);
+        Route::delete('/{prospect}', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'destroy']);
+    });
 
     Route::get('user-projects/{user}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'getAllByUser']);
 });
-
-Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
