@@ -6,12 +6,12 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1 class="m-0">Email Providers</h1>
+                        <h1 class="m-0">Campaigns</h1>
                     </div><!-- /.col -->
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active">Email Providers</li>
+                            <li class="breadcrumb-item active">Campaigns</li>
                         </ol>
                     </div>
                 </div>
@@ -26,47 +26,40 @@
             <div class="container-fluid">
                 <div class="card">
                     <div class="card-header">
-                        <a href="{{ route("admin.email-providers.create") }}" class="btn btn-secondary">Add Email Provider</a>
+                        <a href="{{ route("admin.campaigns.create") }}" class="btn btn-secondary">Add Campaign</a>
                     </div>
                     <div class="card-body" id="datatable-wrapper">
-                        <table id="datatable" class="table table-bordered table-striped">
+                        <table id="datatable" class="datatable1 table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Logo</th>
-                                <th>Email Provider</th>
-                                <th>Created</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Project</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($email_providers as $email_provider)
+                            @foreach($campaigns as $campaign)
                                 <tr>
                                     <td class="align-middle">
-                                        <a href="{{route('admin.email-providers.show', $email_provider->id)}}">
-                                            {{ $email_provider->id }}
+                                        <a href="{{route('admin.campaigns.show', $campaign->id)}}">
+                                            {{ $campaign->name }}
                                         </a>
                                     </td>
                                     <td class="align-middle">
-                                        <a href="{{route('admin.email-providers.show', $email_provider->id)}}">
-                                            <img src="{{ asset("/storage/{$email_provider->logo}") }}"
-                                                 class="rounded-circle" style="width: 40px;"
-                                                 alt="logo" />
+                                        <a href="{{route('admin.mailboxes.show', $campaign->mailbox->id)}}">
+                                            {{ $campaign->mailbox->email }}
                                         </a>
                                     </td>
                                     <td class="align-middle">
-                                        <a href="{{route('admin.email-providers.show', $email_provider->id)}}">
-                                            {{ $email_provider->title }}
+                                        <a href="{{route('admin.projects.show', $campaign->project->id)}}">
+                                            {{ $campaign->project->name }}
                                         </a>
                                     </td>
                                     <td class="align-middle">
-                                        <a href="{{route('admin.email-providers.show', $email_provider->id)}}">
-                                            {{ $email_provider->created_at }}
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <form class="mx-1" method="post" action="{{ route('admin.email-providers.edit', $email_provider->id) }}">
+                                        <form class="mx-1" method="post"
+                                              action="{{ route('admin.campaigns.edit', $campaign->id) }}">
                                             @method('GET')
                                             @csrf
                                             <button type="submit" class="btn btn-outline-primary">
@@ -75,7 +68,8 @@
                                         </form>
                                     </td>
                                     <td class="align-middle">
-                                        <form class="mx-1" method="post" action="{{ route('admin.email-providers.destroy', $email_provider->id) }}">
+                                        <form class="mx-1" method="post"
+                                              action="{{ route('admin.campaigns.destroy', $campaign->id) }}">
                                             @method('DELETE')
                                             @csrf
                                             <button type="submit" class="btn btn-outline-danger">
@@ -88,10 +82,9 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <th>Id</th>
-                                <th>Logo</th>
-                                <th>Email Provider</th>
-                                <th>Created</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Project</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>
