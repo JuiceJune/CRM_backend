@@ -11,27 +11,46 @@ use App\Models\Position;
 use App\Models\Role;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use PHPUnit\Exception;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(UserResource::collection(
-            User::all()
-        ));
+        try {
+            // Отримуємо значення параметрів limit, offset та fields з запиту, або встановлюємо їх за замовчуванням.
+            $limit = $request->input('limit', 10); // За замовчуванням виводимо 10 користувачів.
+            $offset = $request->input('offset', 0); // За замовчуванням починаємо з першого користувача.
+
+            // Створюємо запит до бази даних з врахуванням обмежень та зсуву.
+            $query = User::skip($offset)->take($limit);
+
+            // Витягуємо користувачів та серіалізуємо їх за допомогою ресурсу UserResource.
+            $users = $query->get();
+
+            return response(UserResource::collection($users)); // Використовуємо ресурс для серіалізації результату.
+        } catch (Exception $error) {
+            return response($error, 400);
+        }
     }
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        $roles = Role::all();
-        $positions = Position::all();
-        return view('admin.user.create', compact('roles', 'positions'));
+        try {
+            $roles = Role::all();
+            $positions = Position::all();
+            return response(["roles" => $roles, "positions" => $positions]);
+        } catch (Exception $error) {
+            return response($error, 400);
+        }
     }
 
     /**
@@ -39,20 +58,24 @@ class UserController extends Controller
      */
     public function store(UserStoreRequest $request)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $validated['password'] = Hash::make($validated['password']);
+            $validated['password'] = Hash::make($validated['password']);
 
-        if (isset($validated["avatar"])) {
-            $validated["avatar"] = $request->file('avatar')->store(
-                'users/avatars', 'public'
-            );
-        } else {
-            $validated["avatar"] = "users/avatars/default.png";
+            if (isset($validated["avatar"])) {
+                $validated["avatar"] = $request->file('avatar')->store(
+                    'users/avatars', 'public'
+                );
+            } else {
+                $validated["avatar"] = "users/avatars/default.png";
+            }
+
+            $user = User::create($validated);
+            return response($user);
+        } catch (Exception $error) {
+            return response($error, 400);
         }
-
-        User::create($validated);
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
 
     /**
@@ -60,7 +83,12 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return new UserResource($user);
+        try {
+            $currentUser = new UserResource($user);
+            return response()->json($currentUser);
+        } catch (Exception $error) {
+            return response($error, 400);
+        }
     }
 
     /**
@@ -68,10 +96,14 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        $user = User::findOrFail($id);
-        $roles = Role::all();
-        $positions = Position::all();
-        return view('admin.user.edit', compact('user', 'roles', 'positions'));
+        try {
+            $user = User::findOrFail($id);
+            $roles = Role::all();
+            $positions = Position::all();
+            return response(["" => $user, "roles" => $roles, "positions" => $positions]);
+        } catch (Exception $error) {
+            return response($error, 400);
+        }
     }
 
     /**
@@ -79,24 +111,26 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, string $id)
     {
-        //TODO add services
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $user = User::findOrFail($id);
+            $user = User::findOrFail($id);
 
-        $validated['password'] = Hash::make($validated['password']);
-        $user = User::findOrFail($user->user_id);
-        if (isset($validated["avatar"])) {
-            $validated["avatar"] = $request->file('avatar')->store(
-                'users/avatars', 'public'
-            );
-            if (File::exists(public_path('storage/' . $user->avatar)) && $user->avatar != "users/avatars/default.png") {
-                File::delete(public_path('storage/' . $user->avatar));
+            $validated['password'] = Hash::make($validated['password']);
+            $user = User::findOrFail($user->user_id);
+            if (isset($validated["avatar"])) {
+                $validated["avatar"] = $request->file('avatar')->store(
+                    'users/avatars', 'public'
+                );
+                if (File::exists(public_path('storage/' . $user->avatar)) && $user->avatar != "users/avatars/default.png") {
+                    File::delete(public_path('storage/' . $user->avatar));
+                }
             }
+            $user->update($validated);
+            return response($user);
+        } catch (Exception $error) {
+            return response($error, 400);
         }
-        $user->update($validated);
-
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
     /**
@@ -108,13 +142,10 @@ class UserController extends Controller
             //TODO delete avatar file
             $user = User::find($id);
             $user->projects()->detach();
-            if ($user->delete()) {
-                return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
-            } else {
-                return redirect()->route('admin.users.index')->with('error', 'User not deleted.');
-            }
-        } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->route('admin.mailboxes.index')->with('error', 'This user cannot be deleted due to existing dependencies (project)');
+            $user->delete();
+            return response('User deleted successfully');
+        } catch (Exception $error) {
+            return response($error, 400);
         }
     }
 }

@@ -22,15 +22,12 @@ class UserUpdateRequest extends FormRequest
     public function rules(): array
     {
         return[
-            'name' => 'required|string|max:100',
             'user_id' => 'required|integer|exists:users,id',
+            'name' => 'required|string|max:100',
             'email' => 'required|string|unique:users,email,' . $this->user_id,
             'password' => 'required|string',
-            'avatar' => 'nullable|image',
+            'avatar' => 'image',
             'role_id' => 'required|integer|exists:roles,id',
-            'start_date' => 'required|date',
-            'birthday' => 'required|date',
-            'location' => 'required|string',
             'position_id' => 'required|integer|exists:positions,id',
         ];
     }
@@ -54,12 +51,14 @@ class UserUpdateRequest extends FormRequest
             'role_id.required' => 'Role is required!',
             'role_id.exists' => 'Such role does not exist!',
 
+            'position_id.required' => 'Role is required!',
+            'position_id.exists' => 'Such role does not exist!',
+
             'password.required' => 'Password is required!',
             'password.string' => 'Password should be a string!',
             'password.max' => 'Password should be not longer than 50 chars!',
 
             'avatar.image' => 'Avatar should be image!',
-            'avatar.dimensions' => 'Avatar should have such dimensions: width[50px - 2000px], height[50px - 2000px]!',
         ];
     }
 }
