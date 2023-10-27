@@ -12,6 +12,7 @@ use App\Models\Mailbox;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class MailboxController extends Controller
 {
@@ -107,19 +108,30 @@ class MailboxController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
+    public function destroy(Mailbox $mailbox) {
         try {
-            //TODO delete avatar file
-            $mailbox = Mailbox::find($id);
-            $mailbox->projects()->detach();
-            if($mailbox->delete()) {
-                return redirect()->route('admin.mailboxes.index')->with('success', 'Mailbox deleted successfully.');
-            } else {
-                return redirect()->route('admin.mailboxes.index')->with('error', 'Mailbox not deleted.');
+            if(!$mailbox) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mailbox ' . $mailbox->email . ' not found'
+                ], 404);
             }
-        } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->route('admin.mailboxes.index')->with('error', 'This mailbox cannot be deleted due to existing dependencies (linkedin account)');
+
+            $mailbox->projects()->detach();
+
+            $mailbox->linkedin()->delete();
+
+            $mailbox->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mailbox ' . $mailbox->email . ' deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting mailbox: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

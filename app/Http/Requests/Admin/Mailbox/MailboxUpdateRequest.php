@@ -20,16 +20,17 @@ class MailboxUpdateRequest extends FormRequest
     public function rules(): array
     {
         return[
-            "name" => "required|string|max:50",
-            "phone" => "nullable|string|max:20",
             "email" => "required|string|unique:mailboxes,email," . $this->mailbox_id,
+            "name" => "required|string|max:50",
             "domain" => "required|string",
             "avatar" => "nullable",
-            "password" => "required|string|max:50",
-            "create_date" => "required|date",
-            "for_linkedin" => "boolean",
+            "phone" => "nullable|string|max:20",
+            "password" => "nullable|string|max:50",
             "app_password" => "nullable|string",
-            "email_provider_id" => "required|integer|exists:email_providers,id",
+            "email_provider" => "nullable|integer",
+            "token" => "string",
+            "refresh_token" => "string",
+            "expires_in" => "string",
         ];
     }
 

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin\Mailbox;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Mailbox\MailboxStoreRequest;
 use App\Http\Requests\Admin\Mailbox\MailboxUpdateRequest;
-use App\Models\EmailProvider;
 use App\Models\Mailbox;
 use App\Models\Project;
 use Illuminate\Support\Facades\File;
@@ -26,8 +25,7 @@ class MailboxController extends Controller
      */
     public function create()
     {
-        $email_providers = EmailProvider::all();
-        return view('admin.mailbox.create', compact('email_providers'));
+        return view('admin.mailbox.create');
     }
 
     /**
@@ -36,8 +34,6 @@ class MailboxController extends Controller
     public function store(MailboxStoreRequest $request)
     {
         $validated = $request->validated();
-
-        $validated["for_linkedin"] = isset($validated["for_linkedin"]);
 
         if(isset($validated["avatar"])) {
             $validated["avatar"] = $request->file('avatar')->store(
@@ -67,8 +63,7 @@ class MailboxController extends Controller
     public function edit(string $id)
     {
         $mailbox = Mailbox::findOrFail($id);
-        $email_providers = EmailProvider::all();
-        return view('admin.mailbox.edit', compact('mailbox','email_providers'));
+        return view('admin.mailbox.edit', compact('mailbox'));
     }
 
     /**
@@ -80,8 +75,6 @@ class MailboxController extends Controller
         $validated = $request->validated();
 
         $mailbox = Mailbox::findOrFail($id);
-
-        $validated["for_linkedin"] = isset($validated["for_linkedin"]);
 
         if(isset($validated["avatar"])) {
             $validated["avatar"] = $request->file('avatar')->store(

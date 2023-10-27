@@ -10,31 +10,18 @@ class Mailbox extends Model
     use HasFactory;
 
     protected $fillable = [
-        "name",
-        "phone",
         "email",
+        "name",
         "domain",
         "avatar",
+        "phone",
         "password",
-        "create_date",
         "app_password",
-        "for_linkedin",
-        "email_provider_id",
+        "email_provider",
         "token",
-        "refresh_token",
         "refresh_token",
         "expires_in"
     ];
-
-    public function email_provider()
-    {
-        return $this->belongsTo(EmailProvider::class);
-    }
-
-    public function linkedin()
-    {
-        return $this->hasOne(Linkedin::class);
-    }
 
     public function projects() {
         return $this->belongsToMany(Project::class, 'mailboxes_projects', 'mailbox_id', 'project_id');

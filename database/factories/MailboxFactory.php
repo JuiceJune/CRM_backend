@@ -22,14 +22,12 @@ class MailboxFactory extends Factory
         return [
             'email' => fake()->email,
             'name' => fake()->name,
-            'phone' => fake()->phoneNumber,
-            'avatar' => "mailboxes/avatars/default.png",
             'domain' => fake()->domainName,
+            'avatar' => "mailboxes/avatars/default.png",
+            'phone' => fake()->phoneNumber,
             'password' => fake()->password,
-            'create_date' => fake()->date,
             'app_password' => fake()->password,
-            'for_linkedin' => fake()->randomElement([true, false]),
-            'email_provider_id' => fake()->numberBetween(1, EmailProvider::count()),
+            'email_provider' => "gmail",
         ];
     }
 }
