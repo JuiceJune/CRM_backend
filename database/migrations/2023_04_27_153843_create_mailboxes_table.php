@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string("email");
             $table->string("name");
             $table->string("domain");
-            $table->string("avatar_url");
+            $table->string("avatar");
             $table->string("phone")->nullable();
             $table->string("password")->nullable();
             $table->string("app_password")->nullable();
