@@ -38,12 +38,12 @@ class ClientController extends Controller
     {
         $validated = $request->validated();
 
-        if (isset($validated["logo"])) {
-            $validated["logo"] = $request->file('logo')->store(
-                'clients/logos', 'public'
+        if (isset($validated["avatar"])) {
+            $validated["avatar"] = $request->file('avatar')->store(
+                'clients/avatars', 'public'
             );
         } else {
-            $validated["avatar"] = "clients/logos/default.png";
+            $validated["avatar"] = "clients/avatars/default.png";
         }
 
         Client::create($validated);
@@ -77,11 +77,11 @@ class ClientController extends Controller
 
         $client = Client::findOrFail($id);
 
-        if (isset($validated["logo"])) {
-            $validated["logo"] = $request->file('logo')->store(
-                'clients/logos', 'public'
+        if (isset($validated["avatar"])) {
+            $validated["avatar"] = $request->file('avatar')->store(
+                'clients/avatars', 'public'
             );
-            if (File::exists(public_path('storage/' . $client->logo)) && $client->logo != "clients/logos/default.png") {
+            if (File::exists(public_path('storage/' . $client->logo)) && $client->logo != "clients/avatars/default.png") {
                 File::delete(public_path('storage/' . $client->logo));
             }
         }

@@ -22,13 +22,12 @@ class ClientUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'logo' => 'image',
-            'email' => 'required|string|unique:users,email,' . $this->user_id,
+            'avatar' => 'image',
             'name' => 'required|string|max:100',
-            'start_date' => 'required|date',
+            'email' => 'required|string|unique:users,email,' . $this->user_id,
             'location' => 'required|string',
             'industry' => 'required|string',
-            'company' => 'required|string|max:100',
+            'start_date' => 'required|date',
         ];
     }
 
@@ -43,10 +42,6 @@ class ClientUpdateRequest extends FormRequest
             'name.required' => 'Name is required!',
             'name.string' => 'Name should be a string!',
             'name.max' => 'Name should be not longer than 50 chars!',
-
-            'company.required' => 'Company is required!',
-            'company.string' => 'Company should be a string!',
-            'company.max' => 'Company should be not longer than 50 chars!',
 
             'email.required' => 'Email is required!',
             'email.string' => 'Email should be a string!',

@@ -22,13 +22,12 @@ class ClientStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'logo' => 'image',
-            'email' => 'required|string|unique:users',
+            'avatar' => 'image',
             'name' => 'required|string|max:100',
-            'start_date' => 'required|date',
+            'email' => 'required|string|unique:users',
             'location' => 'required|string',
             'industry' => 'required|string',
-            'company' => 'required|string|max:100',
+            'start_date' => 'required|date',
         ];
     }
 
@@ -40,28 +39,24 @@ class ClientStoreRequest extends FormRequest
     public function messages()
     {
         return [
+            'avatar.image' => 'Avatar should be image!',
+
             'name.required' => 'Name is required!',
             'name.string' => 'Name should be a string!',
             'name.max' => 'Name should be not longer than 50 chars!',
 
-            'company.required' => 'Company is required!',
-            'company.string' => 'Company should be a string!',
-            'company.max' => 'Company should be not longer than 50 chars!',
-
             'email.required' => 'Email is required!',
             'email.string' => 'Email should be a string!',
             'email.unique' => 'This email is already in use!',
-
-            'logo.image' => 'Avatar should be image!',
-
-            'start_date.required' => 'Start date is required!',
-            'start_date.date' => 'Start date should have date format!',
 
             'location.required' => 'Location is required!',
             'location.string' => 'Location should be a string!',
 
             'industry.required' => 'Industry is required!',
             'industry.string' => 'Industry should be a string!',
+
+            'start_date.required' => 'Start date is required!',
+            'start_date.date' => 'Start date should have date format!',
         ];
     }
 }

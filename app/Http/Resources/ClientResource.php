@@ -19,14 +19,13 @@ class ClientResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'logo' => $this->logo,
-            'email' => $this->email,
+            'avatar' => $this->avatar,
             'name' => $this->name,
-            'project' => $project,
-            'start_date' => $this->start_date,
+            'email' => $this->email,
             'location' => $this->location,
             'industry' => $this->industry,
-            'company' => $this->company,
+            'start_date' => $this->start_date,
+            'project' => $project,
         ];
     }
 }

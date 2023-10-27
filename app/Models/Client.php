@@ -14,13 +14,12 @@ class Client extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'avatar',
         'name',
         'email',
-        'logo',
-        "start_date",
         "location",
         "industry",
-        "company"
+        "start_date"
     ];
 
     public function projects() {

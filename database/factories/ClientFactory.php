@@ -19,13 +19,12 @@ class ClientFactory extends Factory
     public function definition(): array
     {
         return [
-            'logo' => "clients/logos/default.png",
+            'avatar' => "clients/avatars/default.png",
             "name" => fake()->name,
             "email" => fake()->email,
-            'start_date' => fake()->date,
             'location' => fake()->city,
             'industry' => fake()->randomElement(['Technology', 'Finance', 'Trade', 'Commercial Real Estate', 'Car & Automobile Sales', 'Engineering Services']),
-            'company' => fake()->company,
+            'start_date' => fake()->date,
         ];
     }
 }
