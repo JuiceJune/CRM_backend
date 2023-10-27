@@ -17,7 +17,7 @@ class GoogleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function getClient($accessToken): Client
+    public function getGoogleClient($accessToken): Client
     {
         $client = new Client();
         $client->setApplicationName('My App');
@@ -51,7 +51,7 @@ class GoogleController extends Controller
     public function callback()
     {
         try {
-            $user = Socialite::driver('google')->user();
+            $user = Socialite::driver('google')->stateless()->user();
 
             if (!$user) {
                 throw new Error('User connection failed');
@@ -60,7 +60,7 @@ class GoogleController extends Controller
             if (Mailbox::where('email', $user->getEmail())->exists()) {
                 throw new Error('User already exist');
             }
-            $mailboxe = Mailbox::create([
+            $mailbox = Mailbox::create([
                 "email" => $user->getEmail(),
                 "name" => $user->getName(),
                 "avatar" => $user->getAvatar(),
@@ -73,26 +73,21 @@ class GoogleController extends Controller
                 "expires_in" => $user->expiresIn
             ]);
 
-//            if ($mailboxe && $mailboxe->id) {
-//                Log::channel('development')->info('Mailbox created');
-//                $res = (new \Illuminate\Console\Scheduling\Schedule)
-//                    ->command(RefreshGoogleAccessToken::class, [$mailboxe->id])
-//                    ->everyFourHours();
-//                Log::channel('development')->info('Res command: ' . json_encode($res));
-//            }
+            $response = [
+                'status' => "success",
+                'message' => 'Mailbox created successfully',
+                'email' => $mailbox->email
+            ];
 
-//            $client = $this->getClient($user->token);
-//            $sender = 'Oleg';
-//            $recipient = 'oleg.bortovsky@gmail.com'; // Адреса отримувача
-//            $subject = 'Test Gmail API';
-//            $messageText = 'Test gmail api text';
-//            $service = new Gmail($client);
-//            $message = $this->createMessage($sender, $recipient, $subject, $messageText);
-//            $response = $service->users_messages->send('me', $message);
-//            dd($response);
-
-        } catch (\Throwable $th) {
-            dd($th);
+            return redirect()->to(env('FRONTEND_URL') . '/mailboxes/' . $mailbox->id . "?" . http_build_query($response));
+        } catch (Exception $error) {
+            Log::channel('development')->error('Google CallBack method error: ' . $error);
+            $response = [
+                'status' => "error",
+                'message' => $error->getMessage(),
+                'email' => ""
+            ];
+            return redirect()->to(env('FRONTEND_URL') . '/mailboxes?' . http_build_query($response));
         }
     }
 
@@ -111,3 +106,4 @@ class GoogleController extends Controller
         return $message;
     }
 }
+
