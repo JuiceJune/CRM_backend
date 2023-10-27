@@ -62,16 +62,6 @@ Route::group(['prefix' => 'admin'], function () {
         Route::delete('/{id}', [\App\Http\Controllers\Admin\Client\ClientController::class, 'destroy'])->name('admin.clients.destroy');
     });
 
-    Route::group(['prefix' => 'email-providers'], function () {
-        Route::get('/', [\App\Http\Controllers\Admin\EmailProvider\EmailProviderController::class, 'index'])->name('admin.email-providers.index');
-        Route::get('/create', [\App\Http\Controllers\Admin\EmailProvider\EmailProviderController::class, 'create'])->name('admin.email-providers.create');
-        Route::post('/', [\App\Http\Controllers\Admin\EmailProvider\EmailProviderController::class, 'store'])->name('admin.email-providers.store');
-        Route::get('/{id}', [\App\Http\Controllers\Admin\EmailProvider\EmailProviderController::class, 'show'])->name('admin.email-providers.show');
-        Route::get('/{id}/edit', [\App\Http\Controllers\Admin\EmailProvider\EmailProviderController::class, 'edit'])->name('admin.email-providers.edit');
-        Route::put('/{id}', [\App\Http\Controllers\Admin\EmailProvider\EmailProviderController::class, 'update'])->name('admin.email-providers.update');
-        Route::delete('/{id}', [\App\Http\Controllers\Admin\EmailProvider\EmailProviderController::class, 'destroy'])->name('admin.email-providers.destroy');
-    });
-
     Route::group(['prefix' => 'mailboxes'], function () {
         Route::get('/', [\App\Http\Controllers\Admin\Mailbox\MailboxController::class, 'index'])->name('admin.mailboxes.index');
         Route::get('/create', [\App\Http\Controllers\Admin\Mailbox\MailboxController::class, 'create'])->name('admin.mailboxes.create');
@@ -82,16 +72,6 @@ Route::group(['prefix' => 'admin'], function () {
         Route::delete('/{id}', [\App\Http\Controllers\Admin\Mailbox\MailboxController::class, 'destroy'])->name('admin.mailboxes.destroy');
     });
 
-    Route::group(['prefix' => 'linkedin-accounts'], function () {
-        Route::get('/', [\App\Http\Controllers\Admin\Linkedin\LinkedinController::class, 'index'])->name('admin.linkedin-accounts.index');
-        Route::get('/create', [\App\Http\Controllers\Admin\Linkedin\LinkedinController::class, 'create'])->name('admin.linkedin-accounts.create');
-        Route::post('/', [\App\Http\Controllers\Admin\Linkedin\LinkedinController::class, 'store'])->name('admin.linkedin-accounts.store');
-        Route::get('/{id}', [\App\Http\Controllers\Admin\Linkedin\LinkedinController::class, 'show'])->name('admin.linkedin-accounts.show');
-        Route::get('/{id}/edit', [\App\Http\Controllers\Admin\Linkedin\LinkedinController::class, 'edit'])->name('admin.linkedin-accounts.edit');
-        Route::put('/{id}', [\App\Http\Controllers\Admin\Linkedin\LinkedinController::class, 'update'])->name('admin.linkedin-accounts.update');
-        Route::delete('/{id}', [\App\Http\Controllers\Admin\Linkedin\LinkedinController::class, 'destroy'])->name('admin.linkedin-accounts.destroy');
-    });
-
     Route::group(['prefix' => 'projects'], function () {
         Route::get('/', [\App\Http\Controllers\Admin\Project\ProjectController::class, 'index'])->name('admin.projects.index');
         Route::get('/create', [\App\Http\Controllers\Admin\Project\ProjectController::class, 'create'])->name('admin.projects.create');
@@ -100,6 +80,16 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/{id}/edit', [\App\Http\Controllers\Admin\Project\ProjectController::class, 'edit'])->name('admin.projects.edit');
         Route::put('/{id}', [\App\Http\Controllers\Admin\Project\ProjectController::class, 'update'])->name('admin.projects.update');
         Route::delete('/{id}', [\App\Http\Controllers\Admin\Project\ProjectController::class, 'destroy'])->name('admin.projects.destroy');
+    });
+
+    Route::group(['prefix' => 'campaigns'], function () {
+        Route::get('/', [\App\Http\Controllers\Admin\Campaign\CampaignController::class, 'index'])->name('admin.campaigns.index');
+        Route::get('/create', [\App\Http\Controllers\Admin\Campaign\CampaignController::class, 'create'])->name('admin.campaigns.create');
+        Route::post('/', [\App\Http\Controllers\Admin\Campaign\CampaignController::class, 'store'])->name('admin.campaigns.store');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\Campaign\CampaignController::class, 'show'])->name('admin.campaigns.show');
+        Route::get('/{id}/edit', [\App\Http\Controllers\Admin\Campaign\CampaignController::class, 'edit'])->name('admin.campaigns.edit');
+        Route::put('/{id}', [\App\Http\Controllers\Admin\Campaign\CampaignController::class, 'update'])->name('admin.campaigns.update');
+        Route::delete('/{id}', [\App\Http\Controllers\Admin\Campaign\CampaignController::class, 'destroy'])->name('admin.campaigns.destroy');
     });
 
     Route::group(['prefix' => 'google'], function () {
