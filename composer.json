@@ -6,10 +6,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
-        "fruitcake/laravel-cors": "^3.0",
+        "google/apiclient": "2.15.0",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
+        "laravel/socialite": "^5.9",
         "laravel/tinker": "^2.7"
     },
     "require-dev": {
@@ -51,7 +52,10 @@
     "extra": {
         "laravel": {
             "dont-discover": []
-        }
+        },
+        "google/apiclient-services": [
+            "Gmail"
+        ]
     },
     "config": {
         "optimize-autoloader": true,
