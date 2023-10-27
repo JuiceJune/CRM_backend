@@ -44,8 +44,6 @@
                                 <th>Phone</th>
                                 <th>Domain</th>
                                 <th>Email Provider</th>
-                                <th>Create Date</th>
-                                <th>For Linkedin</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>
@@ -97,17 +95,7 @@
                                     </td>
                                     <td class="align-middle">
                                         <a href="{{route('admin.mailboxes.show', $mailbox->id)}}">
-                                            {{ $mailbox->email_provider->title }}
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="{{route('admin.mailboxes.show', $mailbox->id)}}">
-                                            {{ $mailbox->create_date }}
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="{{route('admin.mailboxes.show', $mailbox->id)}}">
-                                            {{ $mailbox->for_linkedin ? "Yes" : "No" }}
+                                            {{ $mailbox->email_provider }}
                                         </a>
                                     </td>
                                     <td class="align-middle">
@@ -142,8 +130,6 @@
                                 <th>Phone</th>
                                 <th>Domain</th>
                                 <th>Email Provider</th>
-                                <th>Create Date</th>
-                                <th>For Linkedin</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>

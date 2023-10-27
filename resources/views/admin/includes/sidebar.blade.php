@@ -43,14 +43,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{route('admin.email-providers.index')}}" class="nav-link">
-                        <i class="nav-icon fas fa-shipping-fast"></i>
-                        <p>
-                            Email Providers
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="{{route('admin.mailboxes.index')}}" class="nav-link">
                         <i class="nav-icon fas fa-envelope"></i>
                         <p>
@@ -59,10 +51,10 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{route('admin.linkedin-accounts.index')}}" class="nav-link">
+                    <a href="{{route('admin.campaigns.index')}}" class="nav-link">
                         <i class="nav-icon fab fa-linkedin"></i>
                         <p>
-                            Linkedin Accounts
+                            Campaigns
                         </p>
                     </a>
                 </li>

@@ -49,7 +49,7 @@
                                 <td class="align-middle">1.</td>
                                 <td class="align-middle">Avatar</td>
                                 <td class="align-middle">
-                                    <img src="{{ asset("/storage/{$mailbox->avatar}") }}"
+                                    <img src="{{ $mailbox->avatar }}"
                                          class="rounded-circle" style="width: 40px;"
                                          alt="Avatar" />
                                 </td>
@@ -72,27 +72,17 @@
                             <tr>
                                 <td>5.</td>
                                 <td>App Password</td>
-                                <td>{{ $mailbox->app_password }}</td>
+                                <td>{{ $mailbox->token }}</td>
                             </tr>
                             <tr>
                                 <td>6.</td>
                                 <td>Email Provider</td>
-                                <td>{{ $mailbox->email_provider->title }}</td>
+                                <td>{{ $mailbox->email_provider }}</td>
                             </tr>
                             <tr>
                                 <td>7.</td>
                                 <td>Domain</td>
                                 <td>{{ $mailbox->domain }}</td>
-                            </tr>
-                            <tr>
-                                <td>8.</td>
-                                <td>Create Date</td>
-                                <td>{{ $mailbox->create_date }}</td>
-                            </tr>
-                            <tr>
-                                <td>9.</td>
-                                <td>For Linkedin</td>
-                                <td>{{ $mailbox->for_linkedin ? "Yes" : "No"}}</td>
                             </tr>
                             </tbody>
                         </table>

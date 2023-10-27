@@ -34,20 +34,12 @@
                             <div class="form-group">
                                 <label for="logo">Logo</label>
                                 <div class="border my-1 p-1">
-                                    <img src="{{ asset("/storage/{$client->logo}") }}"
+                                    <img src="{{ asset("/storage/{$client->avatar}") }}"
                                          class="rounded-circle" style="width: 100px;"
                                          alt="Logo" />
                                 </div>
                                 <input class="form-control" type="file" id="logo" name="logo">
                                 @error('logo')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
-                                <label for="name">Company</label>
-                                <input type="text" class="form-control" id="company"
-                                       placeholder="Enter Company" name="company" value="{{$client->company}}">
-                                @error('company')
                                 <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
                                 @enderror
                             </div>

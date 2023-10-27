@@ -60,16 +60,6 @@
                                 <td>{{ $project->name }}</td>
                             </tr>
                             <tr>
-                                <td>3.</td>
-                                <td>Description</td>
-                                <td>{{ $project->description }}</td>
-                            </tr>
-                            <tr>
-                                <td>4.</td>
-                                <td>Period</td>
-                                <td>{{ $project->period }}</td>
-                            </tr>
-                            <tr>
                                 <td>5.</td>
                                 <td>Price</td>
                                 <td>{{ $project->price }}</td>
@@ -145,17 +135,6 @@
                                     @foreach($project->mailboxes as $mailbox)
                                         <a href="{{ route("admin.mailboxes.show", $mailbox->id) }}">
                                             {{$mailbox->email}}
-                                        </a>
-                                    @endforeach
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>13.</td>
-                                <td>Linkedin Accounts</td>
-                                <td>
-                                    @foreach($project->linkedin_accounts as $linkedin)
-                                        <a href="{{ route("admin.linkedin-accounts.show", $linkedin->id) }}">
-                                            {{$linkedin->name}}
                                         </a>
                                     @endforeach
                                 </td>

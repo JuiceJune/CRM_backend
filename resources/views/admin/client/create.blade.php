@@ -37,14 +37,6 @@
                                 @enderror
                             </div>
                             <div class="form-group">
-                                <label for="name">Company</label>
-                                <input type="text" class="form-control" id="company"
-                                       placeholder="Enter Company" name="company" value="{{ old('company') }}">
-                                @error('company')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
                                 <label for="name">Name</label>
                                 <input type="text" class="form-control" id="name"
                                        placeholder="Enter Name" name="name" value="{{ old('name') }}">

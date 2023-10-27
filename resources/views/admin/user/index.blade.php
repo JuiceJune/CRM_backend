@@ -38,9 +38,6 @@
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Position</th>
-                                <th>Start Date</th>
-                                <th>Location</th>
-                                <th>Birthday</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>
@@ -78,21 +75,6 @@
                                     <td class="align-middle">
                                         <a href="{{route('admin.users.show', $user->id)}}">
                                             {{ $user->position->title }}
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="{{route('admin.users.show', $user->id)}}">
-                                            {{ $user->start_date }}
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="{{route('admin.users.show', $user->id)}}">
-                                            {{ $user->location }}
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="{{route('admin.users.show', $user->id)}}">
-                                            {{ $user->birthday }}
                                         </a>
                                     </td>
                                     <td class="align-middle">

@@ -77,17 +77,10 @@
                                 @enderror
                             </div>
                             <div class="form-group">
-                                <label>Email Provider</label>
-                                <select class="form-control" name="email_provider_id" style="width: 100%;">
-                                    @foreach($email_providers as $email_provider)
-                                        @if (old('email_provider_id') == $email_provider->id)
-                                            <option value="{{ $email_provider->id }}" selected>{{ $email_provider->title }}</option>
-                                        @else
-                                            <option value="{{ $email_provider->id }}">{{ $email_provider->title }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @error('email_provider_id')
+                                <label for="email_provider">Email Provider</label>
+                                <input type="text" class="form-control" id="email_provider"
+                                       placeholder="Enter Email Provider " name="email_provider" value="{{ old('email_provider') }}">
+                                @error('email_provider')
                                 <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -98,25 +91,6 @@
                                 @error('domain')
                                 <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
                                 @enderror
-                            </div>
-                            <div class="form-group">
-                                <label for="create_date">Create Date</label>
-                                <div class="input-group date" id="create_date" data-target-input="nearest">
-                                    <input type="text" name="create_date" class="form-control datetimepicker-input"
-                                           data-target="#create_date" placeholder="Enter Start Date" value="{{ old('create_date', date('Y-m-d')) }}">
-                                    <div class="input-group-append" data-target="#create_date" data-toggle="datetimepicker">
-                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                    </div>
-                                </div>
-                                @error('create_date')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" name="for_linkedin" id="for_linkedin">
-                                    <label class="custom-control-label" for="for_linkedin">For linkedin</label>
-                                </div>
                             </div>
                         </div>
 

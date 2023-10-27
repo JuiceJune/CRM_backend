@@ -45,16 +45,6 @@
                                 @enderror
                             </div>
                             <div class="form-group">
-                                <label for="description">Description</label>
-                                <textarea class="form-control" rows="3" id="description"
-                                          name="description" placeholder="Enter Description">
-                                    {{ old('description') }}
-                                </textarea>
-                                @error('description')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
                                 <label for="price">Price</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -79,21 +69,6 @@
                                     @endforeach
                                 </select>
                                 @error('client_id')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
-                                <label>Period</label>
-                                <select class="form-control" name="period" style="width: 100%;">
-                                    @foreach($periods as $period)
-                                        @if (old('period') == $period["title"])
-                                            <option value="{{ $period["title"] }}" selected>{{ $period["title"] }}</option>
-                                        @else
-                                            <option value="{{ $period["title"] }}">{{ $period["title"] }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @error('period')
                                 <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -160,17 +135,6 @@
                                     @endforeach
                                 </select>
                                 @error('mailboxes[]')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
-                                <label>Linkedin Accounts</label>
-                                <select id="linkedin_accounts" class="select2 select2-hidden-accessible" name="linkedin_accounts[]" multiple="" data-placeholder="Select linkedin accounts" style="width: 100%;" data-select2-id="7" tabindex="-1" aria-hidden="true">
-                                    @foreach($linkedin_accounts as $linkedin_account)
-                                        <option value="{{$linkedin_account->id}}">{{ $linkedin_account->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('linkedin_accounts[]')
                                 <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
                                 @enderror
                             </div>

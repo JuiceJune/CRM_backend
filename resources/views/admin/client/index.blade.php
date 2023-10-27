@@ -35,7 +35,6 @@
                                 <th>Id</th>
                                 <th>Logo</th>
                                 <th>Email</th>
-                                <th>Company</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Start Date</th>
@@ -55,7 +54,7 @@
                                     </td>
                                     <td class="align-middle">
                                         <a href="{{route('admin.clients.show', $client->id)}}">
-                                            <img src="{{ asset("/storage/{$client->logo}") }}"
+                                            <img src="{{ asset("/storage/{$client->avatar}") }}"
                                                  class="rounded-circle" style="width: 40px;"
                                                  alt="Logo" />
                                         </a>
@@ -63,11 +62,6 @@
                                     <td class="align-middle">
                                         <a href="{{route('admin.clients.show', $client->id)}}">
                                             {{ $client->email }}
-                                        </a>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="{{route('admin.clients.show', $client->id)}}">
-                                            {{ $client->company }}
                                         </a>
                                     </td>
                                     <td class="align-middle">
@@ -121,7 +115,6 @@
                                 <th>Id</th>
                                 <th>Logo</th>
                                 <th>Email</th>
-                                <th>Company</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Start Date</th>

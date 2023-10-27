@@ -74,21 +74,6 @@
                                 <td>Position</td>
                                 <td>{{ $user->position->title }}</td>
                             </tr>
-                            <tr>
-                                <td>6.</td>
-                                <td></td>
-                                <td>{{ $user->start_date }}</td>
-                            </tr>
-                            <tr>
-                                <td>7.</td>
-                                <td>Position</td>
-                                <td>{{ $user->location }}</td>
-                            </tr>
-                            <tr>
-                                <td>8.</td>
-                                <td>Position</td>
-                                <td>{{ $user->birthday }}</td>
-                            </tr>
                             </tbody>
                         </table>
                     </div>

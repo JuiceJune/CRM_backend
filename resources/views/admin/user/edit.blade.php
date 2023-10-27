@@ -96,41 +96,6 @@
                                 @enderror
                             </div>
                             <div class="form-group">
-                                <label for="start_date">Start Date</label>
-                                <div class="input-group date" id="start_date" data-target-input="nearest">
-                                    <input type="text" name="start_date" class="form-control datetimepicker-input"
-                                           data-target="#start_date" placeholder="Enter Start Date" value="{{ $user->start_date }}">
-                                    <div class="input-group-append" data-target="#start_date" data-toggle="datetimepicker">
-                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                    </div>
-                                </div>
-                                @error('start_date')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
-                                <label for="birthday">Birthday</label>
-                                <div class="input-group date" id="birthday" data-target-input="nearest">
-                                    <input type="text" name="birthday" class="form-control datetimepicker-input"
-                                           data-target="#birthday" placeholder="Enter Birthday" value="{{ $user->birthday }}">
-                                    <div class="input-group-append" data-target="#birthday" data-toggle="datetimepicker">
-                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                    </div>
-                                </div>
-                                @error('birthday')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
-                                <label for="location">Location</label>
-                                <input type="text" class="form-control" id="location"
-                                       placeholder="Enter Location" name="location" value="{{ $user->location }}">
-                                @error('location')
-                                <div class="alert alert-danger mt-2 py-1" role="alert">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="form-group">
                                 <input type="hidden" name="user_id" value="{{$user->id}}">
                             </div>
                         </div>

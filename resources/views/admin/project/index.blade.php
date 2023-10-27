@@ -40,7 +40,6 @@
                                 <th>SDRs</th>
                                 <th>IT Specialist</th>
                                 <th>Mailboxes</th>
-                                <th>Linkedin Accounts</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>
@@ -121,17 +120,6 @@
                                         @endif
                                     </td>
                                     <td class="align-middle">
-                                        @if($project->linkedin_accounts->toArray())
-                                            @foreach($project->linkedin_accounts as $linkedin)
-                                                <a href="{{route('admin.linkedin-accounts.show', $linkedin->id)}}">
-                                                    {{ $linkedin->name }}
-                                                </a>
-                                            @endforeach
-                                        @else
-                                            not specified
-                                        @endif
-                                    </td>
-                                    <td class="align-middle">
                                         <form class="mx-1" method="post"
                                               action="{{ route('admin.projects.edit', $project->id) }}">
                                             @method('GET')
@@ -164,7 +152,6 @@
                                 <th>SDRs</th>
                                 <th>IT Specialist</th>
                                 <th>Mailboxes</th>
-                                <th>Linkedin Accounts</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>
