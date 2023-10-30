@@ -91,10 +91,10 @@ class GoogleController extends Controller
         }
     }
 
-    public function createMessage($sender, $to, $subject, $messageText)
+    public function createMessage($sender_name, $sender_email, $to, $subject, $messageText)
     {
         $message = new Google_Service_Gmail_Message();
-        $rawMessageString = "From: <{$sender}>\r\n";
+        $rawMessageString = "From: {$sender_name} <{$sender_email}>\r\n";
         $rawMessageString .= "To: <{$to}>\r\n";
         $rawMessageString .= 'Subject: =?utf-8?B?' . base64_encode($subject) . "?=\r\n";
         $rawMessageString .= "MIME-Version: 1.0\r\n";
