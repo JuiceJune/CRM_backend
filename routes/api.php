@@ -45,7 +45,8 @@ Route::middleware('auth:sanctum')->group(function() {
 
     Route::prefix('mailboxes')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'index']);
-        Route::middleware("mailbox.access")->get('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'show']);
+//        Route::middleware("mailbox.access")->get('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'show']);
+        Route::get('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'show']);
         Route::post('/', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'store']);
         Route::put('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'update']);
         Route::delete('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'destroy']);
