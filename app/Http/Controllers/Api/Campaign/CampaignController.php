@@ -135,14 +135,22 @@ class CampaignController extends Controller
             $message = $request->input('message');
             $subject = $request->input('subject');
             $test_email = $request->input('test_email');
+            $snippets = $request->input('snippets');
             $mailbox = Mailbox::find($mailbox_id);
             if ($mailbox) {
+                $messageText = $message;
+                if(count($snippets) > 0) {
+                    foreach ($snippets as $key => $snippet) {
+                        $key = strtoupper($key);
+                        $messageText = str_replace('{{' . $key . '}}', $snippet, $messageText);
+                        $subject = str_replace('{{' . $key . '}}', $snippet, $subject);
+                    }
+                }
                 $client = (new \App\Http\Controllers\Api\Google\GoogleController)->getGoogleClient($mailbox["token"]);
                 $sender_name = $mailbox['name'];
                 $sender_email = $mailbox['email'];
                 $signature = $mailbox['signature'];
                 $recipient = $test_email; // Адреса отримувача
-                $messageText = $message;
                 $service = new Gmail($client);
                 $message = (new \App\Http\Controllers\Api\Google\GoogleController)->createMessage($sender_name, $sender_email, $recipient, $subject, $messageText, $signature);
                 $response = $service->users_messages->send('me', $message);
