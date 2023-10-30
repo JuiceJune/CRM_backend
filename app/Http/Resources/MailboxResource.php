@@ -27,6 +27,7 @@ class MailboxResource extends JsonResource
             'domain' => $this->domain,
             'avatar' => $this->avatar,
             'phone' => $this->phone,
+            'signature' => $this->signature,
             'password' => $this->password,
             'app_password' => $this->app_password,
             'email_provider' => $this->email_provider,
