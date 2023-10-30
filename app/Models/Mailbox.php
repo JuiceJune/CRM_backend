@@ -17,10 +17,10 @@ class Mailbox extends Model
         "phone",
         "password",
         "app_password",
-        "email_provider",
         "token",
         "refresh_token",
-        "expires_in"
+        "expires_in",
+        "signature"
     ];
 
     public function projects() {
