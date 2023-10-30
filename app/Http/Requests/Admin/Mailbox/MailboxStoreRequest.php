@@ -24,10 +24,10 @@ class MailboxStoreRequest extends FormRequest
             "phone" => "nullable|string|max:20",
             "password" => "nullable|string|max:50",
             "app_password" => "nullable|string",
-            "email_provider" => "nullable|string",
             "token" => "string",
             "refresh_token" => "string",
             "expires_in" => "string",
+            "signature" => "string"
         ];
     }
 

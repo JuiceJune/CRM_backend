@@ -27,10 +27,10 @@ class MailboxUpdateRequest extends FormRequest
             "phone" => "nullable|string|max:20",
             "password" => "nullable|string|max:50",
             "app_password" => "nullable|string",
-            "email_provider" => "nullable|integer",
             "token" => "string",
             "refresh_token" => "string",
             "expires_in" => "string",
+            "signature" => "string"
         ];
     }
 
@@ -64,10 +64,6 @@ class MailboxUpdateRequest extends FormRequest
             'create_date.date' => 'Create date should be a date!',
 
             'app_password.string' => 'App password should be a string!',
-
-            'email_provider_id.required' => 'Email provider is required!',
-            'email_provider_id.integer' => 'email_provider_id should be an integer !',
-            'email_provider_id.exists' => 'email_provider_id should be exists!',
         ];
     }
 }
