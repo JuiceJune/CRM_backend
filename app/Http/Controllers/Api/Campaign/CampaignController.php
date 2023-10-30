@@ -11,6 +11,7 @@ use App\Models\Campaign;
 use App\Models\Project;
 use Google\Service\Gmail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use PHPUnit\Exception;
 
 class CampaignController extends Controller
@@ -137,13 +138,17 @@ class CampaignController extends Controller
             $mailbox = Mailbox::find($mailbox_id);
             if ($mailbox) {
                 $client = (new \App\Http\Controllers\Api\Google\GoogleController)->getGoogleClient($mailbox["token"]);
-                $sender = $mailbox['name'];
+                $sender_name = $mailbox['name'];
+                $sender_email = $mailbox['email'];
                 $recipient = $test_email; // Адреса отримувача
                 $messageText = $message;
                 $service = new Gmail($client);
-                $message = (new \App\Http\Controllers\Api\Google\GoogleController)->createMessage($sender, $recipient, $subject, $messageText);
+                $message = (new \App\Http\Controllers\Api\Google\GoogleController)->createMessage($sender_name, $sender_email, $recipient, $subject, $messageText);
                 $response = $service->users_messages->send('me', $message);
-                return response($response);
+                return response()->json([
+                    "message" => 'Email send successfully',
+                    "response" => $response
+                ]);
             } else {
                 return response('Mailbox not found');
             }
