@@ -6,13 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Mailbox\MailboxStoreRequest;
 use App\Http\Requests\Admin\Mailbox\MailboxUpdateRequest;
 use App\Http\Resources\MailboxResource;
-use App\Http\Resources\UserResource;
-use App\Models\EmailProvider;
 use App\Models\Mailbox;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
+use PHPUnit\Exception;
 
 class MailboxController extends Controller
 {
@@ -36,10 +33,9 @@ class MailboxController extends Controller
      */
     public function create()
     {
-        $email_providers = EmailProvider::all();
-        return response()->json([
-            "email_providers" => $email_providers,
-        ]);
+//        return response()->json([
+//            "email_providers" => $email_providers,
+//        ]);
     }
 
     /**
@@ -69,7 +65,12 @@ class MailboxController extends Controller
      */
     public function show(Mailbox $mailbox)
     {
-        return new MailboxResource($mailbox);
+        try {
+            $currentMailbox = new MailboxResource($mailbox);
+            return response($currentMailbox);
+        } catch (Exception $error) {
+            return response($error, 400);
+        }
     }
 
     /**
@@ -77,10 +78,8 @@ class MailboxController extends Controller
      */
     public function edit(Mailbox $mailbox)
     {
-        $email_providers = EmailProvider::all();
         return response()->json([
             "mailbox" => new MailboxResource($mailbox),
-            "email_providers" => $email_providers,
         ]);
     }
 
@@ -89,20 +88,17 @@ class MailboxController extends Controller
      */
     public function update(MailboxUpdateRequest $request, Mailbox $mailbox)
     {
-        //TODO add services
-        $validated = $request->validated();
-
-//        if(isset($validated["avatar"])) {
-//            $validated["avatar"] = $request->file('avatar')->store(
-//                'mailboxes/avatars', 'public'
-//            );
-//            if(File::exists(public_path('storage/'.$mailbox->avatar)) && $mailbox->avatar != "mailboxes/avatars/default.png") {
-//                File::delete(public_path('storage/'.$mailbox->avatar));
-//            }
-//        }
-        $mailbox->update($validated);
-
-        return new MailboxResource($mailbox);
+        try {
+            //TODO add services
+            $validated = $request->validated();
+            $mailbox->update($validated);
+            return response($mailbox);
+        } catch (Exception $error) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error update mailbox: ' . $error->getMessage()
+            ], 400);
+        }
     }
 
     /**
