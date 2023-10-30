@@ -91,7 +91,7 @@ class GoogleController extends Controller
         }
     }
 
-    public function createMessage($sender_name, $sender_email, $to, $subject, $messageText)
+    public function createMessage($sender_name, $sender_email, $to, $subject, $messageText, $signature)
     {
         $message = new Google_Service_Gmail_Message();
         $rawMessageString = "From: {$sender_name} <{$sender_email}>\r\n";
@@ -101,6 +101,7 @@ class GoogleController extends Controller
         $rawMessageString .= "Content-Type: text/html; charset=utf-8\r\n";
         $rawMessageString .= 'Content-Transfer-Encoding: quoted-printable' . "\r\n\r\n";
         $rawMessageString .= "{$messageText}\r\n";
+        $rawMessageString .= "{$signature}\r\n";
         $rawMessage = strtr(base64_encode($rawMessageString), array('+' => '-', '/' => '_'));
         $message->setRaw($rawMessage);
         return $message;

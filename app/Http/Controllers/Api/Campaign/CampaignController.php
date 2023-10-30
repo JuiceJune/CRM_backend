@@ -140,10 +140,11 @@ class CampaignController extends Controller
                 $client = (new \App\Http\Controllers\Api\Google\GoogleController)->getGoogleClient($mailbox["token"]);
                 $sender_name = $mailbox['name'];
                 $sender_email = $mailbox['email'];
+                $signature = $mailbox['signature'];
                 $recipient = $test_email; // Адреса отримувача
                 $messageText = $message;
                 $service = new Gmail($client);
-                $message = (new \App\Http\Controllers\Api\Google\GoogleController)->createMessage($sender_name, $sender_email, $recipient, $subject, $messageText);
+                $message = (new \App\Http\Controllers\Api\Google\GoogleController)->createMessage($sender_name, $sender_email, $recipient, $subject, $messageText, $signature);
                 $response = $service->users_messages->send('me', $message);
                 return response()->json([
                     "message" => 'Email send successfully',
