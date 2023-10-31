@@ -45,4 +45,9 @@ class Campaign extends Model
     public function project() {
         return $this->belongsTo(Project::class);
     }
+
+    public function prospects()
+    {
+        return $this->hasMany(Prospect::class);
+    }
 }
