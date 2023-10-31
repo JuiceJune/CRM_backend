@@ -115,8 +115,6 @@ class MailboxController extends Controller
 
             $mailbox->projects()->detach();
 
-            $mailbox->linkedin()->delete();
-
             $mailbox->delete();
 
             return response()->json([
