@@ -121,6 +121,7 @@ class CampaignController extends Controller
         try {
             $campaign = Campaign::find($id);
             $campaign->delete();
+            $campaign->projects()->detach();
             return response('Campaign deleted successfully');
         } catch (Exception $error) {
             return response($error, 400);
