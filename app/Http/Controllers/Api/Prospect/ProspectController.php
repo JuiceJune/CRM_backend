@@ -122,4 +122,43 @@ class ProspectController extends Controller
             return response($error, 400);
         }
     }
+
+    public function csvUpload(Request $request)
+    {
+        try {
+            $campaign_id = $request->input('campaign_id');
+            if ($request->hasFile('csv_file')) {
+                $file = $request->file('csv_file');
+
+                if ($file->getClientOriginalExtension() === 'csv') {
+                    $filePath = $file->getRealPath();
+                    $handle = fopen($filePath, 'r');
+
+                    if ($handle !== false) {
+                        fgetcsv($handle);
+
+                        while (($data = fgetcsv($handle)) !== false) {
+                           $prospect = new Prospect([
+                                    'first_name' => $data[0],
+                                    'last_name' => $data[1],
+                                    'email' => $data[2],
+                                    'campaign_id' => $campaign_id
+                                ]);
+                                $prospect->save();
+                        }
+
+                        fclose($handle);
+                    }
+
+                    return response()->json(['message' => 'Prospects uploaded successfully']);
+                } else {
+                    return response()->json(['error' => 'Invalid file format. Please upload a CSV file.']);
+                }
+            } else {
+                return response()->json(['error' => 'No file uploaded']);
+            }
+        } catch (Exception $error) {
+            return response($error, 400);
+        }
+    }
 }
