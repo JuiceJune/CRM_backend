@@ -63,6 +63,7 @@ class CampaignController extends Controller
     {
         try {
             $validated = $request->validated();
+            $validated['sending_time_json'] = json_decode($validated['sending_time_json']);
             $campaign = Campaign::create($validated);
             return response($campaign);
         } catch (Exception $error) {
@@ -104,6 +105,7 @@ class CampaignController extends Controller
     {
         try {
             $validated = $request->validated();
+            $validated['sending_time_json'] = json_decode($validated['sending_time_json']);
             $campaign->update($validated);
             return response('Campaign successfully updated');
         } catch (Exception $error) {
@@ -139,7 +141,7 @@ class CampaignController extends Controller
             $mailbox = Mailbox::find($mailbox_id);
             if ($mailbox) {
                 $messageText = $message;
-                if(count($snippets) > 0) {
+                if (count($snippets) > 0) {
                     foreach ($snippets as $key => $snippet) {
                         $key = strtoupper($key);
                         $messageText = str_replace('{{' . $key . '}}', $snippet, $messageText);
@@ -161,6 +163,15 @@ class CampaignController extends Controller
             } else {
                 return response('Mailbox not found');
             }
+        } catch (Exception $error) {
+            return response($error, 400);
+        }
+    }
+
+    public function startCampaign(Campaign $campaign)
+    {
+        try {
+            return response($campaign);
         } catch (Exception $error) {
             return response($error, 400);
         }
