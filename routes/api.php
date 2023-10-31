@@ -68,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::put('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'update']);
         Route::delete('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'destroy']);
         Route::post('/sendTestEmail', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'sendTestEmail']);
+        Route::get('/{campaign}/start', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'startCampaign']);
     });
     Route::prefix('prospects')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'index']);
@@ -77,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::get('/{prospect}/edit', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'edit']);
         Route::put('/{prospect}', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'update']);
         Route::delete('/{prospect}', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'destroy']);
+        Route::post('/csv-upload', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'csvUpload']);
     });
 
     Route::get('user-projects/{user}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'getAllByUser']);
