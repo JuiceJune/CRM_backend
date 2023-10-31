@@ -84,7 +84,6 @@ class CampaignController extends Controller
     {
         //TODO delete avatar file
         $campaign = Campaign::find($id);
-        $campaign->project()->detach();
         if ($campaign->delete()) {
             return redirect()->route('admin.campaigns.index')->with('success', 'Campaign deleted successfully.');
         } else {
