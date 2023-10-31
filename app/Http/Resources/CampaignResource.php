@@ -21,6 +21,9 @@ class CampaignResource extends JsonResource
             'project' => $this->project->name,
             'subject' => $this->subject,
             'message' => $this->message,
+            'sending_time_json' => $this->sending_time_json,
+            'status' => $this->status,
+            'period' => $this->period
         ];
     }
 }

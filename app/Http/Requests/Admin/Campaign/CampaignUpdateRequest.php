@@ -26,6 +26,9 @@ class CampaignUpdateRequest extends FormRequest
             'mailbox_id' => 'required|integer|exists:mailboxes,id',
             'subject' => 'required|string',
             'message' => 'required',
+            'status' => 'string',
+            'period' => 'integer',
+            'sending_time_json' => 'json',
         ];
     }
 

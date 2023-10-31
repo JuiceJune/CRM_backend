@@ -27,6 +27,9 @@ class CampaignStoreRequest extends FormRequest
             'project_id' => 'required|integer|exists:projects,id',
             'subject' => 'required|string',
             'message' => 'required',
+            'status' => 'string',
+            'period' => 'integer',
+            'sending_time_json' => 'json',
         ];
     }
 
