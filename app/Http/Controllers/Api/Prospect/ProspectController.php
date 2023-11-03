@@ -10,6 +10,7 @@ use App\Http\Resources\ProspectResource;
 use App\Models\Prospect;
 use Illuminate\Http\Request;
 use PHPUnit\Exception;
+use PHPUnit\Framework\Error;
 
 class ProspectController extends Controller
 {
@@ -62,9 +63,12 @@ class ProspectController extends Controller
             $validated = $request->validated();
             $prospects = $validated['prospects'];
             Prospect::insertProspects($prospects);
-            return response(['message' => 'Prospects were successfully created']);
+            return response('Prospects were successfully created');
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with store Prospects",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -150,15 +154,24 @@ class ProspectController extends Controller
                         fclose($handle);
                     }
 
-                    return response()->json(['message' => 'Prospects uploaded successfully']);
+                    return response('Prospects uploaded successfully');
                 } else {
-                    return response()->json(['error' => 'Invalid file format. Please upload a CSV file.']);
+                    return response([
+                        "message" => "Error",
+                        "error_message" => 'Invalid file format. Please upload a CSV file',
+                    ], 400);
                 }
             } else {
-                return response()->json(['error' => 'No file uploaded']);
+                return response([
+                    "message" => "Error",
+                    "error_message" => 'No file uploaded',
+                ], 400);
             }
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with csv prospects upload",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 }

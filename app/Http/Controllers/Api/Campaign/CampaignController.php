@@ -31,7 +31,10 @@ class CampaignController extends Controller
 
             return response(CampaignResource::collection($campaigns));
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with getting All Campaigns",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -52,7 +55,10 @@ class CampaignController extends Controller
                 return response(["mailboxes" => $mailboxes, "projects" => $projects]);
             }
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with getting info for creating Campaign",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -65,9 +71,13 @@ class CampaignController extends Controller
             $validated = $request->validated();
             $validated['sending_time_json'] = json_decode($validated['sending_time_json']);
             $campaign = Campaign::create($validated);
-            return response($campaign);
+
+            return response($campaign['id']);
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with store Project",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -78,9 +88,12 @@ class CampaignController extends Controller
     {
         try {
             $currentCampaign = new CampaignResource($campaign);
-            return response()->json($currentCampaign);
+            return response($currentCampaign);
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with getting Campaign",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -109,7 +122,10 @@ class CampaignController extends Controller
             $campaign->update($validated);
             return response('Campaign successfully updated');
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with updating Project",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -121,10 +137,12 @@ class CampaignController extends Controller
         try {
             $campaign = Campaign::find($id);
             $campaign->delete();
-            $campaign->prospects()->delete();
             return response('Campaign deleted successfully');
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with destroying Campaign",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -157,15 +175,15 @@ class CampaignController extends Controller
                 $service = new Gmail($client);
                 $message = (new \App\Http\Controllers\Api\Google\GoogleController)->createMessage($sender_name, $sender_email, $recipient, $subject, $messageText, $signature);
                 $response = $service->users_messages->send('me', $message);
-                return response()->json([
-                    "message" => 'Email send successfully',
-                    "response" => $response
-                ]);
+                return response('Email send successfully');
             } else {
                 return response('Mailbox not found');
             }
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with sending test message",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 

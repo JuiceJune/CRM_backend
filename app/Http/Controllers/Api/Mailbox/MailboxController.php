@@ -10,22 +10,38 @@ use App\Models\Mailbox;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Exception;
+use PHPUnit\Framework\Error;
 
 class MailboxController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
+        try {
+            $limit = $request->input('limit', 10);
+            $offset = $request->input('offset', 0);
 
-        if ($user->isAdmin()) {
-            $mailboxes = Mailbox::all();
-        } else {
-            $mailboxes = $user->projects()->with('mailboxes')->get()->pluck('mailboxes')->flatten();
+            $query = Mailbox::skip($offset)->take($limit);
+
+            $mailboxes = $query->get();
+
+            return response(MailboxResource::collection($mailboxes));
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with getting All Mailboxes",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
-        return response()->json(MailboxResource::collection($mailboxes));
+//        $user = Auth::user();
+//
+//        if ($user->isAdmin()) {
+//            $mailboxes = Mailbox::all();
+//        } else {
+//            $mailboxes = $user->projects()->with('mailboxes')->get()->pluck('mailboxes')->flatten();
+//        }
+//        return response()->json(MailboxResource::collection($mailboxes));
     }
 
     /**
@@ -33,9 +49,7 @@ class MailboxController extends Controller
      */
     public function create()
     {
-//        return response()->json([
-//            "email_providers" => $email_providers,
-//        ]);
+        // TODO add template for create mailboxes
     }
 
     /**
@@ -43,21 +57,7 @@ class MailboxController extends Controller
      */
     public function store(MailboxStoreRequest $request)
     {
-        $validated = $request->validated();
-
-        $validated["for_linkedin"] = isset($validated["for_linkedin"]);
-
-        if(isset($validated["avatar"])) {
-            $validated["avatar"] = $request->file('avatar')->store(
-                'mailboxes/avatars', 'public'
-            );
-        } else {
-            $validated["avatar"] = "mailboxes/avatars/default.png";
-        }
-
-        $mailbox = Mailbox::create($validated);
-
-        return response(new MailboxResource($mailbox), 201);
+       // TODO write store method
     }
 
     /**
@@ -69,7 +69,10 @@ class MailboxController extends Controller
             $currentMailbox = new MailboxResource($mailbox);
             return response($currentMailbox);
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with getting Mailbox",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -78,9 +81,14 @@ class MailboxController extends Controller
      */
     public function edit(Mailbox $mailbox)
     {
-        return response()->json([
-            "mailbox" => new MailboxResource($mailbox),
-        ]);
+        try {
+            return response(new MailboxResource($mailbox));
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with getting Mailbox for edit",
+                "error_message" => $error->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -89,15 +97,14 @@ class MailboxController extends Controller
     public function update(MailboxUpdateRequest $request, Mailbox $mailbox)
     {
         try {
-            //TODO add services
             $validated = $request->validated();
             $mailbox->update($validated);
-            return response($mailbox);
+            return response('Mailbox updated successfully');
         } catch (Exception $error) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error update mailbox: ' . $error->getMessage()
-            ], 400);
+            return response([
+                "message" => "Problem with updating Mailbox",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
@@ -106,25 +113,15 @@ class MailboxController extends Controller
      */
     public function destroy(Mailbox $mailbox) {
         try {
-            if(!$mailbox) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Mailbox ' . $mailbox->email . ' not found'
-                ], 404);
-            }
-
             $mailbox->projects()->detach();
-
+            $deletedMailbox = $mailbox->email;
             $mailbox->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Mailbox ' . $mailbox->email . ' deleted successfully'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error deleting mailbox: ' . $e->getMessage()
+            return response($deletedMailbox);
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with destroying Mailbox",
+                "error_message" => $error->getMessage(),
             ], 500);
         }
     }

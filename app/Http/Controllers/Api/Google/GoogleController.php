@@ -43,8 +43,10 @@ class GoogleController extends Controller
                 ->redirect()
                 ->getTargetUrl();
         } catch (Exception $error) {
-            Log::channel('development')->error('Error: ' . $error);
-            return $error;
+            return response([
+                "message" => "Problem with getting Google login url",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 

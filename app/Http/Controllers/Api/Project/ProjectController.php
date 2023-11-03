@@ -31,15 +31,24 @@ class ProjectController extends Controller
 
             return response(ProjectResource::collection($projects));
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with getting All Projects",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
     public function getAllByUser(User $user)
     {
-        $user = User::where("user_id", "=", $user->id)->first();
-        $projects = $user ? $user->projects : [];
-        return response()->json(ProjectResource::collection($projects));
+        try {
+            $projects = $user->projects;
+            return response(ProjectResource::collection($projects));
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with getting Projects of user",
+                "error_message" => $error->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -47,12 +56,21 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $mailboxes = Mailbox::all();
-        $linkedin_accounts = Linkedin::all();
-        $users = User::all();
-        $clients = Client::all();
-        return view('admin.project.create',
-            compact('mailboxes', 'linkedin_accounts', 'clients', 'periods', 'users'));
+        try {
+            $mailboxes = Mailbox::all();
+            $users = User::all();
+            $clients = Client::all();
+            return response()->json([
+                'mailboxes' => $mailboxes,
+                'clients' => $clients,
+                'users' => $users
+            ]);
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with getting info for creating Project",
+                "error_message" => $error->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -60,23 +78,27 @@ class ProjectController extends Controller
      */
     public function store(ProjectStoreRequest $request)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $validated['logo'] = isset($validated['logo'])
-            ? $request->file('logo')->store('projects/logos', 'public')
-            : 'projects/logos/default.png';
+            $validated['logo'] = isset($validated['logo'])
+                ? $request->file('logo')->store('projects/logos', 'public')
+                : 'projects/logos/default.png';
 
-        $project = Project::create($validated);
-        if ($validated['users'])
-            $project->users()->attach($validated['users']);
+            $project = Project::create($validated);
+            if ($validated['users'])
+                $project->users()->attach($validated['users']);
 
-        if ($validated['mailboxes'])
-            $project->mailboxes()->attach($validated['mailboxes']);
+            if ($validated['mailboxes'])
+                $project->mailboxes()->attach($validated['mailboxes']);
 
-        if ($validated['linkedin_accounts'])
-            $project->linkedin_accounts()->attach($validated['linkedin_accounts']);
-
-        return redirect()->route('admin.projects.index')->with('success', 'Project created successfully.');
+            return response('Project created successfully');
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with store Project",
+                "error_message" => $error->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -86,80 +108,87 @@ class ProjectController extends Controller
     {
         try {
             $currentProject = new ProjectResource($project);
-            return response()->json($currentProject);
+            return response($currentProject);
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with getting Project",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Project $project)
     {
-        $project = Project::findOrFail($id);
-
-        $mailboxes = Mailbox::all();
-        $linkedin_accounts = Linkedin::all();
-        $users = User::all();
-        $clients = Client::all();
-        $periods = [
-            [
-                "title" => "Month"
-            ],
-            [
-                "title" => "Quarter"
-            ],
-            [
-                "title" => "Year"
-            ],
-        ];
-        return view('admin.project.edit', compact('project', 'mailboxes', 'linkedin_accounts',
-            'clients', 'periods', 'users'));
+        try {
+            $mailboxes = Mailbox::all();
+            $users = User::all();
+            $clients = Client::all();
+            return response()->json([
+                "mailboxes" => $mailboxes,
+                'users' => $users,
+                'clients' => $clients,
+                'project' => $project
+            ]);
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with editing Project",
+                "error_message" => $error->getMessage(),
+            ], 500);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProjectUpdateRequest $request, string $id)
+    public function update(ProjectUpdateRequest $request, Project $project)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $project = Project::findOrFail($id);
-
-        if (isset($validated["logo"])) {
-            $validated["logo"] = $request->file('logo')->store(
-                'projects/logos', 'public'
-            );
-            if (File::exists(public_path('storage/' . $project->logo)) && $project->logo != "projects/logos/default.png") {
-                File::delete(public_path('storage/' . $project->logo));
+            if (isset($validated["logo"])) {
+                $validated["logo"] = $request->file('logo')->store(
+                    'projects/logos', 'public'
+                );
+                if (File::exists(public_path('storage/' . $project->logo)) && $project->logo != "projects/logos/default.png") {
+                    File::delete(public_path('storage/' . $project->logo));
+                }
             }
+            $project->update($validated);
+
+            $project->users()->sync($validated['users'] ?? []);
+
+            $project->mailboxes()->sync($validated['mailboxes'] ?? []);
+
+            return response('Project updating successfully');
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with updating Project",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
-        $project->update($validated);
-
-        $project->users()->sync($validated['users'] ?? []);
-
-        $project->mailboxes()->sync($validated['mailboxes'] ?? []);
-
-        $project->linkedin_accounts()->sync($validated['linkedin_accounts'] ?? []);
-
-        return redirect()->route('admin.projects.index')->with('success', 'Project updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Project $project)
     {
-        //TODO delete avatar file
-        $project = Project::find($id);
-        $project->users()->detach();
-        $project->mailboxes()->detach();
-        $project->linkedin_accounts()->detach();
-        if ($project->delete()) {
-            return redirect()->route('admin.projects.index')->with('success', 'Project deleted successfully.');
-        } else {
-            return redirect()->route('admin.projects.index')->with('error', 'Project not deleted.');
+        try {
+            //TODO delete avatar file
+            $project->users()->detach();
+            $project->mailboxes()->detach();
+            $deletedProject = $project->name;
+            $project->delete();
+
+            return response($deletedProject);
+        } catch (Exception $error) {
+            return response([
+                "message" => "Problem with destroying Project",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 }
