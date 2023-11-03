@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Mailbox extends Model
 {
@@ -22,6 +23,11 @@ class Mailbox extends Model
         "expires_in",
         "signature"
     ];
+
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class);
+    }
 
     public function projects() {
         return $this->belongsToMany(Project::class, 'mailboxes_projects', 'mailbox_id', 'project_id');
