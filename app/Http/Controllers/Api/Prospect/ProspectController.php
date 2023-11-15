@@ -21,7 +21,7 @@ class ProspectController extends Controller
     {
         try {
             $campaign_id = $request->input('campaign_id');
-            $limit = $request->input('limit', 10);
+            $limit = $request->input('limit', 100);
             $offset = $request->input('offset', 0);
             $query = $campaign_id ? Prospect::where('campaign_id', $campaign_id)->skip($offset)->take($limit)
                 : Prospect::skip($offset)->take($limit);
