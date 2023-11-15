@@ -30,6 +30,7 @@ class CampaignStoreRequest extends FormRequest
             'status' => 'string',
             'period' => 'integer',
             'sending_time_json' => 'json',
+            'timezone' => 'string',
         ];
     }
 

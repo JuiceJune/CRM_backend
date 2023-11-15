@@ -23,7 +23,8 @@ class CampaignResource extends JsonResource
             'message' => $this->message,
             'sending_time_json' => $this->sending_time_json,
             'status' => $this->status,
-            'period' => $this->period
+            'period' => $this->period,
+            'timezone' => $this->timezone
         ];
     }
 }
