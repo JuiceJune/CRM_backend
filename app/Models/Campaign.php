@@ -17,7 +17,8 @@ class Campaign extends Model
         'message',
         'sending_time_json',
         'status',
-        'period'
+        'period',
+        'timezone'
     ];
 
     protected $casts = [
@@ -38,11 +39,13 @@ class Campaign extends Model
     }',
     ];
 
-    public function mailbox() {
+    public function mailbox()
+    {
         return $this->belongsTo(Mailbox::class);
     }
 
-    public function project() {
+    public function project()
+    {
         return $this->belongsTo(Project::class);
     }
 
