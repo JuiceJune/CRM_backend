@@ -53,22 +53,26 @@ Route::middleware('auth:sanctum')->group(function() {
     });
     Route::prefix('projects')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Project\ProjectController::class, 'index']);
-//        Route::middleware("project.access")->get('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'show']);
+        Route::get('/create', [\App\Http\Controllers\Api\Project\ProjectController::class, 'create']);
         Route::get('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'show']);
         Route::post('/', [\App\Http\Controllers\Api\Project\ProjectController::class, 'store']);
+        Route::get('/{project}/edit', [\App\Http\Controllers\Api\Project\ProjectController::class, 'edit']);
         Route::put('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'update']);
         Route::delete('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'destroy']);
     });
     Route::prefix('campaigns')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'index']);
         Route::get('/create', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'create']);
-        Route::post('/', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'store']);
         Route::get('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'show']);
+        Route::post('/', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'store']);
         Route::get('/{campaign}/edit', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'edit']);
         Route::put('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'update']);
         Route::delete('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'destroy']);
         Route::post('/sendTestEmail', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'sendTestEmail']);
         Route::get('/{campaign}/start', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'startCampaign']);
+        Route::get('/{campaign}/stop', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'stopCampaign']);
+        Route::get('/{campaign}/queue', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'showCampaignQueue']);
+        Route::get('/{campaign}/queue-clear', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'clearQueue']);
     });
     Route::prefix('prospects')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'index']);
