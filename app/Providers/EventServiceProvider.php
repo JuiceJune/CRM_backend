@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
+use App\Events\CampaignStarted;
+use App\Events\CampaignStopped;
+use App\Events\QueueStarted;
+use App\Listeners\CampaignStartedListener;
+use App\Listeners\CampaignStoppedListener;
+use App\Listeners\QueueStartedListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -16,8 +21,17 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         Registered::class => [
-            SendEmailVerificationNotification::class,
+            SendEmailVerificationNotification::class
         ],
+        CampaignStarted::class => [
+            CampaignStartedListener::class,
+        ],
+        CampaignStopped::class => [
+            CampaignStoppedListener::class,
+        ],
+        QueueStarted::class => [
+            QueueStartedListener::class
+        ]
     ];
 
     /**
