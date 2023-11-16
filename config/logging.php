@@ -54,6 +54,7 @@ return [
         'development' => [
             'driver' => 'daily',
             'path' => storage_path('logs/development_logs/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
             'level' => 'debug',
             'days' => 14,
         ],
