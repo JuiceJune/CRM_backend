@@ -45,7 +45,7 @@ class SetupCampaign
             $date->addDay()->startOfDay();
         }
 
-//        StartQueue::dispatch($queueName);
+        StartQueue::dispatch($queueName);
     }
 
     private function ScheduleEmailsForToday($startAdnEndTimeDateForSending, $delay, $prospects, $usedProspectsCount, $campaign) {
@@ -140,7 +140,7 @@ class SetupCampaign
     {
         Log::channel('development')->alert('Sending Time: ' . $sendingTime . " | prospect: ". $prospect->id);
         MailJob::dispatch($prospect)
-            ->onQueue('campaign')
+            ->onQueue('campaign_' . $campaign->id)
             ->delay($sendingTime);
     }
 }
