@@ -24,3 +24,5 @@ jobs:
         region: ${{ secrets.AWS_REGION }}
         version_label: ${{ github.sha }}
         deployment_package: deploy.zip
+        wait_for_deploy: true
+        recovery_wait_time: 30
