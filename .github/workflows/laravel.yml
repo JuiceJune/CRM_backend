@@ -12,8 +12,6 @@ jobs:
     steps:
     - name: Checkout the files
       uses: actions/checkout@v2
-    - name: Install dependencies
-      run: composer install - no-dev
     - name: Set up AWS CLI
       uses: aws-actions/configure-aws-credentials@v1
       with:
