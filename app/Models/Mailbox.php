@@ -21,6 +21,7 @@ class Mailbox extends Model
         "token",
         "refresh_token",
         "expires_in",
+        "send_limit",
         "signature"
     ];
 

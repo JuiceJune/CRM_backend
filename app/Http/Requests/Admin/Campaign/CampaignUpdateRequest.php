@@ -24,12 +24,23 @@ class CampaignUpdateRequest extends FormRequest
         return [
             'name' => 'required|string|max:100',
             'mailbox_id' => 'required|integer|exists:mailboxes,id',
-            'subject' => 'required|string',
-            'message' => 'required',
+            'project_id' => 'required|integer|exists:projects,id',
             'status' => 'string',
-            'period' => 'integer',
-            'sending_time_json' => 'json',
             'timezone' => 'string',
+            'start_date' => 'date',
+            'send_limit' => 'integer',
+            'priority_config' => 'required',
+            'steps' => 'required|array|min:1',
+            'steps.*.id' => 'integer',
+            'steps.*.period' => 'required|integer|min:60',
+            'steps.*.start_after' => 'required',
+            'steps.*.sending_time_json' => 'required',
+            'steps.*.step' => 'required|integer',
+            'steps.*.versions' => 'required|array|min:1',
+            'steps.*.versions.*.id' => 'integer',
+            'steps.*.versions.*.subject' => 'required|string',
+            'steps.*.versions.*.message' => 'required|string',
+            'steps.*.versions.*.version' => 'required|string',
         ];
     }
 

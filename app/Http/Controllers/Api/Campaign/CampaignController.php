@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers\Api\Campaign;
 
-use App\Events\CampaignStarted;
 use App\Events\CampaignStopped;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Campaign\CampaignStoreRequest;
 use App\Http\Requests\Admin\Campaign\CampaignUpdateRequest;
-use App\Http\Resources\CampaignResource;
-use App\Jobs\MailJob;
+use App\Http\Resources\Campaign\CampaignResource;
+use App\Http\Resources\EmailJobResource;
+use App\Http\Resources\MailboxResource;
 use App\Jobs\SetupCampaign;
-use App\Models\Mailbox;
 use App\Models\Campaign;
+use App\Models\CampaignStep;
+use App\Models\CampaignStepVersion;
+use App\Models\EmailJob;
+use App\Models\Mailbox;
 use App\Models\Project;
 use Carbon\Carbon;
 use DateTimeZone;
 use Google\Service\Gmail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Exception;
@@ -56,12 +58,26 @@ class CampaignController extends Controller
             $timezones = DateTimeZone::listIdentifiers();
             if ($project_id) {
                 $projects = Project::find($project_id);
-                $mailboxes = $projects->mailboxes;
-                return response(["mailboxes" => $mailboxes, 'timezones' => $timezones]);
+                $mailboxes = MailboxResource::collection($projects->mailboxes);
+
+                $snippets = DB::getSchemaBuilder()->getColumnListing('Prospects');
+                $columnsToExclude = ['created_at', 'date_contacted', "date_added", "date_responded", "id", "status", "tags", "timezone", "updated_at"]; // Вкажіть назви колонок, які вам не потрібні
+                $filteredSnippets = array_filter($snippets, function ($column) use ($columnsToExclude) {
+                    return !in_array($column, $columnsToExclude);
+                });
+
+                return response(["mailboxes" => $mailboxes, 'timezones' => $timezones, 'snippets' => $filteredSnippets]);
             } else {
                 $mailboxes = Mailbox::select('id', 'email', 'name')->get();
                 $projects = Project::select('id', 'name')->get();
-                return response(["mailboxes" => $mailboxes, "projects" => $projects, 'timezones' => $timezones]);
+
+                $snippets = DB::getSchemaBuilder()->getColumnListing('Prospects');
+                $columnsToExclude = ['created_at', 'date_contacted', "date_added", "date_responded", "id", "status", "tags", "timezone", "updated_at"]; // Вкажіть назви колонок, які вам не потрібні
+                $filteredSnippets = array_filter($snippets, function ($column) use ($columnsToExclude) {
+                    return !in_array($column, $columnsToExclude);
+                });
+
+                return response(["mailboxes" => $mailboxes, "projects" => $projects, 'timezones' => $timezones, 'snippets' => $filteredSnippets]);
             }
         } catch (Exception $error) {
             return response([
@@ -76,13 +92,28 @@ class CampaignController extends Controller
      */
     public function store(CampaignStoreRequest $request)
     {
+        DB::beginTransaction();
+
         try {
             $validated = $request->validated();
-            $validated['sending_time_json'] = json_decode($validated['sending_time_json']);
+            $validated['start_date'] = Carbon::parse($validated['start_date']);
             $campaign = Campaign::create($validated);
+
+            foreach ($validated['steps'] as $step) {
+                $step['campaign_id'] = $campaign['id'];
+                $campaignStep = CampaignStep::create($step);
+
+                foreach ($step['versions'] as $version) {
+                    $version['campaign_step_id'] = $campaignStep['id'];
+                    $campaignStepVersion = CampaignStepVersion::create($version);
+                }
+            }
+            DB::commit();
 
             return response($campaign['id']);
         } catch (Exception $error) {
+            DB::rollBack();
+
             return response([
                 "message" => "Problem with store Project",
                 "error_message" => $error->getMessage(),
@@ -115,7 +146,13 @@ class CampaignController extends Controller
             $project = $campaign->project;
             $mailboxes = $project->mailboxes;
             $timezones = DateTimeZone::listIdentifiers();
-            return response(["campaign" => $campaign, "mailboxes" => $mailboxes, 'timezones' => $timezones]);
+
+            $snippets = DB::getSchemaBuilder()->getColumnListing('Prospects');
+            $columnsToExclude = ['created_at', 'date_contacted', "date_added", "date_responded", "id", "status", "tags", "timezone", "updated_at"]; // Вкажіть назви колонок, які вам не потрібні
+            $filteredSnippets = array_filter($snippets, function ($column) use ($columnsToExclude) {
+                return !in_array($column, $columnsToExclude);
+            });
+            return response(["campaign" => new CampaignResource($campaign), "mailboxes" => $mailboxes, 'timezones' => $timezones, 'snippets' => $filteredSnippets]);
         } catch (Exception $error) {
             return response($error, 400);
         }
@@ -126,14 +163,32 @@ class CampaignController extends Controller
      */
     public function update(CampaignUpdateRequest $request, Campaign $campaign)
     {
+        DB::beginTransaction();
+
         try {
             $validated = $request->validated();
-            $validated['sending_time_json'] = json_decode($validated['sending_time_json']);
+            $validated['start_date'] = Carbon::parse($validated['start_date']);
+
             $campaign->update($validated);
-            return response('Campaign successfully updated');
+
+            foreach ($validated['steps'] as $stepData) {
+                $stepId = $stepData['id'] ?? null;
+                $step = $campaign->steps()->updateOrCreate(['id' => $stepId], $stepData);
+
+                foreach ($stepData['versions'] as $versionData) {
+                    $versionId = $versionData['id'] ?? null;
+                    $version = $step->versions()->updateOrCreate(['id' => $versionId], $versionData);
+                }
+            }
+
+            DB::commit();
+
+            return response("Campaign updated successfully");
         } catch (Exception $error) {
+            DB::rollBack();
+
             return response([
-                "message" => "Problem with updating Project",
+                "message" => "Problem with updating Campaign",
                 "error_message" => $error->getMessage(),
             ], 500);
         }
@@ -180,7 +235,7 @@ class CampaignController extends Controller
                 $client = (new \App\Http\Controllers\Api\Google\GoogleController)->getGoogleClient($mailbox["token"]);
                 $sender_name = $mailbox['name'];
                 $sender_email = $mailbox['email'];
-                $signature = $mailbox['signature'];
+                $signature = str_replace('{{UNSUBSCRIBE}}', '#', $mailbox['signature']);;
                 $recipient = $test_email; // Адреса отримувача
                 $service = new Gmail($client);
                 $message = (new \App\Http\Controllers\Api\Google\GoogleController)->createMessage($sender_name, $sender_email, $recipient, $subject, $messageText, $signature);
@@ -200,11 +255,7 @@ class CampaignController extends Controller
     public function showCampaignQueue(Campaign $campaign)
     {
         try {
-            $jobs = DB::table('jobs')->get();
-//            $jobs = DB::table('jobs')->where('queue', 'campaign_' . $campaign->id)->get();
-            foreach ($jobs as $job) {
-                $job->available_at = Carbon::createFromTimestamp($job->available_at);
-            }
+            $jobs = EmailJobResource::collection(EmailJob::all());
             return response($jobs);
         } catch (Exception $error) {
             return response([
@@ -219,7 +270,7 @@ class CampaignController extends Controller
         try {
             SetupCampaign::dispatch($campaign);
             $campaign->update(['status' => 'started']);
-            return response($campaign);
+            return response(new CampaignResource($campaign));
         } catch (Exception $error) {
             return response([
                 "message" => "Problem with starting campaign",
@@ -231,9 +282,9 @@ class CampaignController extends Controller
     public function stopCampaign(Campaign $campaign)
     {
         try {
-//            event(new CampaignStopped($campaign));
+            event(new CampaignStopped($campaign));
             $campaign->update(['status' => 'stopped']);
-            return response($campaign);
+            return response(new CampaignResource($campaign));
         } catch (Exception $error) {
             return response([
                 "message" => "Problem with stopping campaign",

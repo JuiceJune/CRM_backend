@@ -7,7 +7,10 @@ use App\Http\Requests\Admin\Prospect\ProspectsStoreRequest;
 use App\Http\Requests\Admin\Prospect\ProspectStoreRequest;
 use App\Http\Requests\Admin\Prospect\ProspectUpdateRequest;
 use App\Http\Resources\ProspectResource;
+use App\Models\Campaign;
+use App\Models\CampaignStepProspect;
 use App\Models\Prospect;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use PHPUnit\Exception;
 use PHPUnit\Framework\Error;
@@ -23,11 +26,14 @@ class ProspectController extends Controller
             $campaign_id = $request->input('campaign_id');
             $limit = $request->input('limit', 100);
             $offset = $request->input('offset', 0);
-            $query = $campaign_id ? Prospect::where('campaign_id', $campaign_id)->skip($offset)->take($limit)
+
+            $query = $campaign_id
+                ? Campaign::find($campaign_id)->prospects()->skip($offset)->take($limit)
                 : Prospect::skip($offset)->take($limit);
 
-            $prospect = $query->get();
-            return response(ProspectResource::collection($prospect));
+            $prospects = $query->get();
+
+            return response(ProspectResource::collection($prospects));
         } catch (Exception $error) {
             return response($error, 400);
         }
@@ -62,8 +68,33 @@ class ProspectController extends Controller
         try {
             $validated = $request->validated();
             $prospects = $validated['prospects'];
-            Prospect::insertProspects($prospects);
-            return response('Prospects were successfully created');
+            $campaignId = $validated['campaign_id'];
+
+            $campaign = Campaign::find($campaignId);
+            $firstStep = $campaign->step(1);
+
+            if (!$campaign) {
+                throw new Error('Campaign not found');
+            }
+
+            $timezone = $campaign->timezone;
+            $dateInTimeZone = Carbon::now($timezone);
+
+            foreach ($prospects as $prospect) {
+                $createdProspect = Prospect::create($prospect);
+                $campaign->prospects()->attach($createdProspect->id);
+
+                $campaignStepProspect = CampaignStepProspect::create([
+                    'campaign_id' => $campaign->id,
+                    'campaign_step_id' => $firstStep->id,
+                    'prospect_id' => $createdProspect->id,
+                    'available_at' => $dateInTimeZone,
+                ]);
+            }
+
+            return response([
+                "message" => "Prospects were successfully created",
+            ], 200);
         } catch (Exception $error) {
             return response([
                 "message" => "Problem with store Prospects",
@@ -123,14 +154,28 @@ class ProspectController extends Controller
             $prospect->delete();
             return response('Prospect deleted successfully');
         } catch (Exception $error) {
-            return response($error, 400);
+            return response([
+                "message" => "Problem with deleting prospect",
+                "error_message" => $error->getMessage(),
+            ], 500);
         }
     }
 
     public function csvUpload(Request $request)
     {
         try {
-            $campaign_id = $request->input('campaign_id');
+            $campaignId = $request->input('campaign_id');
+            $campaign = Campaign::find($campaignId);
+
+            if (!$campaign) {
+                throw new Error('Campaign not found');
+            }
+
+            $firstStep = $campaign->step(1);
+
+            $timezone = $campaign->timezone;
+            $dateInTimeZone = Carbon::now($timezone);
+
             if ($request->hasFile('csv_file')) {
                 $file = $request->file('csv_file');
 
@@ -146,9 +191,17 @@ class ProspectController extends Controller
                                     'first_name' => $data[0],
                                     'last_name' => $data[1],
                                     'email' => $data[2],
-                                    'campaign_id' => $campaign_id
                                 ]);
                                 $prospect->save();
+
+                            $campaign->prospects()->attach($prospect->id);
+
+                            $campaignStepProspect = CampaignStepProspect::create([
+                                'campaign_id' => $campaign->id,
+                                'campaign_step_id' => $firstStep->id,
+                                'prospect_id' => $prospect->id,
+                                'available_at' => $dateInTimeZone,
+                            ]);
                         }
 
                         fclose($handle);

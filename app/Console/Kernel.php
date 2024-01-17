@@ -2,8 +2,11 @@
 
 namespace App\Console;
 
+use App\Jobs\SetupCampaign;
+use App\Models\Campaign;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,7 +18,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command('refresh:google-access-tokens')->cron("*/50 * * * *");
+        $schedule->command('refresh:google-access-tokens')->cron("*/50 * * * *");
     }
 
     /**

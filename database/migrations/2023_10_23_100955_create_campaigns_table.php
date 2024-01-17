@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('mailbox_id')->nullable()->constrained();
             $table->foreignId('project_id')->constrained();
-            $table->string('subject');
-            $table->text('message');
             $table->string('status')->default('stopped');
-            $table->integer('period')->default(60);
-            $table->json('sending_time_json');
+            $table->string('timezone')->default('Europe/Kyiv');
+            $table->dateTime('start_date')->nullable();
+            $table->integer('send_limit')->default(100);
+            $table->json('priority_config');
             $table->timestamps();
         });
     }

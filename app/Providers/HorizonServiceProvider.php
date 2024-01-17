@@ -31,4 +31,11 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
             return true;
         });
     }
+
+    protected function authorization()
+    {
+        Horizon::auth(function () {
+            return true;
+        });
+    }
 }

@@ -27,6 +27,7 @@ class MailboxStoreRequest extends FormRequest
             "token" => "string",
             "refresh_token" => "string",
             "expires_in" => "string",
+            "send_limit" => "integer",
             "signature" => "string"
         ];
     }

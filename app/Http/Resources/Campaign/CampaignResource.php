@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Campaign;
 
+use App\Http\Resources\MailboxResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CampaignResource extends JsonResource
@@ -19,12 +20,13 @@ class CampaignResource extends JsonResource
             'name' => $this->name,
             'mailbox' => new MailboxResource($this->mailbox),
             'project' => $this->project->name,
-            'subject' => $this->subject,
-            'message' => $this->message,
-            'sending_time_json' => $this->sending_time_json,
             'status' => $this->status,
-            'period' => $this->period,
-            'timezone' => $this->timezone
+            'timezone' => $this->timezone,
+            'start_date' => $this->start_date,
+            'steps' => CampaignStepResource::collection($this->steps),
+            'prospects' => $this->prospects,
+            'send_limit' => $this->send_limit,
+            'priority_config' => $this->priority_config,
         ];
     }
 }

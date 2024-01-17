@@ -20,6 +20,12 @@ class MailboxResource extends JsonResource
         $sdrs = ( $project && $project->usersWithPosition("SDR") ) ? $project->usersWithPosition("SDR") : null;
         $it_specialist = ( $project && $project->usersWithPosition("IT Specialist") ) ? $project->usersWithPosition("IT Specialist")->first() : null;
 
+        $campaigns = $this->campaigns();
+        $available_limit = $this->send_limit;
+        foreach ($campaigns as $campaign) {
+            $available_limit -= $campaign->send_limit;
+        }
+
         return [
             'id' => $this->id,
             'email' => $this->email,
@@ -32,6 +38,8 @@ class MailboxResource extends JsonResource
             'app_password' => $this->app_password,
             'email_provider' => $this->email_provider,
             'project' => $project,
+            'send_limit' => $this->send_limit,
+            'available_limit' => $available_limit,
             'csm' => $csm ? new UserResource($csm) : null,
             'it_specialist' => $it_specialist ? new UserResource($it_specialist) : null,
             'sdrs' => $sdrs ? UserResource::collection($sdrs) : null,

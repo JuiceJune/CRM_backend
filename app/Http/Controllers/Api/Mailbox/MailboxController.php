@@ -20,7 +20,7 @@ class MailboxController extends Controller
     public function index(Request $request)
     {
         try {
-            $limit = $request->input('limit', 10);
+            $limit = $request->input('limit', 50);
             $offset = $request->input('offset', 0);
 
             $query = Mailbox::skip($offset)->take($limit);
