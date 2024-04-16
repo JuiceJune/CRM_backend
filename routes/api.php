@@ -70,7 +70,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('/connect', [MailboxController::class, 'connect']);
         Route::get('/', [MailboxController::class, 'index']);
         Route::get('/{mailbox:uuid}', [MailboxController::class, 'show']);
-        Route::post('/', [MailboxController::class, 'store']);
+        Route::post('/store', [MailboxController::class, 'store']);
         Route::put('/{mailbox:uuid}', [MailboxController::class, 'update']);
         Route::delete('/{mailbox:uuid}', [MailboxController::class, 'destroy']);
     });
