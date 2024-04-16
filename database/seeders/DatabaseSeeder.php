@@ -2,7 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Account;
+use App\Models\Position;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +20,19 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             PositionSeeder::class
         ]);
-         \App\Models\User::factory()->create(['name' => "admin", 'email' => "admin@admin.com", 'password' => 'admin',
-             'avatar' => 'users/avatars/default.png', 'role_id' => 1, 'position_id' => 2]);
-         \App\Models\User::factory(30)->create();
-         \App\Models\Client::factory(20)->create();
-         \App\Models\Mailbox::factory(30)->create();
-         \App\Models\Project::factory(10)->create();
+
+        $account = Account::query()->create([
+            'name' => 'Main',
+        ]);
+
+        User::query()->create([
+                'account_id' => $account["id"],
+                'name' => "admin",
+                'email' => "admin@admin.com",
+                'password' => Hash::make('admin'),
+                'role_id' => Role::where('title', 'SUPER-ADMIN')->first()->id,
+                'position_id' => Position::where('title', 'IT Specialist')->first()->id
+            ]
+        );
     }
 }

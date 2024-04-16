@@ -10,9 +10,8 @@ class PositionSeeder extends Seeder
     protected array $positions = [
         ["title" => "CSM"],
         ["title" => "SDR"],
+        ["title" => "BDM"],
         ["title" => "IT Specialist"],
-        ["title" => "Research Manager"],
-        ["title" => "Researcher"],
     ];
     /**
      * Run the database seeds.

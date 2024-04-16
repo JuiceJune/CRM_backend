@@ -3,24 +3,29 @@
 namespace App\Http\Controllers\Api\Prospect;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Prospect\ProspectsStoreRequest;
-use App\Http\Requests\Admin\Prospect\ProspectStoreRequest;
-use App\Http\Requests\Admin\Prospect\ProspectUpdateRequest;
-use App\Http\Resources\ProspectResource;
+use App\Http\Requests\Prospect\ProspectsStoreRequest;
+use App\Http\Requests\Prospect\ProspectUpdateRequest;
+use App\Http\Resources\Prospect\ProspectCampaignResource;
+use App\Http\Resources\Prospect\ProspectResource;
 use App\Models\Campaign;
-use App\Models\CampaignStepProspect;
+use App\Models\CampaignMessage;
 use App\Models\Prospect;
 use Carbon\Carbon;
+use Exception;
+use F9Web\ApiResponseHelpers;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use PHPUnit\Exception;
-use PHPUnit\Framework\Error;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProspectController extends Controller
 {
+    use ApiResponseHelpers;
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
             $campaign_id = $request->input('campaign_id');
@@ -28,14 +33,14 @@ class ProspectController extends Controller
             $offset = $request->input('offset', 0);
 
             $query = $campaign_id
-                ? Campaign::find($campaign_id)->prospects()->skip($offset)->take($limit)
-                : Prospect::skip($offset)->take($limit);
+                ? Campaign::query()->where('uuid', $campaign_id)->firstOrFail()->prospects()
+                : Prospect::query();
 
-            $prospects = $query->get();
+            $prospects = $query->skip($offset)->take($limit)->get();
 
-            return response(ProspectResource::collection($prospects));
+            return response()->json(ProspectCampaignResource::collection($prospects));
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 
@@ -44,75 +49,65 @@ class ProspectController extends Controller
      */
     public function create(Request $request)
     {
-//        try {
-//            $project_id = $request->input('project_id');
-//            if($project_id) {
-//                $projects = Project::find($project_id);
-//                $mailboxes = $projects->mailboxes;
-//                return response(["mailboxes" => $mailboxes]);
-//            } else {
-//                $mailboxes = Mailbox::select('id', 'email', 'name')->get();
-//                $projects = Project::select('id', 'name')->get();
-//                return response(["mailboxes" => $mailboxes, "projects" => $projects]);
-//            }
-//        } catch (Exception $error) {
-//            return response($error, 400);
-//        }
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProspectsStoreRequest $request)
+    public function store(ProspectsStoreRequest $request): JsonResponse
     {
+        DB::beginTransaction();
         try {
             $validated = $request->validated();
+
+            $user = $request->user();
+            $account_id = $user->account_id;
+
             $prospects = $validated['prospects'];
-            $campaignId = $validated['campaign_id'];
+            $campaignUuid = $validated['campaign_id'];
 
-            $campaign = Campaign::find($campaignId);
+            $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
+
             $firstStep = $campaign->step(1);
-
-            if (!$campaign) {
-                throw new Error('Campaign not found');
-            }
+            $version = $firstStep->version('A');
 
             $timezone = $campaign->timezone;
             $dateInTimeZone = Carbon::now($timezone);
 
-            foreach ($prospects as $prospect) {
-                $createdProspect = Prospect::create($prospect);
-                $campaign->prospects()->attach($createdProspect->id);
 
-                $campaignStepProspect = CampaignStepProspect::create([
+            foreach ($prospects as $prospect) {
+                $prospect['account_id'] = $account_id;
+                $createdProspect = Prospect::create($prospect);
+                $campaign->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
+
+                CampaignMessage::query()->create([
+                    'account_id' => $account_id,
                     'campaign_id' => $campaign->id,
                     'campaign_step_id' => $firstStep->id,
+                    'campaign_step_version_id' => $version->id,
                     'prospect_id' => $createdProspect->id,
                     'available_at' => $dateInTimeZone,
                 ]);
             }
 
-            return response([
-                "message" => "Prospects were successfully created",
-            ], 200);
+            DB::commit();
+            return $this->respondOk("Prospects were successfully created");
         } catch (Exception $error) {
-            return response([
-                "message" => "Problem with store Prospects",
-                "error_message" => $error->getMessage(),
-            ], 500);
+            DB::rollBack();
+            return $this->respondError($error->getMessage());
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Prospect $campaign)
+    public function show(Prospect $campaign): JsonResponse
     {
         try {
-            $currentProspect = new ProspectResource($campaign);
-            return response()->json($currentProspect);
+            return $this->respondWithSuccess(new ProspectResource($campaign));
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 
@@ -121,58 +116,51 @@ class ProspectController extends Controller
      */
     public function edit(Prospect $campaign)
     {
-//        try {
-//            $mailboxes = Mailbox::select('id', 'email', 'name')->get();
-//            $projects = Project::select('id', 'name')->get();
-//            return response(["campaign" => $campaign, "mailboxes" => $mailboxes, "projects" => $projects]);
-//        } catch (Exception $error) {
-//            return response($error, 400);
-//        }
+        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProspectUpdateRequest $request, Prospect $prospect)
+    public function update(ProspectUpdateRequest $request, Prospect $prospect): JsonResponse
     {
         try {
             $validated = $request->validated();
             $prospect->update($validated);
-            return response($prospect);
+            return response()->json($prospect);
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Prospect $prospect): JsonResponse
     {
         try {
-            $prospect = Prospect::find($id);
             $prospect->delete();
-            return response('Prospect deleted successfully');
+            return $this->respondOk("Prospect [{$prospect->first_name} {$prospect->last_name}] deleted successfully");
         } catch (Exception $error) {
-            return response([
-                "message" => "Problem with deleting prospect",
-                "error_message" => $error->getMessage(),
-            ], 500);
+            return $this->respondError($error->getMessage());
         }
     }
 
-    public function csvUpload(Request $request)
+    public function csvUpload(Request $request): JsonResponse
     {
         try {
-            $campaignId = $request->input('campaign_id');
-            $campaign = Campaign::find($campaignId);
+            $campaignUuid = $request->input('campaign_id');
+            $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
+
+            $user = $request->user();
+            $account_id = $user->account_id;
 
             if (!$campaign) {
-                throw new Error('Campaign not found');
+                $this->respondNotFound('Campaign not found');
             }
 
             $firstStep = $campaign->step(1);
-
+            $version = $firstStep->version('A');
             $timezone = $campaign->timezone;
             $dateInTimeZone = Carbon::now($timezone);
 
@@ -184,21 +172,24 @@ class ProspectController extends Controller
                     $handle = fopen($filePath, 'r');
 
                     if ($handle !== false) {
-                        fgetcsv($handle);
+                        $headers = fgetcsv($handle);
 
                         while (($data = fgetcsv($handle)) !== false) {
-                           $prospect = new Prospect([
-                                    'first_name' => $data[0],
-                                    'last_name' => $data[1],
-                                    'email' => $data[2],
-                                ]);
-                                $prospect->save();
+                            $prospectData = [];
 
-                            $campaign->prospects()->attach($prospect->id);
+                            foreach ($headers as $index => $header) {
+                                $prospectData[$header] = $data[$index];
+                            }
 
-                            $campaignStepProspect = CampaignStepProspect::create([
+                            $prospectData['account_id'] = $account_id;
+                            $prospect = Prospect::create($prospectData);
+                            $campaign->prospects()->attach($prospect->id, ['account_id' => $account_id]);
+
+                            CampaignMessage::query()->create([
+                                'account_id' => $account_id,
                                 'campaign_id' => $campaign->id,
                                 'campaign_step_id' => $firstStep->id,
+                                'campaign_step_version_id' => $version->id,
                                 'prospect_id' => $prospect->id,
                                 'available_at' => $dateInTimeZone,
                             ]);
@@ -207,24 +198,15 @@ class ProspectController extends Controller
                         fclose($handle);
                     }
 
-                    return response('Prospects uploaded successfully');
+                    return $this->respondOk('Prospects uploaded successfully');
                 } else {
-                    return response([
-                        "message" => "Error",
-                        "error_message" => 'Invalid file format. Please upload a CSV file',
-                    ], 400);
+                    return $this->respondError('Invalid file format. Please upload a CSV file');
                 }
             } else {
-                return response([
-                    "message" => "Error",
-                    "error_message" => 'No file uploaded',
-                ], 400);
+                return $this->respondError('No file uploaded');
             }
         } catch (Exception $error) {
-            return response([
-                "message" => "Problem with csv prospects upload",
-                "error_message" => $error->getMessage(),
-            ], 500);
+            return $this->respondError($error->getMessage());
         }
     }
 }

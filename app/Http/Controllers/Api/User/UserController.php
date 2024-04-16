@@ -2,150 +2,141 @@
 
 namespace App\Http\Controllers\Api\User;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\User\UserStoreRequest;
-use App\Http\Requests\Admin\User\UserUpdateRequest;
-use App\Http\Resources\UserResource;
-use App\Models\User;
+use App\Http\Requests\User\UserUpdateRequest;
+use App\Http\Requests\User\UserStoreRequest;
+use App\Http\Resources\Position\PositionResource;
+use App\Http\Resources\Role\RoleResource;
+use App\Http\Resources\User\UserCreateResource;
+use App\Http\Resources\User\UserResource;
 use App\Models\Position;
 use App\Models\Role;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
+use F9Web\ApiResponseHelpers;
 use Illuminate\Http\Request;
-use PHPUnit\Exception;
+use App\Models\User;
+use Exception;
 
 class UserController extends Controller
 {
+    use ApiResponseHelpers;
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            // Отримуємо значення параметрів limit, offset та fields з запиту, або встановлюємо їх за замовчуванням.
-            $limit = $request->input('limit', 10); // За замовчуванням виводимо 10 користувачів.
-            $offset = $request->input('offset', 0); // За замовчуванням починаємо з першого користувача.
+            $limit = $request->input('limit', 10);
+            $offset = $request->input('offset', 0);
 
-            // Створюємо запит до бази даних з врахуванням обмежень та зсуву.
-            $query = User::skip($offset)->take($limit);
+            $query = User::query()->skip($offset)->take($limit);
 
-            // Витягуємо користувачів та серіалізуємо їх за допомогою ресурсу UserResource.
             $users = $query->get();
 
-            return response(UserResource::collection($users)); // Використовуємо ресурс для серіалізації результату.
+            return response()->json(UserResource::collection($users));
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
-
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): \Illuminate\Http\JsonResponse
     {
         try {
             $roles = Role::all();
             $positions = Position::all();
-            return response(["roles" => $roles, "positions" => $positions]);
+            return response()->json([
+                "roles" => RoleResource::collection($roles),
+                "positions" => PositionResource::collection($positions)
+            ]);
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UserStoreRequest $request)
+    public function store(UserStoreRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
             $validated = $request->validated();
 
+            $user = $request->user();
+            $validated['account_id'] = $user->account_id;
+
             $validated['password'] = Hash::make($validated['password']);
+            $validated['avatar'] = 'users/avatars/default.png';
 
-            if (isset($validated["avatar"])) {
-                $validated["avatar"] = $request->file('avatar')->store(
-                    'users/avatars', 'public'
-                );
-            } else {
-                $validated["avatar"] = "users/avatars/default.png";
-            }
-
-            $user = User::create($validated);
-            return response($user);
+            $user = User::query()->create($validated);
+            return $this->respondCreated(new UserResource($user));
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(User $user): \Illuminate\Http\JsonResponse
     {
         try {
-            $currentUser = new UserResource($user);
-            return response()->json($currentUser);
+            return $this->respondWithSuccess(new UserResource($user));
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(User $user): \Illuminate\Http\JsonResponse
     {
         try {
-            $user = User::findOrFail($id);
             $roles = Role::all();
             $positions = Position::all();
-            return response(["" => $user, "roles" => $roles, "positions" => $positions]);
+            return $this->respondWithSuccess([
+                "user" => new UserResource($user),
+                "roles" => RoleResource::collection($roles),
+                "positions" => PositionResource::collection($positions)
+            ]);
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserUpdateRequest $request, string $id)
+    public function update(UserUpdateRequest $request, User $user): \Illuminate\Http\JsonResponse
     {
         try {
             $validated = $request->validated();
 
-            $user = User::findOrFail($id);
-
-            $validated['password'] = Hash::make($validated['password']);
-            $user = User::findOrFail($user->user_id);
-            if (isset($validated["avatar"])) {
-                $validated["avatar"] = $request->file('avatar')->store(
-                    'users/avatars', 'public'
-                );
-                if (File::exists(public_path('storage/' . $user->avatar)) && $user->avatar != "users/avatars/default.png") {
-                    File::delete(public_path('storage/' . $user->avatar));
-                }
+            if (isset($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
             }
+
             $user->update($validated);
-            return response($user);
+            return $this->respondWithSuccess(new UserCreateResource($user));
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user): \Illuminate\Http\JsonResponse
     {
         try {
-            //TODO delete avatar file
-            $user = User::find($id);
-            $user->projects()->detach();
             $user->delete();
-            return response('User deleted successfully');
+            return $this->respondOk($user->name);
         } catch (Exception $error) {
-            return response($error, 400);
+            return $this->respondError($error->getMessage());
         }
     }
 }

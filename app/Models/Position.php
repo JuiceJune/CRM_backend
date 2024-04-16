@@ -2,24 +2,35 @@
 
 namespace App\Models;
 
+use App\Http\Resources\User\UserResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\UuidTrait;
 
 class Position extends Model
 {
-    use HasFactory;
+    use HasFactory, UuidTrait;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'title'
+        'title',
     ];
 
-    public function users()
+    public function users(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(User::class);
     }
 
-    public function getUsersByPosition($position_id)
+    public function getUsersByPosition($position_id): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
-        return $this->users()->where('position_id', $position_id)->get();
+        return UserResource::collection(
+            $this->users()
+                ->where('position_id', $position_id)
+                ->get()
+        );
     }
 }

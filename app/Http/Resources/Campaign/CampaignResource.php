@@ -2,7 +2,8 @@
 
 namespace App\Http\Resources\Campaign;
 
-use App\Http\Resources\MailboxResource;
+use App\Http\Resources\CampaignStep\CampaignStepResource;
+use App\Http\Resources\Mailbox\MailboxResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CampaignResource extends JsonResource
@@ -16,7 +17,7 @@ class CampaignResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
+            'id' => $this->uuid,
             'name' => $this->name,
             'mailbox' => new MailboxResource($this->mailbox),
             'project' => $this->project->name,

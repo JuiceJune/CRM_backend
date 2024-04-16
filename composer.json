@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "ext-posix": "*",
         "google/apiclient": "2.15.0",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
@@ -17,7 +18,7 @@
         "laravel/socialite": "^5.9",
         "laravel/tinker": "^2.7",
         "predis/predis": "^2.2",
-        "ext-posix": "*"
+        "spatie/laravel-activitylog": "^4.7"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -74,4 +75,3 @@
     "minimum-stability": "stable",
     "prefer-stable": true
 }
-

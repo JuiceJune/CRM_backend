@@ -1,7 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\Account\AccountController;
+use App\Http\Controllers\Api\Campaign\CampaignController;
+use App\Http\Controllers\Api\Client\ClientController;
 use App\Http\Controllers\Api\Mailbox\MailboxController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Position\PositionController;
+use App\Http\Controllers\Api\Project\ProjectController;
+use App\Http\Controllers\Api\Prospect\ProspectController;
+use App\Http\Controllers\Api\Role\RoleController;
+use App\Http\Controllers\Api\User\AuthController;
+use App\Http\Controllers\Api\User\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -10,80 +18,103 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
 
-Route::get('/google/callback', [\App\Http\Controllers\Api\Google\GoogleController::class, 'callback']);
+Route::group(['prefix' => ''], function () {
+    Route::post('login', [AuthController::class, 'login']);
+//    Route::post('register', [AuthController::class, 'register']);
+});
 
-Route::middleware('auth:sanctum')->group(function() {
-    Route::group(['prefix' => 'google'], function () {
-        Route::get('/login', [\App\Http\Controllers\Api\Google\GoogleController::class, 'login']);
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('logout', [AuthController::class, 'logout']);
+    Route::get('user', [AuthController::class, 'user']);
+
+    Route::group(['prefix' => 'accounts'], function () {
+        Route::get('/', [AccountController::class, 'index']);
+        Route::get('/{account:uuid}', [AccountController::class, 'show']);
+        Route::post('/', [AccountController::class, 'store']);
+        Route::put('/{account:uuid}', [AccountController::class, 'update']);
+        Route::delete('/{account:uuid}', [AccountController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'roles'], function () {
+        Route::get('/', [RoleController::class, 'index']);
+        Route::get('/{role:uuid}', [RoleController::class, 'show']);
+        Route::post('/', [RoleController::class, 'store']);
+        Route::put('/{role:uuid}', [RoleController::class, 'update']);
+        Route::delete('/{role:uuid}', [RoleController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'positions'], function () {
+        Route::get('/', [PositionController::class, 'index']);
+        Route::get('/{position:uuid}', [PositionController::class, 'show']);
+        Route::post('/', [PositionController::class, 'store']);
+        Route::put('/{position:uuid}', [PositionController::class, 'update']);
+        Route::delete('/{position:uuid}', [PositionController::class, 'destroy']);
     });
 
     Route::group(['prefix' => 'users'], function () {
-        Route::get('/', [\App\Http\Controllers\Api\User\UserController::class, 'index']);
-        Route::get('/create', [\App\Http\Controllers\Api\User\UserController::class, 'create']);
-        Route::post('/', [\App\Http\Controllers\Api\User\UserController::class, 'store']);
-        Route::get('/{user}', [\App\Http\Controllers\Api\User\UserController::class, 'show']);
-        Route::get('/{user}/edit', [\App\Http\Controllers\Api\User\UserController::class, 'edit']);
-        Route::put('/{user}', [\App\Http\Controllers\Api\User\UserController::class, 'update']);
-        Route::delete('/{user}', [\App\Http\Controllers\Api\User\UserController::class, 'destroy']);
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/create', [UserController::class, 'create']);
+        Route::get('/{user:uuid}', [UserController::class, 'show']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::get('/{user:uuid}/edit', [UserController::class, 'edit']);
+        Route::put('/{user:uuid}', [UserController::class, 'update']);
+        Route::delete('/{user:uuid}', [UserController::class, 'destroy']);
     });
 
-
-    Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+    Route::group(['prefix' => 'mailboxes'], function () {
+        Route::post('/connect', [MailboxController::class, 'connect']);
+        Route::get('/', [MailboxController::class, 'index']);
+        Route::get('/{mailbox:uuid}', [MailboxController::class, 'show']);
+        Route::post('/', [MailboxController::class, 'store']);
+        Route::put('/{mailbox:uuid}', [MailboxController::class, 'update']);
+        Route::delete('/{mailbox:uuid}', [MailboxController::class, 'destroy']);
     });
 
-    Route::prefix('profile')->group(function () {
-        Route::post('/update-password/{user}', [\App\Http\Controllers\Api\Profile\ProfileController::class, 'update']);
+    Route::group(['prefix' => 'clients'], function () {
+        Route::get('/', [ClientController::class, 'index']);
+        Route::get('/{client:uuid}', [ClientController::class, 'show']);
+        Route::post('/', [ClientController::class, 'store']);
+        Route::get('/{client:uuid}/edit', [ClientController::class, 'edit']);
+        Route::put('/{client:uuid}', [ClientController::class, 'update']);
+        Route::delete('/{client:uuid}', [ClientController::class, 'destroy']);
     });
 
-    Route::prefix('mailboxes')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'index']);
-//        Route::middleware("mailbox.access")->get('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'show']);
-        Route::get('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'show']);
-        Route::post('/', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'store']);
-        Route::put('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'update']);
-        Route::delete('/{mailbox}', [\App\Http\Controllers\Api\Mailbox\MailboxController::class, 'destroy']);
-    });
-    Route::prefix('projects')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Project\ProjectController::class, 'index']);
-        Route::get('/create', [\App\Http\Controllers\Api\Project\ProjectController::class, 'create']);
-        Route::get('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'show']);
-        Route::post('/', [\App\Http\Controllers\Api\Project\ProjectController::class, 'store']);
-        Route::get('/{project}/edit', [\App\Http\Controllers\Api\Project\ProjectController::class, 'edit']);
-        Route::put('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'update']);
-        Route::delete('/{project}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'destroy']);
-    });
-    Route::prefix('campaigns')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'index']);
-        Route::get('/create', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'create']);
-        Route::get('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'show']);
-        Route::post('/', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'store']);
-        Route::get('/{campaign}/edit', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'edit']);
-        Route::put('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'update']);
-        Route::delete('/{campaign}', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'destroy']);
-        Route::post('/sendTestEmail', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'sendTestEmail']);
-        Route::get('/{campaign}/start', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'startCampaign']);
-        Route::get('/{campaign}/stop', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'stopCampaign']);
-        Route::get('/{campaign}/queue', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'showCampaignQueue']);
-        Route::get('/{campaign}/queue-clear', [\App\Http\Controllers\Api\Campaign\CampaignController::class, 'clearQueue']);
-    });
-    Route::prefix('prospects')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'index']);
-        Route::get('/create', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'create']);
-        Route::post('/', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'store']);
-        Route::get('/{prospect}', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'show']);
-        Route::get('/{prospect}/edit', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'edit']);
-        Route::put('/{prospect}', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'update']);
-        Route::delete('/{prospect}', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'destroy']);
-        Route::post('/csv-upload', [\App\Http\Controllers\Api\Prospect\ProspectController::class, 'csvUpload']);
+    Route::group(['prefix' => 'projects'], function () {
+        Route::get('/', [ProjectController::class, 'index']);
+        Route::get('/create', [ProjectController::class, 'create']);
+        Route::get('/{project:uuid}', [ProjectController::class, 'show']);
+        Route::post('/', [ProjectController::class, 'store']);
+        Route::get('/{project:uuid}/edit', [ProjectController::class, 'edit']);
+        Route::put('/{project:uuid}', [ProjectController::class, 'update']);
+        Route::delete('/{project:uuid}', [ProjectController::class, 'destroy']);
     });
 
-    Route::get('user-projects/{user}', [\App\Http\Controllers\Api\Project\ProjectController::class, 'getAllByUser']);
+    Route::group(['prefix' => 'prospects'], function () {
+        Route::get('/', [ProspectController::class, 'index']);
+        Route::get('/{prospect:uuid}', [ProspectController::class, 'show']);
+        Route::post('/', [ProspectController::class, 'store']);
+        Route::post('/csv-upload', [ProspectController::class, 'csvUpload']);
+        Route::put('/{prospect:uuid}', [ProspectController::class, 'update']);
+        Route::delete('/{prospect:uuid}', [ProspectController::class, 'destroy']);
+        Route::post('/csv-upload', [ProspectController::class, 'csvUpload']);
+    });
+
+    Route::group(['prefix' => 'campaigns'], function () {
+        Route::get('/create', [CampaignController::class, 'create']);
+        Route::get('/', [CampaignController::class, 'index']);
+        Route::get('/{campaign:uuid}', [CampaignController::class, 'show']);
+        Route::post('/', [CampaignController::class, 'store']);
+        Route::get('/{campaign:uuid}/edit', [CampaignController::class, 'edit']);
+        Route::put('/{campaign:uuid}', [CampaignController::class, 'update']);
+        Route::delete('/{campaign:uuid}', [CampaignController::class, 'destroy']);
+
+        Route::get('/{campaign:uuid}/start', [CampaignController::class, 'startCampaign']);
+        Route::get('/{campaign:uuid}/stop', [CampaignController::class, 'stopCampaign']);
+    });
+
 });

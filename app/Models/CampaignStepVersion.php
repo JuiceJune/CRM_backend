@@ -2,35 +2,31 @@
 
 namespace App\Models;
 
+use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CampaignStepVersion extends Model
 {
-    use HasFactory;
+    use HasFactory, UuidTrait;
 
     protected $table = "campaign_step_versions";
 
     protected $fillable = [
+        'account_id',
         'campaign_step_id',
         'subject',
         'message',
         'version',
     ];
 
-    public function sentProspects(): HasMany
+    public function account(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->hasMany(CampaignSentProspect::class);
+        return $this->belongsTo(Account::class);
     }
 
     public function step(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(CampaignStep::class, 'campaign_step_id');
-    }
-
-    public function emailJob(): HasMany
-    {
-        return $this->hasMany(EmailJob::class);
     }
 }

@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
 
 class Prospect extends Model
 {
-    use HasFactory;
+    use HasFactory, UuidTrait;
 
     protected $fillable = [
-        'id',
+        'account_id',
         'first_name',
         'last_name',
         'email',
@@ -20,8 +19,6 @@ class Prospect extends Model
         'company',
         'website',
         'linkedin_url',
-        'date_contacted',
-        'date_responded',
         'date_added',
         'phone',
         'title',
@@ -53,22 +50,12 @@ class Prospect extends Model
         'tags' => 'json'
     ];
 
-    public function emailJob(): HasMany
+    public function account(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->hasMany(EmailJob::class);
+        return $this->belongsTo(Account::class);
     }
 
-    public function campaignStepProspects(): HasMany
-    {
-        return $this->hasMany(CampaignStepProspect::class);
-    }
-
-    public function campaignSentProspects(): HasMany
-    {
-        return $this->hasMany(CampaignSentProspect::class);
-    }
-
-    public function campaigns()
+    public function campaigns(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Campaign::class, 'campaigns_prospects', 'prospect_id', 'campaign_id')
             ->withPivot('step', 'status');

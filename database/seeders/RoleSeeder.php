@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\DB;
 class RoleSeeder extends Seeder
 {
     protected array $roles = [
+        ["title" => "SUPER-ADMIN"],
         ["title" => "admin"],
-        ["title" => "employee"],
+        ["title" => "user"],
     ];
     /**
      * Run the database seeds.
