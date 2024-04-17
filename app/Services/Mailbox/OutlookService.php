@@ -53,4 +53,9 @@ class OutlookService implements MailboxService
     {
         // TODO: Implement getThread() method.
     }
+
+    public function refreshToken($token, $refreshToken)
+    {
+        // TODO: Implement refreshToken() method.
+    }
 }
