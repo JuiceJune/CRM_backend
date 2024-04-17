@@ -2,33 +2,40 @@
 
 namespace App\Services\Mail;
 
-use App\Models\Campaign;
+use App\Services\Mailbox\GmailService;
 use App\Models\CampaignMessage;
-use App\Models\CampaignStep;
-use App\Models\CampaignStepVersion;
-use App\Models\Prospect;
-use Carbon\Carbon;
+use App\Models\Mailbox;
+use Error;
 use Illuminate\Support\Facades\Log;
 
 class SetupMailService
 {
     private CampaignMessage $campaignMessage;
-    private Prospect $prospect;
-    private CampaignStepVersion $version;
-    private CampaignStep $step;
-    private Campaign $campaign;
-    private Carbon $currentDateTime;
+    private Mailbox $mailbox;
     public function __construct(CampaignMessage $campaignMessage)
     {
         $this->campaignMessage = $campaignMessage;
-        $this->prospect = $campaignMessage->prospect;
-        $this->version = $campaignMessage->campaignStepVersion;
-        $this->step = $campaignMessage->campaignStep;
-        $this->campaign = $campaignMessage->campaign;
-        $this->currentDateTime = Carbon::now($this->campaign->timezone);
+        $this->mailbox = $campaignMessage->campaign->mailbox;
     }
     public function setup()
     {
-        Log::alert('Send email to: ' . $this->prospect->email);
+        try{
+            Log::alert('Send Message Start');
+
+            if($this->mailbox->email_provider === 'gmail') {
+
+                $gmailService = new GmailService();
+
+                $response = $gmailService->sendMessage($this->campaignMessage);
+
+                if(!$response) {
+                    throw new Error('Message not sent');
+                }
+
+                Log::alert('SendMessage Response: ' . json_encode($response));
+            }
+        } catch (\Exception $error) {
+            Log::error($error->getMessage());
+        }
     }
 }

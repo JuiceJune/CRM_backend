@@ -8,12 +8,16 @@ use App\Http\Requests\Mailbox\MailboxStoreRequest;
 use App\Http\Resources\Mailbox\MailboxCreateResource;
 use App\Http\Resources\Mailbox\MailboxResource;
 use App\Http\Controllers\Controller;
+use App\Models\Account;
 use App\Services\Mailbox\GmailService;
 use App\Services\Mailbox\OutlookService;
 use App\Services\Mailbox\SMTPService;
 use F9Web\ApiResponseHelpers;
 use Illuminate\Http\Request;
 use App\Models\Mailbox;
+use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Facades\Socialite;
+use PHPUnit\Framework\Error;
 
 class MailboxController extends Controller
 {
@@ -44,6 +48,7 @@ class MailboxController extends Controller
     public function connect(MailboxConnectRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
+            $accountUuid = $request->user()->account->uuid;
             $connectedType = $request['connection_type'];
             $mailboxService = match ($connectedType) {
                 'gmail' => new GmailService(),
@@ -51,7 +56,7 @@ class MailboxController extends Controller
                 'smtp' => new SMTPService(),
                 default => throw new \Exception('Unknown connection type'),
             };
-            $result = $mailboxService->connect();
+            $result = $mailboxService->connect($accountUuid);
             return $this->respondOk($result);
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
@@ -61,15 +66,38 @@ class MailboxController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(MailboxStoreRequest $request)
+    public function store()
     {
         try {
-            $validated = $request->validated();
-            $user = $request->user();
-            $validated['account_id'] = $user->account_id;
+            $queryStateString = request()->input('state');
+            $queryStateJSON = json_decode($queryStateString, true);
+            
+            $driver = $queryStateJSON['driver'];
+            $accountUuid = $queryStateJSON['account'];
 
-            $mailbox = Mailbox::create($validated);
-            return $this->respondCreated(new MailboxResource($mailbox));
+            $account = Account::query()->where('uuid', $accountUuid)->first();
+
+            $user = Socialite::driver($driver)->stateless()->user();
+
+            if (Mailbox::where('account_id', $account['id'])->where('email', $user->getEmail())->exists()) {
+                return redirect()->to(env('FRONTEND_URL') . '/mailboxes?exist=true');
+                // TODO rework;
+            }
+
+            $raw = $user->getRaw();
+
+            $mailbox = Mailbox::create([
+                "account_id" => $account['id'],
+                "name" => $user->getName(),
+                "email" => $user->getEmail(),
+                "avatar" => $user->getAvatar(),
+                "domain" => ($raw && array_key_exists("hd", $raw)) ? $raw["hd"] : "gmail",
+                "token" => $user->token,
+                "refresh_token" => $user->refreshToken,
+                "expires_in" => $user->expiresIn
+            ]);
+
+            return redirect()->to(env('FRONTEND_URL') . '/mailboxes/' . $mailbox['uuid']);
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
         }

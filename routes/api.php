@@ -28,6 +28,8 @@ Route::group(['prefix' => ''], function () {
 //    Route::post('register', [AuthController::class, 'register']);
 });
 
+Route::get('mailboxes/store', [MailboxController::class, 'store'])->name('mailboxes.store');
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('logout', [AuthController::class, 'logout']);
     Route::get('user', [AuthController::class, 'user']);
@@ -70,7 +72,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('/connect', [MailboxController::class, 'connect']);
         Route::get('/', [MailboxController::class, 'index']);
         Route::get('/{mailbox:uuid}', [MailboxController::class, 'show']);
-        Route::post('/store', [MailboxController::class, 'store']);
+//        Route::post('/store', [MailboxController::class, 'store']);
         Route::put('/{mailbox:uuid}', [MailboxController::class, 'update']);
         Route::delete('/{mailbox:uuid}', [MailboxController::class, 'destroy']);
     });
