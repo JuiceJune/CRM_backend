@@ -64,25 +64,18 @@ class GmailService implements MailboxService
             $url = env('APP_URL');
             $gmailMessage = new Google_Service_Gmail_Message();
 
-            // Constructing message headers
-            $headers = [
-                "From: {$senderName} <{$senderEmail}>",
-                "To: <{$prospectEmail}>",
-                'Subject: =?utf-8?B?' . base64_encode($subject) . "?=",
-                "MIME-Version: 1.0",
-                "Content-Type: text/html; charset=utf-8",
-                $messageStringId !== null ? "References: {$messageStringId}" : '',
-                $messageStringId !== null ? "In-Reply-To: {$messageStringId}" : '',
-                'Content-Transfer-Encoding: 7bit',
-                '', // Empty line before message body
-                "{$message}", // Message body
-                "<br/>", // HTML break line
-                "{$signature}", // Signature
-                "<img src='{$url}/api/image/{$messageUuid}' alt='-- ' height='1'/>" // Image
-            ];
-
-            // Constructing the raw message string
-            $rawMessageString = implode("\r\n", $headers);
+            $rawMessageString = "From: {$senderName} <{$senderEmail}>\r\n";
+            $rawMessageString .= "To: <{$prospectEmail}>\r\n";
+            $rawMessageString .= 'Subject: =?utf-8?B?' . base64_encode($subject) . "?=\r\n";
+            $rawMessageString .= "MIME-Version: 1.0\r\n";
+            $rawMessageString .= "Content-Type: text/html; charset=utf-8\r\n";
+            $rawMessageString .= $messageStringId !== null ? "References: {$messageStringId}\r\n" : '';
+            $rawMessageString .= $messageStringId !== null ? "In-Reply-To: {$messageStringId}\r\n" : '';
+            $rawMessageString .= 'Content-Transfer-Encoding: 7bit' . "\r\n\r\n";
+            $rawMessageString .= "{$message}\r\n";
+            $rawMessageString .= "<br/>\r\n";
+            $rawMessageString .= "{$signature}\r\n";
+            $rawMessageString .= $messageUuid ? "<img src='{$url}/api/image/{$messageUuid}' alt='-- ' height='1'/>\r\n" : null;
 
             // Encoding the raw message string
             $rawMessage = strtr(base64_encode($rawMessageString), array('+' => '-', '/' => '_'));
