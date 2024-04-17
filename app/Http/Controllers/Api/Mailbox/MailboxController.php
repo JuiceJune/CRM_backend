@@ -56,7 +56,7 @@ class MailboxController extends Controller
                 'smtp' => new SMTPService(),
                 default => throw new \Exception('Unknown connection type'),
             };
-            $result = $mailboxService->connect($accountUuid);
+            $result = $mailboxService->connectAccount($accountUuid);
             return $this->respondOk($result);
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
@@ -71,7 +71,7 @@ class MailboxController extends Controller
         try {
             $queryStateString = request()->input('state');
             $queryStateJSON = json_decode($queryStateString, true);
-            
+
             $driver = $queryStateJSON['driver'];
             $accountUuid = $queryStateJSON['account'];
 

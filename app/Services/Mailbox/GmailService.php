@@ -62,7 +62,7 @@ class GmailService implements MailboxService
     {
         try {
             $url = env('APP_URL');
-            $message = new Google_Service_Gmail_Message();
+            $gmailMessage = new Google_Service_Gmail_Message();
 
             // Constructing message headers
             $headers = [
@@ -88,14 +88,14 @@ class GmailService implements MailboxService
             $rawMessage = strtr(base64_encode($rawMessageString), array('+' => '-', '/' => '_'));
 
             // Setting the raw message to the Gmail message object
-            $message->setRaw($rawMessage);
+            $gmailMessage->setRaw($rawMessage);
 
             // Setting thread id if available
             if ($threadId !== null) {
-                $message->setThreadId($threadId);
+                $gmailMessage->setThreadId($threadId);
             }
 
-            return $message;
+            return $gmailMessage;
         } catch (Exception $error) {
             Log::error('GenerateMessage: ' . $error->getMessage());
             return null;

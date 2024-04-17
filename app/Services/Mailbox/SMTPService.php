@@ -2,8 +2,6 @@
 
 namespace App\Services\Mailbox;
 
-use Google\Client;
-
 class SMTPService implements MailboxService
 {
     public function getClient()
@@ -11,7 +9,7 @@ class SMTPService implements MailboxService
         // TODO: Implement getClient() method.
     }
 
-    public function setClient(Client $client)
+    public function setClient($client)
     {
         // TODO: Implement setClient() method.
     }
@@ -26,8 +24,33 @@ class SMTPService implements MailboxService
         // TODO: Implement initializeClient() method.
     }
 
-    public function sendMessage()
+    public function sendMessage($campaignMessage)
     {
         // TODO: Implement sendMessage() method.
+    }
+
+    public function generateMessage($senderName, $senderEmail, $prospectEmail, $subject, $message, $signature, $messageUuid, $threadId, $messageStringId)
+    {
+        // TODO: Implement generateMessage() method.
+    }
+
+    public function setSnippets($snippets, $messageText, $subject)
+    {
+        // TODO: Implement setSnippets() method.
+    }
+
+    public function getHistory($token, $historyId)
+    {
+        // TODO: Implement getHistory() method.
+    }
+
+    public function getMessage($token, $messageId)
+    {
+        // TODO: Implement getMessage() method.
+    }
+
+    public function getThread($token, $threadId)
+    {
+        // TODO: Implement getThread() method.
     }
 }
