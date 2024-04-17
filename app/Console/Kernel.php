@@ -2,11 +2,8 @@
 
 namespace App\Console;
 
-use App\Jobs\SetupCampaign;
-use App\Models\Campaign;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -18,7 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('refresh:google-access-tokens')->hourly();
+        $schedule->command('refresh:mailbox-access-tokens')->hourly();
         $schedule->command('messages:check-status')->everyFourHours();
     }
 

@@ -117,8 +117,11 @@ class GmailService implements MailboxService
     {
         try {
             $prospect = $campaignMessage->prospect;
+
+            $version = $campaignMessage->campaignStepVersion;
+
             $snippets = $prospect->toArray();
-            [$message, $subject] = $this->setSnippets($snippets, $campaignMessage['message'], $campaignMessage['subject']);
+            [$message, $subject] = $this->setSnippets($snippets, $version['message'], $version['subject']);
 
             $mailbox = $campaignMessage->campaign->mailbox;
             $senderName = $mailbox['name'];
@@ -186,6 +189,21 @@ class GmailService implements MailboxService
             return $res;
         } catch(Exception $e) {
             Log::error('GetThread: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function refreshToken($token, $refreshToken): ?array
+    {
+        try {
+            $this->initializeClient($token);
+
+            $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+            return $this->client->getAccessToken();
+
+        } catch (Exception $error) {
+            Log::error('RefreshToken: ' . $error->getMessage());
             return null;
         }
     }
