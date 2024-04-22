@@ -63,6 +63,11 @@ class CampaignStep extends Model
         return $this->hasMany(CampaignStepVersion::class);
     }
 
+    public function messages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CampaignMessage::class);
+    }
+
     public function campaign(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Campaign::class);

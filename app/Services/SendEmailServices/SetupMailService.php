@@ -41,7 +41,7 @@ class SetupMailService
                 Log::alert('SendMessage Response: ' . json_encode($response));
             }
         } catch (\Exception $error) {
-            Log::error($error->getMessage());
+            Log::error("Setup Mail Service: " . $error->getMessage());
         }
     }
 }

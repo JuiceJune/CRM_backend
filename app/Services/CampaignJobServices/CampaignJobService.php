@@ -37,7 +37,7 @@ class CampaignJobService
 
             CampaignMessage::where('status', 'scheduled')->where('campaign_id', $campaign->id)->update(['status' => 'pending']);
 
-            RedisJob::whereIn('job_id', $jobIds)->delete();
+            RedisJob::whereIn('redis_job_id', $jobIds)->delete();
         } catch (Exception $error) {
             Log::error('DeleteQueueElements: ' . $error->getMessage());
         }

@@ -116,7 +116,7 @@ class SetupCampaignService
 
             Log::alert('currentLimit: ' . $currentLimit);
 
-            $campaignMessages = $this->getPendingCampaignMessagesByStep($stepNumber, $currentLimit); // Get prospects
+            $campaignMessages = $this->getPendingCampaignMessagesByStep($step, $currentLimit); // Get prospects
             Log::alert('ProspectMessages: ' . count($campaignMessages));
             Log::alert('ProspectMessages: ' . json_encode($campaignMessages));
 
@@ -156,16 +156,20 @@ class SetupCampaignService
 
     private function getPendingCampaignMessagesByStep($step, $limit): \Illuminate\Database\Eloquent\Collection|array
     {
-        return CampaignMessage::query()
-            ->where('campaign_messages.account_id', $this->campaign->account_id)
-            ->where('campaign_messages.campaign_id', $this->campaign->id)
-            ->where('campaign_messages.status', 'pending')
-            ->where('campaign_messages.available_at', '<=', $this->dateTime)
-            ->where('campaign_steps.step', $step) // Додайте цю умову
-            ->join('campaign_steps', 'campaign_messages.campaign_step_id', '=', 'campaign_steps.id') // Об'єднання з таблицею campaign_steps
-            ->select('campaign_messages.id')
+//        return CampaignMessage::query()
+//            ->where('campaign_messages.account_id', $this->campaign->account_id)
+//            ->where('campaign_messages.campaign_id', $this->campaign->id)
+//            ->where('campaign_messages.status', 'pending')
+//            ->where('campaign_messages.available_at', '<=', $this->dateTime)
+//            ->where('campaign_steps.step', $step) // Додайте цю умову
+//            ->join('campaign_steps', 'campaign_messages.campaign_step_id', '=', 'campaign_steps.id') // Об'єднання з таблицею campaign_steps
+//            ->take($limit)
+//            ->distinct()
+//            ->get();
+        return $step->messages()
+            ->where('status', 'pending')
+            ->where('available_at', '<=', $this->dateTime)
             ->take($limit)
-            ->distinct()
             ->get();
     }
 
@@ -258,7 +262,7 @@ class SetupCampaignService
 
             Log::alert('Schedule email | Time: ' . $this->dateTime . " | JobId: " . $jobId . " | Message: " . json_encode($campaignMessage));
         } catch (\Exception $error) {
-            Log::error($error->getMessage());
+            Log::error("ScheduleMail: " . $error->getMessage());
         }
     }
 }
