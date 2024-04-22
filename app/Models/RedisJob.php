@@ -38,6 +38,12 @@ class RedisJob extends Model
         return $this->belongsTo(Prospect::class);
     }
 
+    public function campaignMessage(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(CampaignMessage::class, 'redis_job_id');
+    }
+
+
     public function campaignStep(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(CampaignStep::class);

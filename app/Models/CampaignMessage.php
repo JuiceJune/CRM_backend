@@ -18,6 +18,7 @@ class CampaignMessage extends Model
         'campaign_step_id',
         'campaign_step_version_id',
         'prospect_id',
+        'redis_job_id',
         'status',
         'available_at',
         'sent_time',
@@ -54,6 +55,11 @@ class CampaignMessage extends Model
     public function prospect(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Prospect::class, 'prospect_id');
+    }
+
+    public function redisJob(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(RedisJob::class, 'redis_job_id');
     }
 
     public function campaignProspect(): \Illuminate\Database\Eloquent\Relations\HasOne

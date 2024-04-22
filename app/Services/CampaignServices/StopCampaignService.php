@@ -21,7 +21,6 @@ class StopCampaignService {
     public function stopCampaign(): void
     {
         try {
-            Log::alert('StopCampaign: ' . $this->campaign->name);
             $this->campaignJobService->deleteQueueElements($this->campaign);
         } catch (Exception $error) {
             Log::error('StopCampaign: ' . $error->getMessage());

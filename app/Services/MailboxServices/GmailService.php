@@ -132,10 +132,10 @@ class GmailService implements MailboxService
             $frontendUrl = env('FRONTEND_URL');
             $signature = str_replace('{{UNSUBSCRIBE}}', "{$frontendUrl}/unsubscribe/{$campaignMessage['uuid']}", $signature);
 
-            $message = $this->generateMessage($senderName, $senderEmail, $prospect['email'], $subject, $message,
+            $messageObj = $this->generateMessage($senderName, $senderEmail, $prospect['email'], $subject, $message,
                 $signature, $campaignMessage['uuid'], $campaignMessage['thread_id'], $campaignMessage['message_string_id']);
 
-            if(!$message) {
+            if(!$messageObj) {
                 throw new Error('Generate message problem');
             }
 
@@ -143,7 +143,7 @@ class GmailService implements MailboxService
 
             $service = new Gmail($this->client);
 
-            $response = $service->users_messages->send('me', $message);
+            $response = $service->users_messages->send('me', $messageObj);
 
             return [
                 'messageResponse' => $response,

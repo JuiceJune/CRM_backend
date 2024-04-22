@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('campaign_step_id')->constrained()->onDelete('cascade');
             $table->foreignId('campaign_step_version_id')->constrained()->onDelete('cascade');
             $table->foreignId('prospect_id')->constrained()->onDelete('cascade');
+            $table->foreignId('redis_job_id')->nullable()->constrained()->onDelete('set null');
             $table->string('status')->default('pending');
             $table->dateTime('available_at');
             $table->dateTime('sent_time')->nullable();

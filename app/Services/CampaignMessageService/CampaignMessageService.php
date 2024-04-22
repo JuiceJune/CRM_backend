@@ -44,9 +44,9 @@ class CampaignMessageService
     public function sent($sentResponse, MailboxService $mailboxService): void
     {
         try {
-            $messageId = $sentResponse->messageResponse->id;
-            $threadId = $sentResponse->messageResponse->threadId;
-            $token = $sentResponse->token;
+            $messageId = $sentResponse['messageResponse']->id;
+            $threadId = $sentResponse['messageResponse']->threadId;
+            $token = $sentResponse["token"];
 
             $messageStringId = $mailboxService->getMessageStringId($token, $messageId);
 
@@ -56,11 +56,13 @@ class CampaignMessageService
                 'message_id' => $messageId,
                 'message_string_id' => $messageStringId,
                 'thread_id' => $threadId,
-                'subject' => $sentResponse->subject,
-                'message' => $sentResponse->message,
-                'from' => $sentResponse->from,
-                'to' => $sentResponse->to,
+                'subject' => $sentResponse['subject'],
+                'message' => $sentResponse['message'],
+                'from' => $sentResponse['from'],
+                'to' => $sentResponse['to'],
             ]);
+
+            $this->campaignMessage->redisJob->delete();
 
             $this->setupNextMessage();
 
@@ -97,7 +99,7 @@ class CampaignMessageService
             }
             else {
                 // If there are no more steps -> set status of CampaignProspect to 'end'
-                $this->campaignProspect->update(['status' => 'end']);
+                $this->campaignProspect->update(['status' => 'end', 'step' => $this->campaignStep->step + 1]);
             }
         } catch (Exception $error) {
             Log::error("CampaignMessageService->setupNextMessage(): " . $error->getMessage());

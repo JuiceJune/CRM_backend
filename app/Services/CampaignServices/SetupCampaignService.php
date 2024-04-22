@@ -248,7 +248,7 @@ class SetupCampaignService
             );
 
             $campaignMessage->scheduled();
-            RedisJob::create([
+            $redisJob = RedisJob::create([
                 "redis_job_id" => $jobId,
                 "account_id" => $campaignMessage->account->id,
                 "type" => 'campaign-email-send',
@@ -258,6 +258,10 @@ class SetupCampaignService
                 "prospect_id" => $campaignMessage->prospect->id,
                 "status" => 'active',
                 "date_time" => $this->dateTime
+            ]);
+
+            $campaignMessage->update([
+                'redis_job_id' => $redisJob['id']
             ]);
 
             Log::alert('Schedule email | Time: ' . $this->dateTime . " | JobId: " . $jobId . " | Message: " . json_encode($campaignMessage));
