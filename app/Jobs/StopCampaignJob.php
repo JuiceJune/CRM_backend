@@ -3,15 +3,14 @@
 namespace App\Jobs;
 
 use App\Models\Campaign;
-use App\Services\CampaignServices\SetupCampaignService;
+use App\Services\CampaignServices\StopCampaignService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
-class SetupCampaignJob implements ShouldQueue
+class StopCampaignJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -30,6 +29,6 @@ class SetupCampaignJob implements ShouldQueue
      */
     public function handle(): void
     {
-        (new SetupCampaignService($this->campaign))->setup();
+        (new StopCampaignService($this->campaign))->stopCampaign();
     }
 }

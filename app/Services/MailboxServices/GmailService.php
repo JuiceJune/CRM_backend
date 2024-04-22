@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Mailbox;
+namespace App\Services\MailboxServices;
 
 use Error;
 use Google_Service_Gmail_Message;
@@ -113,7 +113,7 @@ class GmailService implements MailboxService
             return null;
         }
     }
-    public function sendMessage($campaignMessage)
+    public function sendMessage($campaignMessage): ?array
     {
         try {
             $prospect = $campaignMessage->prospect;
@@ -143,8 +143,16 @@ class GmailService implements MailboxService
 
             $service = new Gmail($this->client);
 
-            return $service->users_messages->send('me', $message);
+            $response = $service->users_messages->send('me', $message);
 
+            return [
+                'messageResponse' => $response,
+                'from' => $senderEmail,
+                'to' => $prospect['email'],
+                'subject' => $subject,
+                'message' => $message,
+                'token' => $token
+            ];
         } catch (Exception $error) {
             Log::error('SendMessage: ' . $error->getMessage());
             return null;
@@ -175,6 +183,25 @@ class GmailService implements MailboxService
             return $res;
         } catch(Exception $e) {
             Log::error('GetMessage: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function getMessageStringId($token, $messageId)
+    {
+        try {
+            $message = $this->getMessage($token, $messageId);
+            $message_id = null;
+
+            foreach ($message['payload']['headers'] as $header) {
+                if ($header['name'] === 'Message-Id') {
+                    $message_id = $header['value'];
+                    break;
+                }
+            }
+            return $message_id;
+        } catch(Exception $e) {
+            Log::error('GetMessageStringId: ' . $e->getMessage());
             return null;
         }
     }

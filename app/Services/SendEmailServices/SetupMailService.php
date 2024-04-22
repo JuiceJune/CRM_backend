@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Services\Mail;
+namespace App\Services\SendEmailServices;
 
-use App\Services\Mailbox\GmailService;
+use App\Services\CampaignMessageService\CampaignMessageService;
+use App\Services\MailboxServices\GmailService;
 use App\Models\CampaignMessage;
 use App\Models\Mailbox;
 use Error;
@@ -17,7 +18,7 @@ class SetupMailService
         $this->campaignMessage = $campaignMessage;
         $this->mailbox = $campaignMessage->campaign->mailbox;
     }
-    public function setup()
+    public function setup(): void
     {
         try{
             Log::alert('Send Message Start');
@@ -26,11 +27,16 @@ class SetupMailService
 
                 $gmailService = new GmailService();
 
+                //TODO Check previous messages for reply and bounce.
+
                 $response = $gmailService->sendMessage($this->campaignMessage);
 
                 if(!$response) {
                     throw new Error('Message not sent');
                 }
+
+                $campaignMessageService = new CampaignMessageService($this->campaignMessage);
+                $campaignMessageService->sent($response, $gmailService);
 
                 Log::alert('SendMessage Response: ' . json_encode($response));
             }

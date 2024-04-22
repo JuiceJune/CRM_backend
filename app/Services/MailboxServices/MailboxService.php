@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Mailbox;
+namespace App\Services\MailboxServices;
 
 interface MailboxService
 {
@@ -14,6 +14,7 @@ interface MailboxService
     public function sendMessage($campaignMessage);
     public function getHistory($token, $historyId);
     public function getMessage($token, $messageId);
+    public function getMessageStringId($token, $messageId);
     public function getThread($token, $threadId);
     public function refreshToken($token, $refreshToken);
 }

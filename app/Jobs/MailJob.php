@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\CampaignMessage;
-use App\Services\Mail\SetupMailService;
+use App\Services\SendEmailServices\SetupMailService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Mailbox;
-use App\Services\Mailbox\GmailService;
+use App\Services\MailboxServices\GmailService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;

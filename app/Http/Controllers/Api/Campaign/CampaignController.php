@@ -14,6 +14,7 @@ use App\Http\Resources\Mailbox\MailboxCreateResource;
 use App\Http\Resources\Mailbox\MailboxResource;
 use App\Jobs\SetupCampaign;
 use App\Jobs\SetupCampaignJob;
+use App\Jobs\StopCampaignJob;
 use App\Models\Campaign;
 use App\Models\CampaignProspect;
 use App\Models\CampaignSentProspect;
@@ -311,7 +312,7 @@ class CampaignController extends Controller
     public function stopCampaign(Campaign $campaign): \Illuminate\Http\JsonResponse
     {
         try {
-//            event(new CampaignStopped($campaign));
+            StopCampaignJob::dispatch($campaign);
             $campaign->update(['status' => 'stopped']);
             return response()->json(new CampaignResource($campaign));
         } catch (Exception $error) {

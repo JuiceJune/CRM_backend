@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Services\Campaign;
+namespace App\Services\CampaignServices;
 
 use App\Jobs\MailJob;
 use App\Models\Campaign;
 use App\Models\CampaignMessage;
-use App\Models\Prospect;
+use App\Models\RedisJob;
 use Carbon\Carbon;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Support\Facades\DB;
@@ -243,8 +243,20 @@ class SetupCampaignService
                     ->delay($this->dateTime)
             );
 
-//            $campaignMessage->scheduled();
-            Log::alert('Schedule email | Time: ' . $this->dateTime . " | Message: " . json_encode($campaignMessage));
+            $campaignMessage->scheduled();
+            RedisJob::create([
+                "redis_job_id" => $jobId,
+                "account_id" => $campaignMessage->account->id,
+                "type" => 'campaign-email-send',
+                "campaign_step_version_id" => $campaignMessage->campaignStepVersion->id,
+                'campaign_step_id' => $campaignMessage->campaignStep->id,
+                'campaign_id' => $campaignMessage->campaign->id,
+                "prospect_id" => $campaignMessage->prospect->id,
+                "status" => 'active',
+                "date_time" => $this->dateTime
+            ]);
+
+            Log::alert('Schedule email | Time: ' . $this->dateTime . " | JobId: " . $jobId . " | Message: " . json_encode($campaignMessage));
         } catch (\Exception $error) {
             Log::error($error->getMessage());
         }

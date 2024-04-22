@@ -56,6 +56,13 @@ class CampaignMessage extends Model
         return $this->belongsTo(Prospect::class, 'prospect_id');
     }
 
+    public function campaignProspect(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(CampaignProspect::class, 'prospect_id', 'prospect_id')
+            ->where('campaign_id', $this->campaign_id)
+            ->where('account_id', $this->account_id);
+    }
+
     public function scheduled(): void
     {
         $this->update(['status', 'scheduled']);

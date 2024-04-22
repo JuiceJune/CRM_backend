@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Mailbox;
+namespace App\Services\MailboxServices;
 
 class OutlookService implements MailboxService
 {
@@ -57,5 +57,10 @@ class OutlookService implements MailboxService
     public function refreshToken($token, $refreshToken)
     {
         // TODO: Implement refreshToken() method.
+    }
+
+    public function getMessageStringId($token, $messageId)
+    {
+        // TODO: Implement getMessageStringId() method.
     }
 }

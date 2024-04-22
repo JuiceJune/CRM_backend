@@ -1,36 +1,45 @@
 <?php
 
-namespace App\Services\QueuesHandleServices;
+namespace App\Services\CampaignJobServices;
 
-use App\Models\EmailJob;
+use App\Models\CampaignMessage;
+use App\Models\RedisJob;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
-class QueuesStopElementService
+class CampaignJobService
 {
-    public function deleteQueueElements($campaign, $prospectId)
+    public function deleteQueueElements($campaign): void
     {
         try {
-            $jobIds = EmailJob::where("campaign_id", $campaign->id)
-                ->where('prospect_id', $prospectId)
-                ->pluck('job_id');
+            $jobIds = RedisJob::where("campaign_id", $campaign->id)
+                ->pluck('redis_job_id');
+            Log::alert('JobIds:' . json_encode($jobIds));
 
             $redisHorizon = Redis::connection('horizon');
 
             if(count($jobIds) > 0) {
                 $removedIds = $redisHorizon->command('del', $jobIds->toArray());
+                Log::alert('RemovedIds: ' . $removedIds);
 
                 $removedPendingJobIds = $redisHorizon->command('ZREM', ['pending_jobs', $jobIds->toArray()]);
+                Log::alert('RemovedPendingJobs: ' . $removedPendingJobIds);
 
                 $removedRecentJobIds = $redisHorizon->command('ZREM', ['recent_jobs', $jobIds->toArray()]);
+                Log::alert('RemovedRecentJobs: ' . $removedRecentJobIds);
 
                 $removedQueuesCampaignDelayedJobIds = $this->deleteJobsByIds('default','queues:campaign:delayed', $jobIds->toArray());
+                Log::alert('RemovedQueuesCampaignDelayedJobs: ' . $removedQueuesCampaignDelayedJobIds);
             }
 
-            EmailJob::whereIn('job_id', $jobIds)->delete();
+            $campaign->update(['setup_campaign_job_id' => null]);
+
+            CampaignMessage::where('status', 'scheduled')->where('campaign_id', $campaign->id)->update(['status' => 'pending']);
+
+            RedisJob::whereIn('job_id', $jobIds)->delete();
         } catch (Exception $error) {
-            Log::channel('development')->error("Error: " . $error->getMessage());
+            Log::error('DeleteQueueElements: ' . $error->getMessage());
         }
     }
 
