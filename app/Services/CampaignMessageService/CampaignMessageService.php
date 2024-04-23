@@ -94,7 +94,7 @@ class CampaignMessageService
                     'account_id' => $this->campaign->account_id,
                     'campaign_id' => $this->campaign->id,
                     'campaign_step_id' => $nextStep->id,
-                    'campaign_step_version_id' => $nextStep->version->id,
+                    'campaign_step_version_id' => $nextStep->version('A')->id,
                     'prospect_id' => $this->prospect->id,
                     'available_at' => $this->currentTime->startOfDay()->toDateTimeString(),
                 ]);
