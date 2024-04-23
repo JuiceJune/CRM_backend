@@ -7,9 +7,11 @@ use App\Models\CampaignMessage;
 use App\Models\CampaignProspect;
 use App\Models\CampaignStep;
 use App\Models\Prospect;
+use App\Services\CampaignJobServices\CampaignJobService;
 use App\Services\MailboxServices\MailboxService;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CampaignMessageService
@@ -96,13 +98,85 @@ class CampaignMessageService
                     'prospect_id' => $this->prospect->id,
                     'available_at' => $this->currentTime->startOfDay()->toDateTimeString(),
                 ]);
-            }
-            else {
+            } else {
                 // If there are no more steps -> set status of CampaignProspect to 'end'
                 $this->campaignProspect->update(['status' => 'end', 'step' => $this->campaignStep->step + 1]);
             }
         } catch (Exception $error) {
             Log::error("CampaignMessageService->setupNextMessage(): " . $error->getMessage());
+        }
+    }
+
+    public function opened(): void
+    {
+        try {
+            $this->campaignMessage->update(['status' => 'opened']);
+            $this->campaignProspect->update(['status' => 'opened']);
+        } catch (Exception $error) {
+            Log::error('Opened: ' . $error->getMessage());
+        }
+    }
+
+    public function unsubscribe(): void
+    {
+        DB::beginTransaction();
+        try {
+            $this->campaignMessage->update(['status' => 'unsubscribe']);
+            $this->campaignProspect->update(['status' => 'unsubscribe']);
+
+            $this->deleteNextMessages();
+
+            DB::commit();
+        } catch (Exception $error) {
+            Log::error('Unsubscribe: ' . $error->getMessage());
+            DB::rollBack();
+        }
+    }
+
+    public function replayed(): void
+    {
+        DB::beginTransaction();
+        try {
+            $this->campaignMessage->update(['status' => 'replayed']);
+            $this->campaignProspect->update(['status' => 'replayed']);
+
+            $this->deleteNextMessages();
+
+            DB::commit();
+        } catch (Exception $error) {
+            Log::error('Replayed: ' . $error->getMessage());
+            DB::rollBack();
+        }
+    }
+
+    public function bounced(): void
+    {
+        DB::beginTransaction();
+        try {
+            $this->campaignMessage->update(['status' => 'bounced']);
+            $this->campaignProspect->update(['status' => 'bounced']);
+
+            $this->deleteNextMessages();
+
+            DB::commit();
+        } catch (Exception $error) {
+            Log::error('Bounced: ' . $error->getMessage());
+            DB::rollBack();
+        }
+    }
+
+    private function deleteNextMessages(): void
+    {
+        try {
+            CampaignMessage::where('campaign_id', $this->campaign->id)
+                ->where('prospect_id', $this->prospect->id)
+                ->where('status', 'in', ['pending', 'scheduled'])
+                ->delete();
+
+            $campaignJobService = new CampaignJobService();
+            $campaignJobService->deleteProspectJobs($this->campaign, $this->prospect);
+        } catch (Exception $error) {
+            Log::error("CampaignMessageService->deleteNextMessages(): " . $error->getMessage());
         }
     }
 }

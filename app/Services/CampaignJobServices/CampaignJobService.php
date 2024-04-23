@@ -10,7 +10,36 @@ use Illuminate\Support\Facades\Redis;
 
 class CampaignJobService
 {
-    public function deleteQueueElements($campaign): void
+    public function deleteProspectJobs($campaign, $prospect): void
+    {
+        try {
+            $jobIds = RedisJob::where("campaign_id", $campaign->id)
+                ->where('prospect_id', $prospect->id)
+                ->pluck('redis_job_id');
+            Log::alert('JobIds:' . json_encode($jobIds));
+
+            $redisHorizon = Redis::connection('horizon');
+
+            if(count($jobIds) > 0) {
+                $removedIds = $redisHorizon->command('del', $jobIds->toArray());
+                Log::alert('RemovedIds: ' . $removedIds);
+
+                $removedPendingJobIds = $redisHorizon->command('ZREM', ['pending_jobs', $jobIds->toArray()]);
+                Log::alert('RemovedPendingJobs: ' . $removedPendingJobIds);
+
+                $removedRecentJobIds = $redisHorizon->command('ZREM', ['recent_jobs', $jobIds->toArray()]);
+                Log::alert('RemovedRecentJobs: ' . $removedRecentJobIds);
+
+                $removedQueuesCampaignDelayedJobIds = $this->deleteJobsByIds('default','queues:campaign:delayed', $jobIds->toArray());
+                Log::alert('RemovedQueuesCampaignDelayedJobs: ' . $removedQueuesCampaignDelayedJobIds);
+            }
+
+            RedisJob::whereIn('redis_job_id', $jobIds)->delete();
+        } catch (Exception $error) {
+            Log::error('DeleteQueueElements: ' . $error->getMessage());
+        }
+    }
+    public function deleteCampaignJobs($campaign): void
     {
         try {
             $jobIds = RedisJob::where("campaign_id", $campaign->id)
@@ -33,8 +62,6 @@ class CampaignJobService
                 Log::alert('RemovedQueuesCampaignDelayedJobs: ' . $removedQueuesCampaignDelayedJobIds);
             }
 
-            $campaign->update(['setup_campaign_job_id' => null]);
-
             CampaignMessage::where('status', 'scheduled')->where('campaign_id', $campaign->id)->update(['status' => 'pending']);
 
             RedisJob::whereIn('redis_job_id', $jobIds)->delete();
@@ -42,7 +69,6 @@ class CampaignJobService
             Log::error('DeleteQueueElements: ' . $error->getMessage());
         }
     }
-
     private function deleteJobsByIds($connection, $element, $ids) {
         try {
             $redisDefault = Redis::connection($connection);

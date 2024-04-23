@@ -23,6 +23,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/image/{campaignMessage:uuid}', [CampaignController::class, 'openEmail'])->name('openEmail');
+
+Route::get('/unsubscribe/{campaignMessage:uuid}', [CampaignController::class, 'unsubscribe'])->name('unsubscribe');
+
 Route::group(['prefix' => ''], function () {
     Route::post('login', [AuthController::class, 'login']);
 //    Route::post('register', [AuthController::class, 'register']);

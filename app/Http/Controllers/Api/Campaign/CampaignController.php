@@ -16,6 +16,7 @@ use App\Jobs\SetupCampaign;
 use App\Jobs\SetupCampaignJob;
 use App\Jobs\StopCampaignJob;
 use App\Models\Campaign;
+use App\Models\CampaignMessage;
 use App\Models\CampaignProspect;
 use App\Models\CampaignSentProspect;
 use App\Models\CampaignStep;
@@ -24,6 +25,7 @@ use App\Models\CampaignStepVersion;
 use App\Models\EmailJob;
 use App\Models\Mailbox;
 use App\Models\Project;
+use App\Services\CampaignMessageService\CampaignMessageService;
 use Carbon\Carbon;
 use DateTimeZone;
 use Exception;
@@ -243,6 +245,7 @@ class CampaignController extends Controller
     }
 
     //TODO create services for all these staff
+
     /**
      * Send test email.
      */
@@ -320,54 +323,30 @@ class CampaignController extends Controller
         }
     }
 
-    public function clearQueue()
+    public function openEmail(CampaignMessage $campaignMessage)
     {
         try {
-            DB::table('jobs')->delete();
-            return response('Queue are cleared');
-        } catch (Exception $error) {
-            return response([
-                "message" => "Problem with clearing queue",
-                "error_message" => $error->getMessage(),
-            ], 500);
-        }
-    }
-
-    public function openTrack(Request $request, CampaignStepProspect $campaignStepProspect)
-    {
-        try {
-//            Log::channel('development')->alert('Open');
-//            $ip = $request->ip();
-//            $dt = new Carbon();
-//            $dateTime = $dt->toDateTimeString();
-//
-//            Log::channel('development')->alert('DateTime: ' . $dateTime);
-//            Log::channel('development')->alert('Ip: ' . $ip);
-
-            if(!in_array($campaignStepProspect['status'], ['unsubscribe', 'bounced', 'replayed', 'opened'])) {
-                $campaignStepProspect->opened();
+            if(!in_array($campaignMessage['status'], ['unsubscribe', 'bounced', 'replayed', 'opened'])) {
+                $campaignMessageService = new CampaignMessageService($campaignMessage);
+                $campaignMessageService->opened();
             }
-
         } catch (Exception $error) {
-            Log::channel('development')->error("Error: " . $error->getMessage());
+            Log::error('OpenEmail: ' . $error->getMessage());
         } finally {
             $pixel = base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
             return response($pixel)->header('Content-Type', 'image/gif');
         }
     }
 
-    public function unsubscribe($id)
+    public function unsubscribe(CampaignMessage $campaignMessage): void
     {
         try {
-            $campaignStepProspect = CampaignStepProspect::find($id);
-            if($campaignStepProspect && !in_array($campaignStepProspect['status'], ['unsubscribe', 'bounced'])) {
-                DB::beginTransaction();
-                $campaignStepProspect->unsubscribe();
-                DB::commit();
+            if(!in_array($campaignMessage['status'], ['unsubscribe', 'bounced'])) {
+                $campaignMessageService = new CampaignMessageService($campaignMessage);
+                $campaignMessageService->unsubscribe();
             }
         } catch (Exception $error) {
-            Log::channel('development')->error("Error: " . $error->getMessage());
-            DB::rollback();
+            Log::error('Unsubscribe: ' . $error->getMessage());
         }
     }
 }
