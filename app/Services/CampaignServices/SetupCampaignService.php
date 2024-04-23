@@ -3,6 +3,7 @@
 namespace App\Services\CampaignServices;
 
 use App\Jobs\MailJob;
+use App\Jobs\SetupCampaignJob;
 use App\Models\Campaign;
 use App\Models\CampaignMessage;
 use App\Models\RedisJob;
@@ -52,6 +53,8 @@ class SetupCampaignService
             }
         } catch (\Exception $error) {
             Log::error(json_encode($error));
+        } finally {
+            $this->scheduleCampaignSetup();
         }
     }
 
@@ -156,16 +159,6 @@ class SetupCampaignService
 
     private function getPendingCampaignMessagesByStep($step, $limit): \Illuminate\Database\Eloquent\Collection|array
     {
-//        return CampaignMessage::query()
-//            ->where('campaign_messages.account_id', $this->campaign->account_id)
-//            ->where('campaign_messages.campaign_id', $this->campaign->id)
-//            ->where('campaign_messages.status', 'pending')
-//            ->where('campaign_messages.available_at', '<=', $this->dateTime)
-//            ->where('campaign_steps.step', $step) // Додайте цю умову
-//            ->join('campaign_steps', 'campaign_messages.campaign_step_id', '=', 'campaign_steps.id') // Об'єднання з таблицею campaign_steps
-//            ->take($limit)
-//            ->distinct()
-//            ->get();
         return $step->messages()
             ->where('status', 'pending')
             ->where('available_at', '<=', $this->dateTime)
@@ -173,7 +166,7 @@ class SetupCampaignService
             ->get();
     }
 
-    function getShortDayOfWeek($dayOfWeek): string
+    private function getShortDayOfWeek($dayOfWeek): string
     {
         $shortDaysOfWeek = [
             0 => "Sun",
@@ -238,7 +231,7 @@ class SetupCampaignService
         }
     }
 
-    function scheduleMail($campaignMessage)
+    private function scheduleMail($campaignMessage): void
     {
         try {
             $jobId = app(Dispatcher::class)->dispatch(
@@ -267,6 +260,27 @@ class SetupCampaignService
             Log::alert('Schedule email | Time: ' . $this->dateTime . " | JobId: " . $jobId . " | Message: " . json_encode($campaignMessage));
         } catch (\Exception $error) {
             Log::error("ScheduleMail: " . $error->getMessage());
+        }
+    }
+
+    private function scheduleCampaignSetup(): void
+    {
+        try {
+            $setupTime = Carbon::now($this->campaign->timezone)->addDay()->setTime(0, 1);
+            $jobId = app(Dispatcher::class)->dispatch((new SetupCampaignJob($this->campaign))->delay($setupTime));
+
+            RedisJob::create([
+                "redis_job_id" => $jobId,
+                "account_id" => $this->campaign->accountId,
+                "type" => 'campaign-setup',
+                'campaign_id' => $this->campaign->id,
+                "status" => 'active',
+                "date_time" => $setupTime
+            ]);
+
+            Log::alert('Schedule next campaign setup (tomorrow): ' . $setupTime . " | Job: " . $jobId);
+        } catch (\Exception $error) {
+            Log::error('scheduleCampaignSetup: ' . $error->getMessage());
         }
     }
 }
