@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class CheckMessageStatus
 {
-    public function checkStatus(CampaignMessage $campaignMessage, MailboxService $mailboxService)
+    public function checkStatus(CampaignMessage $campaignMessage, MailboxService $mailboxService): array
     {
         try {
             $campaignProspect = $campaignMessage->campaignProspect;
@@ -119,6 +119,11 @@ class CheckMessageStatus
                     ];
                 }
             }
+
+            return [
+                'status' => 'success',
+                'data' => 'send'
+            ];
         } catch (Exception $error) {
             Log::error("CheckStatus: " . $error->getMessage());
             return [
