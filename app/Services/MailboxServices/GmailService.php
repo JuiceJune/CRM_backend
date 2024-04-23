@@ -123,9 +123,9 @@ class GmailService implements MailboxService
             $campaignStep = $campaignMessage->campaignStep;
             $replayedThreadId = null;
             $replayedMessageStringId = null;
-            if($campaignStep['reply_to_exist_thread']->reply && $campaignStep['reply_to_exist_thread']->step) {
+            if($campaignStep['reply_to_exist_thread']['reply'] && $campaignStep['reply_to_exist_thread']['step']) {
                 $campaign = $campaignMessage->campaign;
-                $replayedStep = $campaign->step($campaignStep['reply_to_exist_thread']->step);
+                $replayedStep = $campaign->step($campaignStep['reply_to_exist_thread']['step']);
                 $replayedCampaignMessage = CampaignMessage::where('campaign_id', $campaign->id)
                     ->where('campaign_step_id', $replayedStep->id)
                     ->where('prospect_id', $prospect->id)
