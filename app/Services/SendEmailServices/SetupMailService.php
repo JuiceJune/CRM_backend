@@ -28,24 +28,21 @@ class SetupMailService
 
                 $gmailService = new GmailService();
 
-                $checkMessageStatus = new CheckMessageStatus();
-                $statusCheckResponse = $checkMessageStatus->checkStatus($this->campaignMessage, $gmailService);
-
-                if($statusCheckResponse['status'] === 'error' || $statusCheckResponse['data'] === 'not-send') {
-                    Log::alert('Send Message Error');
-                    throw new Error($statusCheckResponse['data']);
-                }
-
-                $response = $gmailService->sendMessage($this->campaignMessage);
-
-                if(!$response) {
-                    throw new Error('Message not sent');
-                }
-
                 $campaignMessageService = new CampaignMessageService($this->campaignMessage);
-                $campaignMessageService->sent($response, $gmailService);
 
-                Log::alert('SendMessage Response: ' . json_encode($response));
+                $statusCheckResponse = $campaignMessageService->checkMessageStatus($this->campaignMessage, $gmailService);
+
+                if($statusCheckResponse['status'] === 'error' || $statusCheckResponse['status'] === 'not-send') {
+                    Log::alert('Message has not be sent: ' . $statusCheckResponse['data']);
+                } else {
+                    $response = $gmailService->sendMessage($this->campaignMessage);
+
+                    if(!$response) {
+                        throw new Error('Message not sent');
+                    }
+
+                    $campaignMessageService->sent($response, $gmailService);
+                }
             }
         } catch (\Exception $error) {
             Log::error("Setup Mail Service: " . $error->getMessage());

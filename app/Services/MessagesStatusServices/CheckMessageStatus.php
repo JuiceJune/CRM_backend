@@ -12,6 +12,15 @@ use Illuminate\Support\Facades\Log;
 
 class CheckMessageStatus
 {
+    protected CampaignMessage $campaignMessage;
+    protected MailboxService $mailboxService;
+
+    public function __construct(CampaignMessage $campaignMessage, MailboxService $mailboxService)
+    {
+        $this->campaignMessage = $campaignMessage;
+        $this->mailboxService = $mailboxService;
+    }
+
     public function checkStatus(CampaignMessage $campaignMessage, MailboxService $mailboxService): array
     {
         try {
@@ -21,15 +30,15 @@ class CheckMessageStatus
 
             if($currentStatus === 'end') {
                 return [
-                    "status" => "success",
-                    "data" => "not-send"
+                    "status" => "not-send",
+                    "data" => "Current status end"
                 ];
             }
 
             if($nextStep === 1) {
                 return [
-                    "status" => "success",
-                    "data" => "send"
+                    "status" => "send",
+                    "data" => "First message"
                 ];
             }
 
@@ -51,85 +60,85 @@ class CheckMessageStatus
             }
 
             foreach($previousMessages as $previousMessage) {
-                if($previousMessage['status'] != 'replayed' && $previousMessage['status'] != 'unsubscribe' && $previousMessage['status'] != 'bounced') {
 
-                    $campaignMessageService = new CampaignMessageService($previousMessage);
-
-                    $threadResponse = $mailboxService->getThread($mailbox['token'], $previousMessage['thread_id']);
-
-                    if ($threadResponse['status'] === 'success') {
-                        $messages = $threadResponse['data']->messages;
-                        Log::alert('CheckStatus Messages: ' . json_encode($messages));
-
-                        if (count($messages) > 1) {
-
-                            $bouncedFlag = false;
-
-                            foreach ($messages as $messageKey => $message) {
-                                foreach ($message->payload->headers as $header) {
-                                    if ($header->name === 'From' && str_contains($header->value, 'mailer-daemon@googlemail.com')) {
-                                        $bouncedFlag = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if ($bouncedFlag) {
-                                $campaignMessageService->bounced();
-                                return [
-                                    'status' => 'success',
-                                    'data' => 'not-send'
-                                ];
-                            }
-
-                            $replayedFlag = false;
-
-                            foreach ($messages as $messageKey => $message) {
-                                foreach ($message->payload->headers as $header) {
-                                    if ($header->name === 'From' && !str_contains($header->value, $mailbox->email)) {
-                                        $replayedFlag = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if ($replayedFlag) {
-                                $campaignMessageService->replayed();
-                                return [
-                                    'status' => 'success',
-                                    'data' => 'not-send'
-                                ];
-                            }
-                        }
-                        return [
-                            'status' => 'success',
-                            'data' => 'send'
-                        ];
-                    } else {
-                        Log::error('Thread ERROR: ' . $threadResponse['data']);
-                        return [
-                            'status' => 'error',
-                            'data' => $threadResponse['data']
-                        ];
-                    }
-                } else {
-                    return [
-                        "status" => "success",
-                        "data" => "not-send"
-                    ];
-                }
             }
 
             return [
-                'status' => 'success',
+                'status' => 'send',
                 'data' => 'send'
             ];
         } catch (Exception $error) {
             Log::error("CheckStatus: " . $error->getMessage());
             return [
                 'status' => 'error',
-                'data' => $error
+                'data' => $error->getMessage()
             ];
+        }
+    }
+
+    protected function checkMessageStatus($previousMessage) {
+        try {
+            if($previousMessage['status'] != 'replayed' && $previousMessage['status'] != 'unsubscribe' && $previousMessage['status'] != 'bounced') {
+
+                $campaignMessageService = new CampaignMessageService($previousMessage);
+
+                $threadResponse = $mailboxService->getThread($mailbox['token'], $previousMessage['thread_id']);
+
+                if ($threadResponse['status'] === 'success') {
+                    $messages = $threadResponse['data']->messages;
+                    Log::alert('CheckStatus Messages: ' . json_encode($messages));
+
+                    if (count($messages) > 1) {
+
+                        $bouncedFlag = false;
+
+                        foreach ($messages as $messageKey => $message) {
+                            foreach ($message->payload->headers as $header) {
+                                if ($header->name === 'From' && str_contains($header->value, 'mailer-daemon@googlemail.com')) {
+                                    $bouncedFlag = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if ($bouncedFlag) {
+                            $campaignMessageService->bounced();
+                            return [
+                                'status' => 'not-send',
+                                'data' => 'Bounced'
+                            ];
+                        }
+
+                        $replayedFlag = false;
+
+                        foreach ($messages as $messageKey => $message) {
+                            foreach ($message->payload->headers as $header) {
+                                if ($header->name === 'From' && !str_contains($header->value, $mailbox->email)) {
+                                    $replayedFlag = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if ($replayedFlag) {
+                            $campaignMessageService->replayed();
+                            return [
+                                'status' => 'not-send',
+                                'data' => 'Replayed'
+                            ];
+                        }
+                    }
+                } else {
+                    throw new \Error($threadResponse['data']);
+                }
+            } else {
+                return [
+                    "status" => "success",
+                    "data" => "not-send"
+                ];
+            }
+        } catch (Exception $error) {
+            Log::error("CheckMessageStatus->checkMessageStatus: " . $error->getMessage());
         }
     }
 }

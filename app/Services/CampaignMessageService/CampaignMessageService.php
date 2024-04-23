@@ -9,6 +9,7 @@ use App\Models\CampaignStep;
 use App\Models\Prospect;
 use App\Services\CampaignJobServices\CampaignJobService;
 use App\Services\MailboxServices\MailboxService;
+use App\Services\MessagesStatusServices\CheckMessageStatus;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -177,6 +178,22 @@ class CampaignMessageService
             $campaignJobService->deleteProspectJobs($this->campaign, $this->prospect);
         } catch (Exception $error) {
             Log::error("CampaignMessageService->deleteNextMessages(): " . $error->getMessage());
+        }
+    }
+
+    public function checkMessageStatus(CampaignMessage $campaignMessage, MailboxService $mailboxService): array
+    {
+        try {
+            $checkMessageStatus = new CheckMessageStatus($campaignMessage, $mailboxService);
+
+            return [
+                "status" => "success"
+            ];
+        } catch (Exception $error) {
+            Log::error("CampaignMessageService -> CheckMessageStatus: " . $error->getMessage());
+            return [
+                "status" => "error"
+            ];
         }
     }
 }
