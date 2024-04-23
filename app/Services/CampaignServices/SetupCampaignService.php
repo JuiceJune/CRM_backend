@@ -271,7 +271,7 @@ class SetupCampaignService
 
             RedisJob::create([
                 "redis_job_id" => $jobId,
-                "account_id" => $this->campaign->accountId,
+                "account_id" => $this->campaign->account_id,
                 "type" => 'campaign-setup',
                 'campaign_id' => $this->campaign->id,
                 "status" => 'active',
