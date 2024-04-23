@@ -113,6 +113,7 @@ class GmailService implements MailboxService
             return null;
         }
     }
+
     public function sendMessage($campaignMessage): ?array
     {
         try {
@@ -206,17 +207,22 @@ class GmailService implements MailboxService
         }
     }
 
-    public function getThread($token, $threadId): ?Gmail\Thread
+    public function getThread($token, $threadId): array
     {
         try {
             $this->initializeClient($token);
             $gmail = new Gmail($this->client);
             $res = $gmail->users_threads->get('me', $threadId);
-            Log::alert('Thread: ' . json_encode($res));
-            return $res;
+            return [
+                'status' => 'success',
+                'data' => $res
+            ];
         } catch(Exception $e) {
             Log::error('GetThread: ' . $e->getMessage());
-            return null;
+            return [
+                'status' => 'error',
+                'data' => $e->getMessage()
+            ];
         }
     }
 

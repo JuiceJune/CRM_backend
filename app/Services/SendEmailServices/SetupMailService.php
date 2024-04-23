@@ -6,6 +6,7 @@ use App\Services\CampaignMessageService\CampaignMessageService;
 use App\Services\MailboxServices\GmailService;
 use App\Models\CampaignMessage;
 use App\Models\Mailbox;
+use App\Services\MessagesStatusServices\CheckMessageStatus;
 use Error;
 use Illuminate\Support\Facades\Log;
 
@@ -27,7 +28,13 @@ class SetupMailService
 
                 $gmailService = new GmailService();
 
-                //TODO Check previous messages for reply and bounce.
+                $checkMessageStatus = new CheckMessageStatus();
+                $statusCheckResponse = $checkMessageStatus->checkStatus($this->campaignMessage, $gmailService);
+
+                if($statusCheckResponse['status'] === 'error' || $statusCheckResponse['data'] === 'not-send') {
+                    Log::alert('Send Message Error');
+                    throw new Error($statusCheckResponse['data']);
+                }
 
                 $response = $gmailService->sendMessage($this->campaignMessage);
 

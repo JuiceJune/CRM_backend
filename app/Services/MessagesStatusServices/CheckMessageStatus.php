@@ -3,46 +3,63 @@
 namespace App\Services\MessagesStatusServices;
 
 use App\Http\Controllers\Api\Google\GoogleController;
-use App\Models\CampaignSentProspect;
-use App\Models\CampaignStepProspect;
-use App\Models\CampaignProspectMessage;
+use App\Models\CampaignMessage;
 use App\Models\Mailbox;
+use App\Services\CampaignMessageService\CampaignMessageService;
+use App\Services\MailboxServices\MailboxService;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class CheckMessageStatus
 {
-    public function index($campaignStepProspectId, Mailbox $mailbox)
+    public function checkStatus(CampaignMessage $campaignMessage, MailboxService $mailboxService)
     {
         try {
-            $campaignStepProspect = CampaignStepProspect::find($campaignStepProspectId);
+            $campaignProspect = $campaignMessage->campaignProspect;
+            $currentStatus = $campaignProspect->status;
+            $nextStep = $campaignProspect->step;
 
-            $campaignStepProspectPrevious =CampaignStepProspect::where('campaign_id', $campaignStepProspect->campaign_id)
-                ->where('prospect_id', $campaignStepProspect->prospect_id)
-                ->where('id', '!=', $campaignStepProspect->id)
-                ->orderBy('id', 'desc') // сортування за спаданням id
-                ->first(); // вибір першого рядка
+            if($currentStatus === 'end') {
+                return [
+                    "status" => "success",
+                    "data" => "not-send"
+                ];
+            }
 
-            $campaignSentProspect = CampaignSentProspect::where('campaign_id', $campaignStepProspect['campaign_id'])
-                ->where('prospect_id', $campaignStepProspect['prospect_id'])
-                ->orderBy('id', 'desc') // сортування за спаданням id
-                ->first(); // вибір першого рядка
+            if($nextStep === 1) {
+                return [
+                    "status" => "success",
+                    "data" => "send"
+                ];
+            }
 
-            Log::channel('development')->error("CampaignStepProspect: " . json_encode($campaignStepProspect));
-            Log::channel('development')->error("CampaignSentProspect: " . json_encode($campaignSentProspect));
+            $previousMessages = CampaignMessage::where('campaign_id', $campaignMessage->campaign_id)
+                ->where('prospect_id', $campaignMessage->prospect_id)
+                ->whereNotNull('message_id')
+                ->where('type', 'from me')
+                ->orderBy('id', 'desc')
+                ->get();
 
-            if ($campaignSentProspect) {
-                Log::channel('development')->error("СampaignSentProspect: " . json_encode($campaignSentProspect));
-                if ($campaignSentProspect['status'] != 'replayed' && $campaignSentProspect['status'] != 'unsubscribe' && $campaignSentProspect['status'] != 'bounced') {
-                    $campaignProspectMessage = CampaignProspectMessage::where('campaign_sent_prospect_id', $campaignSentProspect['id'])->first();
+            $campaign = $campaignMessage->campaign;
+            $mailbox = $campaign->mailbox;
 
-                    $google = new GoogleController();
-                    $client = $google->getClient($mailbox['token']);
-                    $threadResponse = $google->getThread($client, $campaignProspectMessage['thread_id']);
+            if(!$mailbox) {
+                return [
+                    "status" => "error",
+                    "data" => "Mailbox not found in Campaign"
+                ];
+            }
+
+            foreach($previousMessages as $previousMessage) {
+                if($previousMessage['status'] != 'replayed' && $previousMessage['status'] != 'unsubscribe' && $previousMessage['status'] != 'bounced') {
+
+                    $campaignMessageService = new CampaignMessageService($previousMessage);
+
+                    $threadResponse = $mailboxService->getThread($mailbox['token'], $previousMessage['thread_id']);
 
                     if ($threadResponse['status'] === 'success') {
                         $messages = $threadResponse['data']->messages;
-                        Log::channel('development')->error("Messages: " . json_encode($messages));
+                        Log::alert('CheckStatus Messages: ' . json_encode($messages));
 
                         if (count($messages) > 1) {
 
@@ -58,11 +75,10 @@ class CheckMessageStatus
                             }
 
                             if ($bouncedFlag) {
-                                $campaignStepProspectPrevious->bounced();
-                                $campaignStepProspect->delete();
+                                $campaignMessageService->bounced();
                                 return [
                                     'status' => 'success',
-                                    'data' => 'bounced'
+                                    'data' => 'not-send'
                                 ];
                             }
 
@@ -78,47 +94,33 @@ class CheckMessageStatus
                             }
 
                             if ($replayedFlag) {
-                                $campaignStepProspectPrevious->replayed();
-                                $campaignStepProspect->delete();
+                                $campaignMessageService->replayed();
                                 return [
                                     'status' => 'success',
-                                    'data' => 'replayed'
+                                    'data' => 'not-send'
                                 ];
                             }
-
-                            return [
-                                'status' => 'success',
-                                'data' => 'good'
-                            ];
-                        } else {
-                            return [
-                                'status' => 'success',
-                                'data' => 'good'
-                            ];
                         }
+                        return [
+                            'status' => 'success',
+                            'data' => 'send'
+                        ];
                     } else {
-                        Log::channel('development')->error("Thread ERROR: " . json_encode($threadResponse['data']));
-                        $campaignStepProspect->delete();
+                        Log::error('Thread ERROR: ' . $threadResponse['data']);
                         return [
                             'status' => 'error',
                             'data' => $threadResponse['data']
                         ];
                     }
                 } else {
-                    $campaignStepProspect->delete();
                     return [
-                        'status' => 'error',
-                        'data' => 'replayed or unsubscribe'
+                        "status" => "success",
+                        "data" => "not-send"
                     ];
                 }
-            } else {
-                return [
-                    'status' => 'success',
-                    'data' => 'good'
-                ];
             }
         } catch (Exception $error) {
-            Log::channel('development')->error("Error: " . $error->getMessage());
+            Log::error("CheckStatus: " . $error->getMessage());
             return [
                 'status' => 'error',
                 'data' => $error
