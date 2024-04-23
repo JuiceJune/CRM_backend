@@ -9,7 +9,7 @@ use App\Models\CampaignStep;
 use App\Models\Prospect;
 use App\Services\CampaignJobServices\CampaignJobService;
 use App\Services\MailboxServices\MailboxService;
-use App\Services\MessagesStatusServices\CheckMessageStatus;
+use App\Services\MessagesStatusServices\MessageStatusService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -181,19 +181,20 @@ class CampaignMessageService
         }
     }
 
-    public function checkMessageStatus(CampaignMessage $campaignMessage, MailboxService $mailboxService): array
+    public function checkMessageStatus(CampaignMessage $campaignMessage, MailboxService $mailboxService): int
     {
         try {
-            $checkMessageStatus = new CheckMessageStatus($campaignMessage, $mailboxService);
+            $checkMessageStatus = new MessageStatusService($campaignMessage, $mailboxService);
+            $statusCheckResponse = $checkMessageStatus->checkAllMessageHistory();
 
-            return [
-                "status" => "success"
-            ];
+            if($statusCheckResponse['status'] === 'error' || $statusCheckResponse['status'] === 'not-send') {
+                Log::alert('Message has not be sent: ' . $statusCheckResponse['data']);
+                return 0;
+            }
+            return 1;
         } catch (Exception $error) {
             Log::error("CampaignMessageService -> CheckMessageStatus: " . $error->getMessage());
-            return [
-                "status" => "error"
-            ];
+            return 0;
         }
     }
 }

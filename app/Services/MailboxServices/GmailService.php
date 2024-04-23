@@ -2,6 +2,7 @@
 
 namespace App\Services\MailboxServices;
 
+use App\Models\CampaignMessage;
 use Error;
 use Google_Service_Gmail_Message;
 use Illuminate\Support\Facades\Log;
@@ -58,7 +59,7 @@ class GmailService implements MailboxService
     }
 
     public function generateMessage($senderName, $senderEmail, $prospectEmail, $subject, $message,
-                                    $signature, $messageUuid, $threadId, $messageStringId): ?Google_Service_Gmail_Message
+                                    $signature, $messageUuid, $threadId = null, $messageStringId = null): ?Google_Service_Gmail_Message
     {
         try {
             $url = env('APP_URL');
@@ -119,6 +120,25 @@ class GmailService implements MailboxService
         try {
             $prospect = $campaignMessage->prospect;
 
+            $campaignStep = $campaignMessage->campaignStep;
+            $replayedThreadId = null;
+            $replayedMessageStringId = null;
+            if($campaignStep['reply_to_exist_thread']->reply && $campaignStep['reply_to_exist_thread']->step) {
+                $campaign = $campaignMessage->campaign;
+                $replayedStep = $campaign->step($campaignStep['reply_to_exist_thread']->step);
+                $replayedCampaignMessage = CampaignMessage::where('campaign_id', $campaign->id)
+                    ->where('campaign_step_id', $replayedStep->id)
+                    ->where('prospect_id', $prospect->id)
+                    ->where('type', 'from me')
+                    ->first();
+                if($replayedCampaignMessage) {
+                    $replayedThreadId = $replayedCampaignMessage['thread_id'];
+                    $replayedMessageStringId = $replayedCampaignMessage['message_string_id'];
+                } else {
+                    throw new Error('Not found message to followup');
+                }
+            }
+
             $version = $campaignMessage->campaignStepVersion;
 
             $snippets = $prospect->toArray();
@@ -134,7 +154,7 @@ class GmailService implements MailboxService
             $signature = str_replace('{{UNSUBSCRIBE}}', "{$frontendUrl}/unsubscribe/{$campaignMessage['uuid']}", $signature);
 
             $messageObj = $this->generateMessage($senderName, $senderEmail, $prospect['email'], $subject, $message,
-                $signature, $campaignMessage['uuid'], $campaignMessage['thread_id'], $campaignMessage['message_string_id']);
+                $signature, $campaignMessage['uuid'], $replayedThreadId, $replayedMessageStringId);
 
             if(!$messageObj) {
                 throw new Error('Generate message problem');

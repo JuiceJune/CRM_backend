@@ -6,7 +6,6 @@ use App\Services\CampaignMessageService\CampaignMessageService;
 use App\Services\MailboxServices\GmailService;
 use App\Models\CampaignMessage;
 use App\Models\Mailbox;
-use App\Services\MessagesStatusServices\CheckMessageStatus;
 use Error;
 use Illuminate\Support\Facades\Log;
 
@@ -32,9 +31,7 @@ class SetupMailService
 
                 $statusCheckResponse = $campaignMessageService->checkMessageStatus($this->campaignMessage, $gmailService);
 
-                if($statusCheckResponse['status'] === 'error' || $statusCheckResponse['status'] === 'not-send') {
-                    Log::alert('Message has not be sent: ' . $statusCheckResponse['data']);
-                } else {
+                if($statusCheckResponse) {
                     $response = $gmailService->sendMessage($this->campaignMessage);
 
                     if(!$response) {
