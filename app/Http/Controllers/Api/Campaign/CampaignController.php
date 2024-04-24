@@ -26,6 +26,7 @@ use Google\Service\Gmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CampaignController extends Controller
 {
@@ -250,7 +251,7 @@ class CampaignController extends Controller
             $test_email = $request->input('test_email');
             $snippets = $request->input('snippets');
 
-            $mailbox = Mailbox::find($mailbox_id);
+            $mailbox = Str::isUuid($mailbox_id) ? Mailbox::where('uuid', $mailbox_id)->first() : Mailbox::find($mailbox_id);
             if ($mailbox) {
                 $gmailService = new GmailService();
                 $res = $gmailService->sendTestMessage($mailbox, $message, $subject, $test_email, $snippets);
