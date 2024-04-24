@@ -7,7 +7,7 @@ use App\Models\CampaignMessage;
 use App\Models\CampaignProspect;
 use App\Models\CampaignStep;
 use App\Models\Prospect;
-use App\Services\CampaignJobServices\CampaignJobService;
+use App\Services\CampaignJobServices\CampaignRedisJobService;
 use App\Services\MailboxServices\MailboxService;
 use App\Services\MessagesStatusServices\MessageStatusService;
 use Carbon\Carbon;
@@ -171,10 +171,10 @@ class CampaignMessageService
         try {
             CampaignMessage::where('campaign_id', $this->campaign->id)
                 ->where('prospect_id', $this->prospect->id)
-                ->where('status', 'in', ['pending', 'scheduled'])
+                ->whereIn('status', ['pending', 'scheduled'])
                 ->delete();
 
-            $campaignJobService = new CampaignJobService();
+            $campaignJobService = new CampaignRedisJobService();
             $campaignJobService->deleteProspectJobs($this->campaign, $this->prospect);
         } catch (Exception $error) {
             Log::error("CampaignMessageService->deleteNextMessages(): " . $error->getMessage());

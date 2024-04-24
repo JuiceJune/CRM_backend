@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
-class CampaignJobService
+class CampaignRedisJobService
 {
     public function deleteProspectJobs($campaign, $prospect): void
     {
@@ -16,7 +16,7 @@ class CampaignJobService
             $jobIds = RedisJob::where("campaign_id", $campaign->id)
                 ->where('prospect_id', $prospect->id)
                 ->pluck('redis_job_id');
-            Log::alert('JobIds:' . json_encode($jobIds));
+            Log::alert('JobIds 1:' . json_encode($jobIds));
 
             $redisHorizon = Redis::connection('horizon');
 

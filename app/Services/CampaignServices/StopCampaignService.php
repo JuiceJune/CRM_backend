@@ -2,7 +2,7 @@
 
 namespace App\Services\CampaignServices;
 
-use App\Services\CampaignJobServices\CampaignJobService;
+use App\Services\CampaignJobServices\CampaignRedisJobService;
 use Illuminate\Support\Facades\Log;
 use App\Models\Campaign;
 use Exception;
@@ -10,12 +10,12 @@ use Exception;
 class StopCampaignService {
 
     public Campaign $campaign;
-    private CampaignJobService $campaignJobService;
+    private CampaignRedisJobService $campaignJobService;
 
     public function __construct(Campaign $campaign)
     {
         $this->campaign = $campaign;
-        $this->campaignJobService = new CampaignJobService();
+        $this->campaignJobService = new CampaignRedisJobService();
     }
 
     public function stopCampaign(): void
