@@ -16,7 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('refresh:mailbox-access-tokens')->hourly();
-//        $schedule->command('messages:check-status')->everyFourHours();
+        $schedule->command('messages:check-status')->everyFourHours();
     }
 
     /**

@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Api\Google\GoogleController;
-use App\Models\CampaignProspect;
-use App\Models\CampaignSentProspect;
-use App\Models\CampaignStepProspect;
+use App\Models\CampaignMessage;
+use App\Services\MailboxServices\GmailService;
+use App\Services\MessagesStatusServices\MessageStatusService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Exception;
@@ -24,77 +23,33 @@ class CheckMessagesStatus extends Command
      *
      * @var string
      */
-    protected $description = 'Check messages status by gmail api';
+    protected $description = 'Check messages status';
 
     public function handle()
     {
         try {
-            Log::channel('development')->alert("=======================CHECK MESSAGES STATUS START=======================");
+            Log::alert('=======================CHECK MESSAGES STATUS START=======================');
 
-            $allSentProspects = CampaignSentProspect::whereNotIn('status', ['bounced', 'unsubscribe', 'replayed'])->get();
+            $allSentMessages = CampaignMessage::where('type', 'from me')
+                ->whereNotIn('status', ['bounced', 'unsubscribe', 'replayed'])->get();
 
-            foreach ($allSentProspects as $key => $sentProspect) {
-                $messageInfo = $sentProspect->messageInfo;
-                $campaign = $sentProspect->campaign;
-                $mailbox = $campaign->mailbox;
+            $gmailService = new GmailService();
 
-                $google = new GoogleController();
-                $client = $google->getClient($mailbox['token']);
+            foreach ($allSentMessages as $sentMessage) {
 
-                $threadResponse = $google->getThread($client, $messageInfo['thread_id']);
+                $messageStatusService = new MessageStatusService($sentMessage, $gmailService);
+                $res = $messageStatusService->checkMessageStatus();
 
-                if ($threadResponse['status'] === 'success') {
-                    $messages = $threadResponse['data']->messages;
-                    if (count($messages) > 1) {
-                        $bouncedFlag = false;
-
-                        foreach ($messages as $messageKey => $message) {
-                            foreach ($message->payload->headers as $header) {
-                                if ($header->name === 'From'
-                                    && (str_contains($header->value, 'mailer-daemon@googlemail.com') || str_contains($header->value, 'postmaster'))) {
-                                    $bouncedFlag = true;
-                                    break;
-                                }
-
-                            }
-                        }
-
-                        $replayedFlag = false;
-
-                        foreach ($messages as $messageKey => $message) {
-                            foreach ($message->payload->headers as $header) {
-                                if ($header->name === 'From'
-                                    && !str_contains($header->value, $mailbox->email)) {
-                                    $replayedFlag = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if($bouncedFlag || $replayedFlag) {
-                            $campaignStepProspect = CampaignStepProspect::where('campaign_id', $sentProspect->campaign_id)
-                                ->where('prospect_id', $sentProspect->prospect_id)
-                                ->where('campaign_step_id', $sentProspect->campaign_step_id)
-                                ->first();
-
-                            if ($campaignStepProspect) {
-                                if ($bouncedFlag) {
-                                    $campaignStepProspect->bounced();
-                                } else {
-                                    $campaignStepProspect->replayed();
-                                }
-                            }
-                        }
-                    }
+                if($res['status'] === 'success') {
+                    Log::alert('CampaignMessage: ' . $sentMessage['id'] . " | Status success: " . $res['data']);
                 } else {
-                    Log::channel('development')->error("Thread ERROR: " . json_encode($threadResponse['data']));
-
+                    Log::error('CampaignMessage: ' . $sentMessage['id'] . " | Status Error: " . $res['data']);
                 }
             }
         } catch (Exception $error) {
-            Log::channel('development')->error('Error: ' . $error);
+            Log::error('Command: messages:check-status: ' . $error->getMessage());
         } finally {
-            Log::channel('development')->alert("=======================CHECK MESSAGES STATUS END=======================");
+            Log::alert('=======================CHECK MESSAGES STATUS END=======================');
         }
     }
 }
