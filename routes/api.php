@@ -115,6 +115,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [CampaignController::class, 'index']);
         Route::get('/{campaign:uuid}', [CampaignController::class, 'show']);
         Route::post('/', [CampaignController::class, 'store']);
+        Route::post('/sendTestEmail', [CampaignController::class, 'sendTestEmail']);
         Route::get('/{campaign:uuid}/edit', [CampaignController::class, 'edit']);
         Route::put('/{campaign:uuid}', [CampaignController::class, 'update']);
         Route::delete('/{campaign:uuid}', [CampaignController::class, 'destroy']);

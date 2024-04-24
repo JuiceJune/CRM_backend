@@ -2,30 +2,22 @@
 
 namespace App\Http\Controllers\Api\Campaign;
 
-use App\Events\CampaignStopped;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Campaign\CampaignStoreRequest;
 use App\Http\Requests\Campaign\CampaignUpdateRequest;
 use App\Http\Resources\Campaign\CampaignEditResource;
 use App\Http\Resources\Campaign\CampaignResource;
-use App\Http\Resources\EmailJobResource;
 use App\Http\Resources\Mailbox\MailboxCampaignCreateResource;
-use App\Http\Resources\Mailbox\MailboxCreateResource;
-use App\Http\Resources\Mailbox\MailboxResource;
-use App\Jobs\SetupCampaign;
 use App\Jobs\SetupCampaignJob;
 use App\Jobs\StopCampaignJob;
 use App\Models\Campaign;
 use App\Models\CampaignMessage;
-use App\Models\CampaignProspect;
-use App\Models\CampaignSentProspect;
 use App\Models\CampaignStep;
-use App\Models\CampaignStepProspect;
 use App\Models\CampaignStepVersion;
-use App\Models\EmailJob;
 use App\Models\Mailbox;
 use App\Models\Project;
 use App\Services\CampaignMessageService\CampaignMessageService;
+use App\Services\MailboxServices\GmailService;
 use Carbon\Carbon;
 use DateTimeZone;
 use Exception;
@@ -249,7 +241,7 @@ class CampaignController extends Controller
     /**
      * Send test email.
      */
-    public function sendTestEmail(Request $request)
+    public function sendTestEmail(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $mailbox_id = $request->input('mailbox_id');
@@ -257,47 +249,22 @@ class CampaignController extends Controller
             $subject = $request->input('subject');
             $test_email = $request->input('test_email');
             $snippets = $request->input('snippets');
-            Log::channel('development')->error('Snippets: ' . json_encode($snippets));
 
             $mailbox = Mailbox::find($mailbox_id);
             if ($mailbox) {
-                $messageText = $message;
-                if (count($snippets) > 0) {
-                    foreach ($snippets as $key => $snippet) {
-                        $messageText = str_replace('{{' . $key . '}}', $snippet, $messageText);
-                        $subject = str_replace('{{' . $key . '}}', $snippet, $subject);
-                    }
+                $gmailService = new GmailService();
+                $res = $gmailService->sendTestMessage($mailbox, $message, $subject, $test_email, $snippets);
+
+                if($res['status'] === 'success') {
+                    return $this->respondOk('Email send successfully');
+                } else {
+                    throw new \Error($res['data']);
                 }
-                $client = (new \App\Http\Controllers\Api\Google\GoogleController)->getClient($mailbox["token"]);
-                $sender_name = $mailbox['name'];
-                $sender_email = $mailbox['email'];
-                $signature = str_replace('{{UNSUBSCRIBE}}', '#', $mailbox['signature']);;
-                $recipient = $test_email; // Адреса отримувача
-                $service = new Gmail($client);
-                $message = (new \App\Http\Controllers\Api\Google\GoogleController)->createMessage($sender_name, $sender_email, $recipient, $subject, $messageText, $signature, null);
-                $response = $service->users_messages->send('me', $message);
-                return response('Email send successfully');
             } else {
-                return response('Mailbox not found');
+                throw new \Error('Mailbox not found');
             }
         } catch (Exception $error) {
-            return response([
-                "message" => "Problem with sending test message",
-                "error_message" => $error->getMessage(),
-            ], 500);
-        }
-    }
-
-    public function showCampaignQueue(Campaign $campaign)
-    {
-        try {
-            $jobs = EmailJobResource::collection(EmailJob::all());
-            return response($jobs);
-        } catch (Exception $error) {
-            return response([
-                "message" => "Problem with showing campaign queue",
-                "error_message" => $error->getMessage(),
-            ], 500);
+            return $this->respondError($error->getMessage());
         }
     }
 

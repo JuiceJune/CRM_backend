@@ -59,7 +59,7 @@ class GmailService implements MailboxService
     }
 
     public function generateMessage($senderName, $senderEmail, $prospectEmail, $subject, $message,
-                                    $signature, $messageUuid, $threadId = null, $messageStringId = null): ?Google_Service_Gmail_Message
+                                    $signature, $messageUuid = null, $threadId = null, $messageStringId = null): ?Google_Service_Gmail_Message
     {
         try {
             $url = env('APP_URL');
@@ -177,6 +177,44 @@ class GmailService implements MailboxService
         } catch (Exception $error) {
             Log::error('SendMessage: ' . $error->getMessage());
             return null;
+        }
+    }
+
+    public function sendTestMessage($mailbox, $message, $subject, $testEmail, $snippets): array
+    {
+        try {
+            $this->initializeClient($mailbox['token']);
+
+            if (count($snippets) > 0) {
+                foreach ($snippets as $key => $snippet) {
+                    $message = str_replace('{{' . $key . '}}', $snippet, $message);
+                    $subject = str_replace('{{' . $key . '}}', $snippet, $subject);
+                }
+            }
+            $senderName = $mailbox['name'];
+            $senderEmail = $mailbox['email'];
+            $signature = str_replace('{{UNSUBSCRIBE}}', '#', $mailbox['signature']);;
+
+            $messageObj = $this->generateMessage($senderName, $senderEmail, $testEmail, $subject, $message, $signature);
+
+            if(!$messageObj) {
+                throw new Error('Generate message problem');
+            }
+
+            $service = new Gmail($this->client);
+
+            $service->users_messages->send('me', $messageObj);
+
+            return [
+                'status' => 'success',
+                'data' => 'success'
+            ];
+        } catch (Exception $error) {
+            Log::error('SendTestMessage: ' . $error->getMessage());
+            return [
+                'status' => 'error',
+                'data' => $error->getMessage(),
+            ];
         }
     }
 
