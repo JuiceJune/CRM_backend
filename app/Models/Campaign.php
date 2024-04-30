@@ -97,4 +97,10 @@ class Campaign extends Model
             ->values()
             ->toArray();
     }
+
+    public function active()
+    {
+        return $this->where('status', 'active')->get();
+    }
+
 }
