@@ -20,8 +20,8 @@ class MailboxProjectsResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'avatar' => $this->avatar,
-            'email_provider' => $this->email_provider,
-            'active_campaigns' => $this->campaigns()->where('status', 'active')->count()
+            'emailProvider' => $this->email_provider,
+            'activeCampaignsCount' => $this->campaigns()->where('status', 'active')->count()
         ];
     }
 }

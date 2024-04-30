@@ -21,7 +21,7 @@ class ProjectResource extends JsonResource
             'logo' => $this->logo,
             'name' => $this->name,
             'mailboxes' => MailboxProjectsResource::collection($this->mailboxes),
-            'campaignsCount' => $this->campaigns ? count($this->campaigns) : 0
+            'activeCampaignsCount' => $this->campaigns()->where('status', 'active')->count()
         ];
     }
 }
