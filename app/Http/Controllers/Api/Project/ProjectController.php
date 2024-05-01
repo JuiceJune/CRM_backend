@@ -32,8 +32,9 @@ class ProjectController extends Controller
         try {
             $limit = $request->input('limit', 10);
             $offset = $request->input('offset', 0);
+            $status = $request->input('status', 'active');
 
-            $query = Project::query()->skip($offset)->take($limit);
+            $query = Project::query()->where('status', $status)->skip($offset)->take($limit);
 
             $projects = $query->get();
 

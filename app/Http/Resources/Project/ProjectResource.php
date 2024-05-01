@@ -21,6 +21,7 @@ class ProjectResource extends JsonResource
             'id' => $this->uuid,
             'logo' => $this->logo,
             'name' => $this->name,
+            'status' => $this->status,
             'mailboxes' => MailboxProjectsResource::collection($this->mailboxes),
             'users' => UserCreateResource::collection($this->users),
             'activeCampaignsCount' => $this->campaigns()->where('status', 'active')->count()

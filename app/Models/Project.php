@@ -18,6 +18,7 @@ class Project extends Model
         "client_id",
         "start_date",
         "end_date",
+        "status"
     ];
 
     public function campaigns(): HasMany

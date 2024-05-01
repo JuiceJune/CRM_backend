@@ -19,6 +19,7 @@ class ProjectStoreResource extends JsonResource
         return [
             'id' => $this->uuid,
             'name' => $this->name,
+            'status' => $this->status,
         ];
     }
 }

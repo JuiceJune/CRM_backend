@@ -32,6 +32,7 @@ class ProjectUpdateRequest extends FormRequest
             'end_date' => 'nullable|date',
             'users' => 'nullable|array',
             'mailboxes' => 'nullable|array',
+            'status' => 'string',
         ];
     }
 

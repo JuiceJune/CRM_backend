@@ -19,6 +19,7 @@ class ProjectEditResource extends JsonResource
             'id' => $this->uuid,
             'name' => $this->name,
             'client' => $this->client->id,
+            'status' => $this->status,
             'mailboxes' => $this->mailboxes->pluck('id'),
         ];
     }
