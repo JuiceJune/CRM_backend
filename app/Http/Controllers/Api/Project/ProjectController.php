@@ -9,6 +9,7 @@ use App\Http\Resources\Client\ClientCreateResource;
 use App\Http\Resources\Mailbox\MailboxCreateResource;
 use App\Http\Resources\Project\ProjectEditResource;
 use App\Http\Resources\Project\ProjectResource;
+use App\Http\Resources\Project\ProjectsAllResource;
 use App\Http\Resources\Project\ProjectStoreResource;
 use App\Http\Resources\User\UserCreateResource;
 use App\Models\Client;
@@ -38,7 +39,7 @@ class ProjectController extends Controller
 
             $projects = $query->get();
 
-            return response()->json(ProjectResource::collection($projects));
+            return response()->json(ProjectsAllResource::collection($projects));
         } catch (Exception $error) {
             return $this->respondError($error->getMessage());
         }

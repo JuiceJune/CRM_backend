@@ -42,6 +42,8 @@ class Campaign extends Model
         }'
     ];
 
+    protected $withCount = ['prospects'];
+
     public function project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Project::class);
@@ -55,6 +57,11 @@ class Campaign extends Model
     public function mailbox(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Mailbox::class);
+    }
+
+    public function campaignMessages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CampaignMessage::class);
     }
 
     public function prospects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany

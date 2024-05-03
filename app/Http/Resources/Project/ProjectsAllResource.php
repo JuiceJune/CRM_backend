@@ -2,13 +2,12 @@
 
 namespace App\Http\Resources\Project;
 
-use App\Http\Resources\Campaign\CampaignsTableInProjectResource;
 use App\Http\Resources\Mailbox\MailboxProjectsResource;
 use App\Http\Resources\User\UserCreateResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProjectResource extends JsonResource
+class ProjectsAllResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -25,7 +24,7 @@ class ProjectResource extends JsonResource
             'status' => $this->status,
             'mailboxes' => MailboxProjectsResource::collection($this->mailboxes),
             'users' => UserCreateResource::collection($this->users),
-            'campaigns' => CampaignsTableInProjectResource::collection($this->campaigns)
+            'activeCampaignsCount' => $this->campaigns()->where('status', 'active')->count()
         ];
     }
 }
