@@ -14,6 +14,7 @@ class CampaignStepVersion extends Model
 
     protected $fillable = [
         'account_id',
+        'status',
         'campaign_step_id',
         'subject',
         'message',
@@ -28,5 +29,10 @@ class CampaignStepVersion extends Model
     public function step(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(CampaignStep::class, 'campaign_step_id');
+    }
+
+    public function messages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CampaignMessage::class);
     }
 }

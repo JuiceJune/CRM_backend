@@ -1,26 +1,22 @@
 <?php
 
-namespace App\Services\CampaignServices;
+namespace App\Services\VersionServices;
 
-use App\Models\Campaign;
-use Carbon\Carbon;
+use App\Models\CampaignStepVersion;
 use Illuminate\Support\Facades\Log;
 
-class StatisticCampaignService
+class StatisticVersionService
 {
-    public Campaign $campaign;
-    private Carbon $dateTime;
-
-    public function __construct(Campaign $campaign)
+    public CampaignStepVersion $version;
+    public function __construct(CampaignStepVersion $version)
     {
-        $this->campaign = $campaign;
-        $this->dateTime = Carbon::now($campaign->timezone);
+        $this->version = $version;
     }
 
     public function sentAllTime(): int
     {
         try {
-            return $this->campaign->campaignMessages()
+            return $this->version->messages()
                 ->where('type', 'from me')
                 ->whereNotIn('status', ['pending', 'scheduled'])
                 ->count();
@@ -33,7 +29,7 @@ class StatisticCampaignService
     public function deliveredAllTime(): int
     {
         try {
-            return $this->campaign->campaignMessages()
+            return $this->version->messages()
                 ->where('type', 'from me')
                 ->whereNotIn('status', ['pending', 'scheduled', 'bounced'])
                 ->count();
@@ -46,7 +42,7 @@ class StatisticCampaignService
     public function invalidAllTime(): int
     {
         try {
-            return $this->campaign->campaignMessages()
+            return $this->version->messages()
                 ->where('type', 'from me')
                 ->whereNotIn('status', ['invalid'])
                 ->count();
@@ -59,7 +55,7 @@ class StatisticCampaignService
     public function bouncedAllTime(): int
     {
         try {
-            return $this->campaign->campaignMessages()
+            return $this->version->messages()
                 ->where('type', 'from me')
                 ->whereNotIn('status', ['bounced'])
                 ->count();
@@ -72,7 +68,7 @@ class StatisticCampaignService
     public function openedAllTime(): int
     {
         try {
-            return $this->campaign->campaignMessages()
+            return $this->version->messages()
                 ->where('type', 'from me')
                 ->whereNotIn('status', ['pending', 'scheduled', 'sent', 'bounced'])
                 ->count();
@@ -85,12 +81,38 @@ class StatisticCampaignService
     public function respondedAllTime(): int
     {
         try {
-            return $this->campaign->campaignMessages()
+            return $this->version->messages()
                 ->where('type', 'from me')
                 ->where('status', 'replayed')
                 ->count();
         } catch (\Exception $error) {
             Log::error('RespondedAllTime: ' . $error->getMessage());
+            return 0;
+        }
+    }
+
+    public function queuedNow(): int
+    {
+        try {
+            return $this->version->messages()
+                ->where('type', 'from me')
+                ->where('status', 'scheduled')
+                ->count();
+        } catch (\Exception $error) {
+            Log::error('QueuedNow: ' . $error->getMessage());
+            return 0;
+        }
+    }
+
+    public function unsubscribeAllTime(): int
+    {
+        try {
+            return $this->version->messages()
+                ->where('type', 'from me')
+                ->where('status', 'unsubscribe')
+                ->count();
+        } catch (\Exception $error) {
+            Log::error('UnsubscribeAllTime: ' . $error->getMessage());
             return 0;
         }
     }

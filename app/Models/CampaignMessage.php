@@ -49,7 +49,7 @@ class CampaignMessage extends Model
 
     public function campaignStepVersion(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(CampaignStepVersion::class, 'campaign_step_id');
+        return $this->belongsTo(CampaignStepVersion::class, 'campaign_step_version_id');
     }
 
     public function prospect(): \Illuminate\Database\Eloquent\Relations\BelongsTo

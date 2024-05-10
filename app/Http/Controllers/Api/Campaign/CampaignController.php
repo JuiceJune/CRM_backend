@@ -7,6 +7,7 @@ use App\Http\Requests\Campaign\CampaignStoreRequest;
 use App\Http\Requests\Campaign\CampaignUpdateRequest;
 use App\Http\Resources\Campaign\CampaignEditResource;
 use App\Http\Resources\Campaign\CampaignResource;
+use App\Http\Resources\Campaign\CampaignShowResource;
 use App\Http\Resources\Mailbox\MailboxCampaignCreateResource;
 use App\Jobs\SetupCampaignJob;
 use App\Jobs\StopCampaignJob;
@@ -135,7 +136,7 @@ class CampaignController extends Controller
     public function show(Campaign $campaign): \Illuminate\Http\JsonResponse
     {
         try {
-            return $this->respondWithSuccess(new CampaignResource($campaign));
+            return $this->respondWithSuccess(new CampaignShowResource($campaign));
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
         }
