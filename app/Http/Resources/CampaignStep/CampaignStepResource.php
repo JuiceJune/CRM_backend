@@ -29,6 +29,10 @@ class CampaignStepResource extends JsonResource
         return [
             'id' => $this->uuid,
             'step' => $this->step,
+            'sending_time_json' => $this->sending_time_json,
+            'period' => $this->period,
+            'start_after' => $this->start_after,
+            'reply_to_exist_thread' => $this->reply_to_exist_thread,
             'versions' => CampaignStepVersionResource::collection($this->versions),
 
             'deliveredAllTimeCount' => $deliveredAllTime,

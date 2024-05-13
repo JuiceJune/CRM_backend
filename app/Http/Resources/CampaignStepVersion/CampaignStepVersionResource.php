@@ -29,6 +29,8 @@ class CampaignStepVersionResource extends JsonResource
             'id' => $this->uuid,
             'version' => $this->version,
             'status' => $this->status,
+            'subject' => $this->subject,
+            'message' => $this->message,
 
             'deliveredAllTimeCount' => $deliveredAllTime,
             'openedAllTimeCount' => $openedAllTime,
