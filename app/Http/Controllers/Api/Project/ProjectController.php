@@ -89,6 +89,7 @@ class ProjectController extends Controller
 
             $user = $request->user();
             $validated['account_id'] = $user->account_id;
+            $validated['creator_id'] = $user->id;
 
             $project = Project::create($validated);
 
