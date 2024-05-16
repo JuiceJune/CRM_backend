@@ -94,7 +94,8 @@ class MailboxController extends Controller
                 "domain" => ($raw && array_key_exists("hd", $raw)) ? $raw["hd"] : "gmail",
                 "token" => $user->token,
                 "refresh_token" => $user->refreshToken,
-                "expires_in" => $user->expiresIn
+                "expires_in" => $user->expiresIn,
+                "email_provider" => 'gmail', //TODO rework it later
             ]);
 
             return redirect()->to(env('FRONTEND_URL') . '/mailboxes/' . $mailbox['uuid']);

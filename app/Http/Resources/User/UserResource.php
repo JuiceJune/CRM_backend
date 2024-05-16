@@ -25,7 +25,6 @@ class UserResource extends JsonResource
             'avatar' => $this->avatar,
             'role' => new RoleResource($this->role),
             'position' => new PositionResource($this->position),
-            'projects' => ProjectResource::collection($this->projects),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }

@@ -18,7 +18,8 @@ class Project extends Model
         "client_id",
         "start_date",
         "end_date",
-        "status"
+        "status",
+        "creator_id"
     ];
 
     public function campaigns(): HasMany
@@ -39,6 +40,11 @@ class Project extends Model
     public function client(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
     public function account(): \Illuminate\Database\Eloquent\Relations\BelongsTo

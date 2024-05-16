@@ -29,6 +29,7 @@ class ProjectStoreRequest extends FormRequest
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'users' => 'nullable|array',
+            'creator_id' => 'required|integer|exists:users,id',
             'mailboxes' => 'nullable|array',
         ];
     }
