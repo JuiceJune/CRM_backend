@@ -23,7 +23,7 @@ class CampaignsTableInProjectResource extends JsonResource
         return [
             'id' => $this->uuid,
             'name' => $this->name,
-            'mailbox' => $this->mailbox->email,
+            'mailbox' => $this->mailbox ? $this->mailbox->email : null,
             'status' => $this->status,
             'prospectsCount' => $this->prospects_count,
             'deliveredAllTimeCount' => $deliveredAllTime,
