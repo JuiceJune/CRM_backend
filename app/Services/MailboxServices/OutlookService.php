@@ -14,7 +14,7 @@ class OutlookService implements MailboxService
         // TODO: Implement setClient() method.
     }
 
-    public function connectAccount($accountUuid, $projectId)
+    public function connectAccount($accountUuid, $url, $project)
     {
         // TODO: Implement connectAccount() method.
     }

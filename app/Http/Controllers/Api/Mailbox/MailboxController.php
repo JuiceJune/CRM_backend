@@ -9,6 +9,7 @@ use App\Http\Resources\Mailbox\MailboxCreateResource;
 use App\Http\Resources\Mailbox\MailboxResource;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
+use App\Models\Project;
 use App\Services\MailboxServices\GmailService;
 use App\Services\MailboxServices\OutlookService;
 use App\Services\MailboxServices\SMTPService;
@@ -50,14 +51,15 @@ class MailboxController extends Controller
         try {
             $accountUuid = $request->user()->account->uuid;
             $connectedType = $request['connection_type'];
-            $projectId = $request['project'];
+            $url = $request['url'];
+            $project = $request['project'];
             $mailboxService = match ($connectedType) {
                 'gmail' => new GmailService(),
                 'outlook' => new OutlookService(),
                 'smtp' => new SMTPService(),
                 default => throw new \Exception('Unknown connection type'),
             };
-            $result = $mailboxService->connectAccount($accountUuid, $projectId);
+            $result = $mailboxService->connectAccount($accountUuid, $url, $project);
             return $this->respondOk($result);
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
@@ -75,14 +77,16 @@ class MailboxController extends Controller
 
             $driver = $queryStateJSON['driver'];
             $accountUuid = $queryStateJSON['account'];
-            $projectUuid = $queryStateJSON['project'];
+            $url = $queryStateJSON['url'];
+            $project = $queryStateJSON['project'];
 
             $account = Account::query()->where('uuid', $accountUuid)->first();
+            $project = Project::query()->where('uuid', $project)->first();
 
             $user = Socialite::driver($driver)->stateless()->user();
 
             if (Mailbox::where('account_id', $account['id'])->where('email', $user->getEmail())->exists()) {
-                return redirect()->to(env('FRONTEND_URL') . '/projects/' . $projectUuid . '/edit');
+                return redirect()->to($url);
                 // TODO rework;
             }
 
@@ -100,7 +104,9 @@ class MailboxController extends Controller
                 "email_provider" => 'gmail', //TODO rework it later
             ]);
 
-            return redirect()->to(env('FRONTEND_URL') . '/projects/' . $projectUuid . '/edit');
+            $project->mailboxes()->attach($mailbox->id);
+
+            return redirect()->to($url);
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
         }

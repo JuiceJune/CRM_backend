@@ -25,17 +25,19 @@ class GmailService implements MailboxService
         $this->client = $client;
     }
 
-    public function connectAccount($accountUuid, $projectId)
+    public function connectAccount($accountUuid, $url, $project)
     {
-        return $this->getAuthUrl($accountUuid, $projectId);
+        return $this->getAuthUrl($accountUuid, $url, $project);
     }
 
-    public function getAuthUrl($accountUuid, $projectId)
+    public function getAuthUrl($accountUuid, $url, $project)
     {
         return Socialite::driver('google')
             ->scopes([Gmail::GMAIL_READONLY, Gmail::GMAIL_COMPOSE])
             ->with(['access_type' => 'offline', "prompt" => "consent",
-                'state' => json_encode(['driver' => 'google', 'account' => $accountUuid, 'project' => $projectId])])
+                'state' => json_encode(
+                    ['driver' => 'google', 'account' => $accountUuid, 'url' => $url, 'project' => $project]
+                )])
             ->stateless()
             ->redirect()
             ->getTargetUrl();
