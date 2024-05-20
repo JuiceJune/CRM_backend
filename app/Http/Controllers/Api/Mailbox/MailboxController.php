@@ -50,13 +50,14 @@ class MailboxController extends Controller
         try {
             $accountUuid = $request->user()->account->uuid;
             $connectedType = $request['connection_type'];
+            $projectId = $request['project'];
             $mailboxService = match ($connectedType) {
                 'gmail' => new GmailService(),
                 'outlook' => new OutlookService(),
                 'smtp' => new SMTPService(),
                 default => throw new \Exception('Unknown connection type'),
             };
-            $result = $mailboxService->connectAccount($accountUuid);
+            $result = $mailboxService->connectAccount($accountUuid, $projectId);
             return $this->respondOk($result);
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
@@ -74,13 +75,14 @@ class MailboxController extends Controller
 
             $driver = $queryStateJSON['driver'];
             $accountUuid = $queryStateJSON['account'];
+            $projectUuid = $queryStateJSON['project'];
 
             $account = Account::query()->where('uuid', $accountUuid)->first();
 
             $user = Socialite::driver($driver)->stateless()->user();
 
             if (Mailbox::where('account_id', $account['id'])->where('email', $user->getEmail())->exists()) {
-                return redirect()->to(env('FRONTEND_URL') . '/mailboxes?exist=true');
+                return redirect()->to(env('FRONTEND_URL') . '/projects/' . $projectUuid . '/edit');
                 // TODO rework;
             }
 
@@ -98,7 +100,7 @@ class MailboxController extends Controller
                 "email_provider" => 'gmail', //TODO rework it later
             ]);
 
-            return redirect()->to(env('FRONTEND_URL') . '/mailboxes/' . $mailbox['uuid']);
+            return redirect()->to(env('FRONTEND_URL') . '/projects/' . $projectUuid . '/edit');
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
         }

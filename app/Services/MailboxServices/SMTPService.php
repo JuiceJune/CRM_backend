@@ -14,7 +14,7 @@ class SMTPService implements MailboxService
         // TODO: Implement setClient() method.
     }
 
-    public function connectAccount($accountUuid)
+    public function connectAccount($accountUuid, $projectId)
     {
         // TODO: Implement connectAccount() method.
     }

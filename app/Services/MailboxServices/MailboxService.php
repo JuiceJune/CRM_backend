@@ -6,7 +6,7 @@ interface MailboxService
 {
     public function getClient();
     public function setClient($client);
-    public function connectAccount($accountUuid);
+    public function connectAccount($accountUuid, $projectId);
     public function initializeClient($token);
     public function generateMessage($senderName, $senderEmail, $prospectEmail, $subject, $message,
                                     $signature, $messageUuid, $threadId, $messageStringId);
