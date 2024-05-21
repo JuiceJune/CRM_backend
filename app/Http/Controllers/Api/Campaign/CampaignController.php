@@ -194,25 +194,28 @@ class CampaignController extends Controller
                 [20, 9, 9, 9, 9, 9, 9, 9, 9],
             ];
 
-            $validated['start_date'] = Carbon::parse($validated['start_date']);
+            if(isset($validated['start_date']))
+                $validated['start_date'] = Carbon::parse($validated['start_date']);
 
             $campaign->update($validated);
 
-            $stepIds = collect($validated['steps'])->pluck('id')->filter();
+            if (!empty($validated['steps'])) {
+                $stepIds = collect($validated['steps'])->pluck('id')->filter();
+                $campaign->steps()->whereNotIn('uuid', $stepIds)->delete();
 
-            $campaign->steps()->whereNotIn('uuid', $stepIds)->delete();
+                foreach ($validated['steps'] as $stepData) {
+                    $stepData['account_id'] = $validated['account_id'];
+                    $step = $campaign->steps()->updateOrCreate(['uuid' => $stepData['id'] ?? null], $stepData);
 
-            foreach ($validated['steps'] as $stepData) {
-                $stepData['account_id'] = $validated['account_id'];
-                $step = $campaign->steps()->updateOrCreate(['uuid' => $stepData['id'] ?? null], $stepData);
+                    if (!empty($stepData['versions'])) {
+                        $versionIds = collect($stepData['versions'])->pluck('id')->filter();
+                        $step->versions()->whereNotIn('uuid', $versionIds)->delete();
 
-                $versionIds = collect($stepData['versions'])->pluck('id')->filter();
-
-                $step->versions()->whereNotIn('uuid', $versionIds)->delete();
-
-                foreach ($stepData['versions'] as $versionData) {
-                    $versionData['account_id'] = $validated['account_id'];
-                    $step->versions()->updateOrCreate(['uuid' => $versionData['id'] ?? null], $versionData);
+                        foreach ($stepData['versions'] as $versionData) {
+                            $versionData['account_id'] = $validated['account_id'];
+                            $step->versions()->updateOrCreate(['uuid' => $versionData['id'] ?? null], $versionData);
+                        }
+                    }
                 }
             }
 
