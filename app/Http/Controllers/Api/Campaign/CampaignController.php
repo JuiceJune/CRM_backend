@@ -220,7 +220,7 @@ class CampaignController extends Controller
             }
 
             DB::commit();
-            return $this->respondWithSuccess(new CampaignShowResource($campaign));
+            return $this->respondWithSuccess(new CampaignEditResource($campaign));
         } catch (\Exception $error) {
             DB::rollBack();
             return $this->respondError($error->getMessage());
