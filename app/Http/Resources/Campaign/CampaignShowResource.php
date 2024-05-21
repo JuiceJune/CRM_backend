@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Campaign;
 
 use App\Http\Resources\CampaignStep\CampaignStepResource;
+use App\Http\Resources\Mailbox\MailboxCampaignCreateResource;
 use App\Http\Resources\Mailbox\MailboxResource;
 use App\Services\CampaignServices\StatisticCampaignService;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -28,7 +29,7 @@ class CampaignShowResource extends JsonResource
         return [
             'id' => $this->uuid,
             'name' => $this->name,
-            'mailbox' => $this->mailbox ? $this->mailbox->email : null,
+            'mailbox' => $this->mailbox ? new MailboxCampaignCreateResource($this->mailbox) : null,
             'status' => $this->status,
             'timezone' => $this->timezone,
             'start_date' => $this->start_date,
