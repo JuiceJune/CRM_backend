@@ -16,8 +16,8 @@ class CampaignMessageResource extends JsonResource
     {
         return [
             'uuid' => $this->uuid,
-            'campaign_step_id' => $this->campaign_step_id->step,
-            'campaign_step_version_id' => $this->campaign_step_version_id->version,
+            'campaign_step_id' => $this->campaignStep->step,
+            'campaign_step_version_id' => $this->campaignStepVersion->version,
             'status' => $this->status,
             'sent_time' => $this->sent_time,
             'subject' => $this->subject,
