@@ -60,4 +60,9 @@ class Prospect extends Model
         return $this->belongsToMany(Campaign::class, 'campaigns_prospects', 'prospect_id', 'campaign_id')
             ->withPivot('step', 'status');
     }
+
+    public function campaignMessages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CampaignMessage::class);
+    }
 }

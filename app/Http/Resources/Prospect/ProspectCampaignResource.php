@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Prospect;
 
+use App\Http\Resources\CampaignMessaage\CampaignMessageResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProspectCampaignResource extends JsonResource
@@ -21,6 +22,7 @@ class ProspectCampaignResource extends JsonResource
             'email' => $this->email,
             'status' => $this->prospect_status_in_campaign,
             'step' => $this->step,
+            'messages' => CampaignMessageResource::collection($this->campaignMessages)
         ];
     }
 }
