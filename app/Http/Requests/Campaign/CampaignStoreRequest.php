@@ -24,7 +24,7 @@ class CampaignStoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:50', new UniquePerAccount('campaigns', 'name', $this->user()->account_id)],
-            'mailbox_id' => 'integer|exists:mailboxes,id,account_id,' . $this->user()->account_id,
+            'mailbox_id' => 'nullable|integer|exists:mailboxes,id,account_id,' . $this->user()->account_id,
             'project_id' => 'required|integer|exists:projects,id,account_id,' . $this->user()->account_id,
             'status' => 'string',
             'timezone' => 'string',
@@ -57,7 +57,6 @@ class CampaignStoreRequest extends FormRequest
             'name.unique' => 'Name should be not longer than 50 chars!',
 
             'mailbox_id.required' => 'Mailbox Id is required!',
-            'mailbox_id.integer' => 'Mailbox Id should be a string!',
             'mailbox_id.exists' => 'Mailbox Id already exists!',
 
             'project_id.required' => 'Project Id is required!',
