@@ -22,7 +22,7 @@ class ProspectCampaignResource extends JsonResource
             'email' => $this->email,
             'status' => $this->prospect_status_in_campaign,
             'step' => $this->step,
-            'messages' => CampaignMessageResource::collection($this->campaignMessages)
+            'sentMessages' => CampaignMessageResource::collection($this->sentMessages)
         ];
     }
 }
