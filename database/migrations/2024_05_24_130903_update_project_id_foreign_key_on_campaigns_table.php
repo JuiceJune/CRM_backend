@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('campaigns', function (Blueprint $table) {
-            $table->dropForeign(['project_id']); // Drop the existing foreign key constraint
-            $table->foreignId('project_id')->constrained()->onDelete('cascade'); // Add the new foreign key constraint with onDelete cascade
+            // Drop the existing foreign key constraint
+            $table->dropForeign(['project_id']);
+            // Add the foreign key constraint with onDelete cascade
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
         });
     }
 
@@ -23,8 +25,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('campaigns', function (Blueprint $table) {
-            $table->dropForeign(['project_id']); // Drop the new foreign key constraint
-            $table->foreignId('project_id')->constrained(); // Restore the old foreign key constraint
+            // Drop the new foreign key constraint with onDelete cascade
+            $table->dropForeign(['project_id']);
+            // Add the old foreign key constraint without onDelete cascade
+            $table->foreign('project_id')->references('id')->on('projects');
         });
     }
 };
