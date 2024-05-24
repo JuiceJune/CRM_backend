@@ -174,7 +174,7 @@ class ProjectController extends Controller
         DB::beginTransaction();
         try {
             $project->users()->detach();
-            $project->mailboxes()->detach();
+            $project->mailboxes()->delete();
             $project->delete();
 
             DB::commit();
