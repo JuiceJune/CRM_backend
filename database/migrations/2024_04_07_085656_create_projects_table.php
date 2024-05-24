@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained();
             $table->date('start_date')->nullable()->default(now());
             $table->date('end_date')->nullable();
+            $table->foreignId('creator_id')->constrained('users');
             $table->timestamps();
         });
     }
