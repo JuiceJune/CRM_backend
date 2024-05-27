@@ -86,6 +86,12 @@ class MailboxController extends Controller
             $user = Socialite::driver($driver)->stateless()->user();
 
             if (Mailbox::where('account_id', $account['id'])->where('email', $user->getEmail())->exists()) {
+                $mailbox = Mailbox::where('account_id', $account['id'])->where('email', $user->getEmail())->first();
+                $mailbox->update([
+                    "token" => $user->token,
+                    "refresh_token" => $user->refreshToken,
+                    "expires_in" => $user->expiresIn,
+                ]);
                 return redirect()->to($url);
                 // TODO rework;
             }
