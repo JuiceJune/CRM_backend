@@ -33,6 +33,11 @@ class SetupCampaignService
     {
         try {
             Log::alert('Setup');
+            Log::alert('Check if mailbox exist');
+
+            if(!$this->campaign->mailbox) {
+                throw new \Error('Mailbox is not define');
+            }
 
             $stepsProspectsCount = $this->getAvailableProspectCountForEachStep();
             Log::alert(json_encode("Step prospects count"));
@@ -51,6 +56,8 @@ class SetupCampaignService
             foreach (array_reverse($stepsProspectsCount) as $key => $stepProspectsCount) { // Loop of steps Form END to START 10..1
                 $this->setupStep($key, $stepProspectsCount);
             }
+
+            $this->campaign->update(['status' => 'started']);
         } catch (\Exception $error) {
             Log::error(json_encode($error));
         } finally {

@@ -276,8 +276,7 @@ class CampaignController extends Controller
     {
         try {
             SetupCampaignJob::dispatch($campaign);
-            $campaign->update(['status' => 'started']);
-            return response()->json(new CampaignResource($campaign));
+            return $this->respondOk($campaign->name);
         } catch (Exception $error) {
             return $this->respondError($error->getMessage());
         }

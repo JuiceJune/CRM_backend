@@ -27,9 +27,14 @@ class SetupCampaignJob implements ShouldQueue
 
     /**
      * Execute the job.
+     * @throws \Exception
      */
     public function handle(): void
     {
-        (new SetupCampaignService($this->campaign))->setup();
+        try {
+            (new SetupCampaignService($this->campaign))->setup();
+        } catch(\Exception $e) {
+             throw new \Exception($e->getMessage());
+        }
     }
 }
