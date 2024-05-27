@@ -44,7 +44,7 @@ class StatisticStepService
         try {
             return $this->step->messages()
                 ->where('type', 'from me')
-                ->whereNotIn('status', ['invalid'])
+                ->where('status', 'invalid')
                 ->count();
         } catch (\Exception $error) {
             Log::error('InvalidAllTime: ' . $error->getMessage());
@@ -57,7 +57,7 @@ class StatisticStepService
         try {
             return $this->step->messages()
                 ->where('type', 'from me')
-                ->whereNotIn('status', ['bounced'])
+                ->where('status', 'bounced')
                 ->count();
         } catch (\Exception $error) {
             Log::error('BouncedAllTime: ' . $error->getMessage());
