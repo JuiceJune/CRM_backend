@@ -29,6 +29,9 @@ class SetupCampaignService
         $this->dateTime = Carbon::now($campaign->timezone);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setup(): void
     {
         try {
@@ -59,6 +62,7 @@ class SetupCampaignService
 
         } catch (\Exception $error) {
             Log::error(json_encode($error));
+            throw $error;
         } finally {
             $this->scheduleCampaignSetup();
         }
