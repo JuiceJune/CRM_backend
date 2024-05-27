@@ -36,11 +36,6 @@ class SetupCampaignService
     {
         try {
             Log::alert('Setup');
-            Log::alert('Check if mailbox exist');
-
-            if(!$this->campaign->mailbox) {
-                throw new \Error('Mailbox is not define');
-            }
 
             $stepsProspectsCount = $this->getAvailableProspectCountForEachStep();
             Log::alert(json_encode("Step prospects count"));
@@ -62,7 +57,6 @@ class SetupCampaignService
 
         } catch (\Exception $error) {
             Log::error(json_encode($error));
-            throw $error;
         } finally {
             $this->scheduleCampaignSetup();
         }

@@ -275,6 +275,9 @@ class CampaignController extends Controller
     public function startCampaign(Campaign $campaign): \Illuminate\Http\JsonResponse
     {
         try {
+            if(!$campaign->mailbox) {
+                throw new \Error('Mailbox is not define');
+            }
             SetupCampaignJob::dispatch($campaign);
             $campaign->update(['status' => 'started']);
             return $this->respondOk($campaign->name);
