@@ -48,7 +48,7 @@ class StatisticCampaignService
         try {
             return $this->campaign->campaignMessages()
                 ->where('type', 'from me')
-                ->whereNotIn('status', ['invalid'])
+                ->whereIn('status', ['invalid'])
                 ->count();
         } catch (\Exception $error) {
             Log::error('InvalidAllTime: ' . $error->getMessage());
@@ -61,7 +61,7 @@ class StatisticCampaignService
         try {
             return $this->campaign->campaignMessages()
                 ->where('type', 'from me')
-                ->whereNotIn('status', ['bounced'])
+                ->whereIn('status', ['bounced'])
                 ->count();
         } catch (\Exception $error) {
             Log::error('BouncedAllTime: ' . $error->getMessage());
