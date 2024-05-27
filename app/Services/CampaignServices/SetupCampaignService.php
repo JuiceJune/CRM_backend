@@ -57,7 +57,6 @@ class SetupCampaignService
                 $this->setupStep($key, $stepProspectsCount);
             }
 
-            $this->campaign->update(['status' => 'started']);
         } catch (\Exception $error) {
             Log::error(json_encode($error));
         } finally {
