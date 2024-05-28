@@ -168,8 +168,10 @@ class GmailService implements MailboxService
 
             $response = $service->users_messages->send('me', $messageObj);
 
+            $messageResponse = $this->getMessage($token, $response->id);
+
             return [
-                'messageResponse' => $response,
+                'messageResponse' => $messageResponse,
                 'from' => $senderEmail,
                 'to' => $prospect['email'],
                 'subject' => $subject,
