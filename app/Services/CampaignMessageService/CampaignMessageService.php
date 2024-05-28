@@ -65,6 +65,11 @@ class CampaignMessageService
                 'to' => $sentResponse['to'],
             ]);
 
+            $this->campaignMessage->messageActivities()->create([
+                'date_time' => now(),
+                'type' => 'Email sent'
+            ]);
+
             $this->campaignMessage->redisJob->delete();
 
             $this->setupNextMessage();
@@ -108,22 +113,34 @@ class CampaignMessageService
         }
     }
 
-    public function opened(): void
+    public function opened($ip): void
     {
         try {
             $this->campaignMessage->update(['status' => 'opened']);
             $this->campaignProspect->update(['status' => 'opened']);
+
+            $this->campaignMessage->messageActivities()->create([
+                'date_time' => now(),
+                'type' => 'Email opened',
+                'ip' => $ip
+            ]);
         } catch (Exception $error) {
             Log::error('Opened: ' . $error->getMessage());
         }
     }
 
-    public function unsubscribe(): void
+    public function unsubscribe($ip): void
     {
         DB::beginTransaction();
         try {
             $this->campaignMessage->update(['status' => 'unsubscribe']);
             $this->campaignProspect->update(['status' => 'unsubscribe']);
+
+            $this->campaignMessage->messageActivities()->create([
+                'date_time' => now(),
+                'type' => 'Client unsubscribed',
+                'ip' => $ip
+            ]);
 
             $this->deleteNextMessages();
 
@@ -134,12 +151,39 @@ class CampaignMessageService
         }
     }
 
-    public function replayed(): void
+    public function replayed($message): void
     {
         DB::beginTransaction();
         try {
             $this->campaignMessage->update(['status' => 'replayed']);
             $this->campaignProspect->update(['status' => 'replayed']);
+
+            $dateTime = Carbon::createFromTimestamp($message->timeStamp)->setTimezone($this->campaign->timezone);
+
+            $this->campaignMessage->messageActivities()->create([
+                'date_time' => $dateTime,
+                'type' => 'Client responded',
+            ]);
+
+            $messageText = base64_decode($message->payload->parts[0]->body->data);
+
+            CampaignMessage::query()->create([
+                'account_id' => $this->campaign->account_id,
+                'campaign_id' => $this->campaign->id,
+                'campaign_step_id' => $this->campaignStep->id,
+                'campaign_step_version_id' => $this->campaignStep->version('A')->id,
+                'prospect_id' => $this->prospect->id,
+                'available_at' => $dateTime,
+                'status' => 'responded',
+                'sent_time' => $dateTime,
+                'message_id' => $message->id,
+                'thread_id' => $message->threadId,
+                'subject' => 'Re: ' . $this->campaignMessage->subject,
+                'message' => $messageText,
+                'from' => $this->campaignMessage->to,
+                'to' => $this->campaignMessage->from,
+                'type' => 'to me',
+            ]);
 
             $this->deleteNextMessages();
 
@@ -150,12 +194,39 @@ class CampaignMessageService
         }
     }
 
-    public function bounced(): void
+    public function bounced($message): void
     {
         DB::beginTransaction();
         try {
             $this->campaignMessage->update(['status' => 'bounced']);
             $this->campaignProspect->update(['status' => 'bounced']);
+
+            $dateTime = Carbon::createFromTimestamp($message->timeStamp)->setTimezone($this->campaign->timezone);
+
+            $this->campaignMessage->messageActivities()->create([
+                'date_time' => $dateTime,
+                'type' => 'Email bounced',
+            ]);
+
+            $messageText = base64_decode($message->payload->parts[0]->body->data);
+
+            CampaignMessage::query()->create([
+                'account_id' => $this->campaign->account_id,
+                'campaign_id' => $this->campaign->id,
+                'campaign_step_id' => $this->campaignStep->id,
+                'campaign_step_version_id' => $this->campaignStep->version('A')->id,
+                'prospect_id' => $this->prospect->id,
+                'available_at' => $dateTime,
+                'status' => 'bounced',
+                'sent_time' => $dateTime,
+                'message_id' => $message->id,
+                'thread_id' => $message->threadId,
+                'subject' => 'Re: ' . $this->campaignMessage->subject,
+                'message' => $messageText,
+                'from' => $this->campaignMessage->to,
+                'to' => $this->campaignMessage->from,
+                'type' => 'to me',
+            ]);
 
             $this->deleteNextMessages();
 

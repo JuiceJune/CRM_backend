@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\CampaignMessaage;
 
+use App\Http\Resources\MessageActivity\MessageActivityResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CampaignMessageResource extends JsonResource
@@ -23,6 +24,7 @@ class CampaignMessageResource extends JsonResource
             'subject' => $this->subject,
             'message' => $this->message,
             'to' => $this->to,
+            'activities' => MessageActivityResource::collection($this->messageActivities)
         ];
     }
 }

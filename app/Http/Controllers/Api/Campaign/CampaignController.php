@@ -297,12 +297,12 @@ class CampaignController extends Controller
         }
     }
 
-    public function openEmail(CampaignMessage $campaignMessage)
+    public function openEmail(CampaignMessage $campaignMessage, Request $request)
     {
         try {
             if(!in_array($campaignMessage['status'], ['unsubscribe', 'bounced', 'replayed', 'opened'])) {
                 $campaignMessageService = new CampaignMessageService($campaignMessage);
-                $campaignMessageService->opened();
+                $campaignMessageService->opened($request->ip());
             }
         } catch (Exception $error) {
             Log::error('OpenEmail: ' . $error->getMessage());
@@ -312,12 +312,12 @@ class CampaignController extends Controller
         }
     }
 
-    public function unsubscribe(CampaignMessage $campaignMessage): void
+    public function unsubscribe(CampaignMessage $campaignMessage, Request $request): void
     {
         try {
             if(!in_array($campaignMessage['status'], ['unsubscribe', 'bounced'])) {
                 $campaignMessageService = new CampaignMessageService($campaignMessage);
-                $campaignMessageService->unsubscribe();
+                $campaignMessageService->unsubscribe($request->ip());
             }
         } catch (Exception $error) {
             Log::error('Unsubscribe: ' . $error->getMessage());

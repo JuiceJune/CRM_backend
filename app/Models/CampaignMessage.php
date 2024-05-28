@@ -42,6 +42,10 @@ class CampaignMessage extends Model
         return $this->belongsTo(Campaign::class, 'campaign_id');
     }
 
+    public function messageActivities(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(MessageActivity::class, 'campaign_message_id', 'id');
+    }
     public function campaignStep(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(CampaignStep::class, 'campaign_step_id');

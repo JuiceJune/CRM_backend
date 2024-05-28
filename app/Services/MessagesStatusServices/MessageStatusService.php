@@ -93,42 +93,28 @@ class MessageStatusService
 
                     if (count($messages) > 1) {
 
-                        $bouncedFlag = false;
-
                         foreach ($messages as $messageKey => $message) {
                             foreach ($message->payload->headers as $header) {
                                 if ($header->name === 'From' && str_contains($header->value, 'mailer-daemon@googlemail.com')) {
-                                    $bouncedFlag = true;
-                                    break;
+                                    $campaignMessageService->bounced($message);
+                                    return [
+                                        'status' => 'not-send',
+                                        'data' => 'Bounced'
+                                    ];
                                 }
                             }
                         }
-
-                        if ($bouncedFlag) {
-                            $campaignMessageService->bounced();
-                            return [
-                                'status' => 'not-send',
-                                'data' => 'Bounced'
-                            ];
-                        }
-
-                        $replayedFlag = false;
 
                         foreach ($messages as $messageKey => $message) {
                             foreach ($message->payload->headers as $header) {
                                 if ($header->name === 'From' && !str_contains($header->value, $this->mailbox->email)) {
-                                    $replayedFlag = true;
-                                    break;
+                                    $campaignMessageService->replayed($message);
+                                    return [
+                                        'status' => 'not-send',
+                                        'data' => 'Replayed'
+                                    ];
                                 }
                             }
-                        }
-
-                        if ($replayedFlag) {
-                            $campaignMessageService->replayed();
-                            return [
-                                'status' => 'not-send',
-                                'data' => 'Replayed'
-                            ];
                         }
                     }
                 } else {
@@ -167,42 +153,28 @@ class MessageStatusService
 
                 if (count($messages) > 1) {
 
-                    $bouncedFlag = false;
-
                     foreach ($messages as $messageKey => $message) {
                         foreach ($message->payload->headers as $header) {
                             if ($header->name === 'From' && str_contains($header->value, 'mailer-daemon@googlemail.com')) {
-                                $bouncedFlag = true;
-                                break;
+                                $campaignMessageService->bounced($message);
+                                return [
+                                    'status' => 'success',
+                                    'data' => 'Bounced'
+                                ];
                             }
                         }
                     }
-
-                    if ($bouncedFlag) {
-                        $campaignMessageService->bounced();
-                        return [
-                            'status' => 'success',
-                            'data' => 'Bounced'
-                        ];
-                    }
-
-                    $replayedFlag = false;
 
                     foreach ($messages as $messageKey => $message) {
                         foreach ($message->payload->headers as $header) {
                             if ($header->name === 'From' && !str_contains($header->value, $this->mailbox->email)) {
-                                $replayedFlag = true;
-                                break;
+                                $campaignMessageService->replayed($message);
+                                return [
+                                    'status' => 'success',
+                                    'data' => 'Replayed'
+                                ];
                             }
                         }
-                    }
-
-                    if ($replayedFlag) {
-                        $campaignMessageService->replayed();
-                        return [
-                            'status' => 'success',
-                            'data' => 'Replayed'
-                        ];
                     }
                 }
             } else {
