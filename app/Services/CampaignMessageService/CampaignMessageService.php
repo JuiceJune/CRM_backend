@@ -49,11 +49,15 @@ class CampaignMessageService
         try {
             $messageId = $sentResponse['messageResponse']->id;
             $threadId = $sentResponse['messageResponse']->threadId;
-            $textBased64 = $sentResponse['messageResponse']->payload->body->data;
-            $decodedText =  base64_decode($textBased64, true);
-            $token = $sentResponse["token"];
+            $textBased64 = $sentResponse['messageResponse']->getPayload()->getBody()->getData();;
+            $bodyDecoded = base64_decode(str_replace('-', '+', str_replace('_', '/', $textBased64)));
 
-            $messageStringId = $mailboxService->getMessageStringId($token, $messageId);
+            $messageStringId = null;
+            foreach ($sentResponse['messageResponse']['payload']['headers'] as $header) {
+                if ($header['name'] === 'Message-Id') {
+                    $messageStringId = $header['value'];
+                }
+            }
 
             $this->campaignMessage->update([
                 'status' => "sent",
@@ -62,7 +66,7 @@ class CampaignMessageService
                 'message_string_id' => $messageStringId,
                 'thread_id' => $threadId,
                 'subject' => $sentResponse['subject'],
-                'message' => $decodedText,
+                'message' => $bodyDecoded,
                 'from' => $sentResponse['from'],
                 'to' => $sentResponse['to'],
             ]);
