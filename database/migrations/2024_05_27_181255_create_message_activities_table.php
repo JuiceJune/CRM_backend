@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('message_activities', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->dateTime('date_time');
             $table->string('type');
             $table->string('ip')->nullable();
