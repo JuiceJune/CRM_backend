@@ -165,7 +165,12 @@ class CampaignMessageService
                 'type' => 'Client responded',
             ]);
 
-            $messageText = base64_decode($message->payload->parts[0]->body->data);
+            $messageText = base64_decode($message->payload->parts[0]->body->data, true);
+            if ($messageText === false) {
+                $messageText = 'Decode error';
+            } else {
+                $messageText = mb_convert_encoding($messageText, 'UTF-8', 'UTF-8');
+            }
 
             CampaignMessage::query()->create([
                 'account_id' => $this->campaign->account_id,
@@ -208,7 +213,12 @@ class CampaignMessageService
                 'type' => 'Email bounced',
             ]);
 
-            $messageText = base64_decode($message->payload->parts[0]->body->data);
+            $messageText = base64_decode($message->payload->parts[0]->body->data, true);
+            if ($messageText === false) {
+                $messageText = 'Decode error';
+            } else {
+                $messageText = mb_convert_encoding($messageText, 'UTF-8', 'UTF-8');
+            }
 
             CampaignMessage::query()->create([
                 'account_id' => $this->campaign->account_id,
