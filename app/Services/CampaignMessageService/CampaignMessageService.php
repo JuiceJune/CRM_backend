@@ -49,6 +49,8 @@ class CampaignMessageService
         try {
             $messageId = $sentResponse['messageResponse']->id;
             $threadId = $sentResponse['messageResponse']->threadId;
+            $textBased64 = $sentResponse['messageResponse']->payload->body->data;
+            $decodedText =  base64_decode($textBased64, true);
             $token = $sentResponse["token"];
 
             $messageStringId = $mailboxService->getMessageStringId($token, $messageId);
@@ -60,7 +62,7 @@ class CampaignMessageService
                 'message_string_id' => $messageStringId,
                 'thread_id' => $threadId,
                 'subject' => $sentResponse['subject'],
-                'message' => $sentResponse['message'],
+                'message' => $decodedText,
                 'from' => $sentResponse['from'],
                 'to' => $sentResponse['to'],
             ]);
