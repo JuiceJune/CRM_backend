@@ -158,18 +158,19 @@ class CampaignMessageService
             $this->campaignMessage->update(['status' => 'replayed']);
             $this->campaignProspect->update(['status' => 'replayed']);
 
-            $dateTime = Carbon::createFromTimestamp($message->timeStamp)->setTimezone($this->campaign->timezone);
+            $dateTime = Carbon::createFromTimestampMs($message->internalDate)->setTimezone($this->campaign->timezone);
 
             $this->campaignMessage->messageActivities()->create([
                 'date_time' => $dateTime,
                 'type' => 'Client responded',
             ]);
 
-            $messageText = base64_decode($message->payload->parts[0]->body->data, true);
+            $messageText = base64_decode($message->payload->parts[0]->body->data);
             if ($messageText === false) {
                 $messageText = 'Decode error';
             } else {
                 $messageText = mb_convert_encoding($messageText, 'UTF-8', 'UTF-8');
+                $messageText = preg_replace('/[^\P{C}\n]+/u', '', $messageText);
             }
 
             CampaignMessage::query()->create([
@@ -206,18 +207,19 @@ class CampaignMessageService
             $this->campaignMessage->update(['status' => 'bounced']);
             $this->campaignProspect->update(['status' => 'bounced']);
 
-            $dateTime = Carbon::createFromTimestamp($message->timeStamp)->setTimezone($this->campaign->timezone);
+            $dateTime = Carbon::createFromTimestampMs($message->internalDate)->setTimezone($this->campaign->timezone);
 
             $this->campaignMessage->messageActivities()->create([
                 'date_time' => $dateTime,
                 'type' => 'Email bounced',
             ]);
 
-            $messageText = base64_decode($message->payload->parts[0]->body->data, true);
+            $messageText = base64_decode($message->payload->parts[0]->body->data);
             if ($messageText === false) {
                 $messageText = 'Decode error';
             } else {
                 $messageText = mb_convert_encoding($messageText, 'UTF-8', 'UTF-8');
+                $messageText = preg_replace('/[^\P{C}\n]+/u', '', $messageText);
             }
 
             CampaignMessage::query()->create([
