@@ -171,13 +171,7 @@ class CampaignMessageService
                 'type' => 'Client responded',
             ]);
 
-            $messageText = base64_decode($message->payload->parts[0]->body->data);
-            if ($messageText === false) {
-                $messageText = 'Decode error';
-            } else {
-                $messageText = mb_convert_encoding($messageText, 'UTF-8', 'UTF-8');
-                $messageText = preg_replace('/[^\P{C}\n]+/u', '', $messageText);
-            }
+            $messageText = base64_decode(str_replace('-', '+', str_replace('_', '/', $message->payload->parts[0]->body->data)));
 
             CampaignMessage::query()->create([
                 'account_id' => $this->campaign->account_id,
