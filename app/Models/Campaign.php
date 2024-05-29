@@ -16,10 +16,6 @@ class Campaign extends Model
     protected static function booted()
     {
         static::created(function ($campaign) {
-            Log::alert('FFF: ' . json_encode($campaign));
-            $directory = 'logs/campaigns/' . $campaign->id;
-            Storage::disk('local')->makeDirectory($directory);
-
             self::logAction($campaign->id, "Campaign {$campaign->id} created.", ['campaign' => $campaign]);
         });
     }
