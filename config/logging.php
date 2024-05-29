@@ -60,10 +60,8 @@ return [
         ],
 
         'campaign' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/campaigns/campaign.log'),
-            'level' => 'info',
-            'days' => 14,
+            'driver' => 'custom',
+            'via' => App\Logging\CampaignLogger::class,
         ],
 
         'stack' => [
