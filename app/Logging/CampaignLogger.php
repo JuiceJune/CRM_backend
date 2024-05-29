@@ -16,8 +16,6 @@ class CampaignLogger
      */
     public function __invoke(array $config)
     {
-        Log::alert('FFF_2: ' . json_encode($config));
-
         $campaignId = $config['campaign_id'] ?? 'default';
         $logPath = storage_path("logs/campaigns/{$campaignId}/campaign.log");
 

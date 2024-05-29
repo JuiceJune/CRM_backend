@@ -283,7 +283,7 @@ class CampaignController extends Controller
             return $this->respondOk($campaign->name);
         } catch (Exception $error) {
             $message = $error->getMessage();
-            Log::channel('campaign')->withContext(['campaign_id' => $campaign->id])->info("Campaign {$campaign->id} Not started | Error: ${message}.", ['campaign' => $campaign]);
+            $campaign->logAction($campaign->id, "Campaign {$campaign->id} Not started | Error: ${message}.");
             return $this->respondError($error->getMessage());
         }
     }
