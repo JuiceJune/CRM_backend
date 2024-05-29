@@ -2,26 +2,22 @@
 
 namespace App\Logging;
 
-use Illuminate\Support\Facades\Log;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
+use Illuminate\Support\Facades\File;
 
 class CampaignLogger
 {
-    /**
-     * Create a custom Monolog instance.
-     *
-     * @param  array  $config
-     * @return \Monolog\Logger
-     */
-    public function __invoke(array $config)
+    public static function log($campaignId, $message)
     {
-        $campaignId = $config['campaign_id'] ?? 'default';
-        $logPath = storage_path("logs/campaigns/{$campaignId}/campaign.log");
+        $logPath = storage_path("logs/campaigns/{$campaignId}");
 
-        $logger = new Logger('campaign');
-        $logger->pushHandler(new StreamHandler($logPath));
+        // Перевірка, чи існує папка для кампанії. Якщо ні - створіть її.
+        if (!File::exists($logPath)) {
+            File::makeDirectory($logPath, 0755, true);
+        }
 
-        return $logger;
+        $logFile = $logPath . '/' . now()->format('Y-m-d') . '.log';
+
+        // Запис тексту в файл логу.
+        File::append($logFile, '[' . now()->format('Y-m-d H:i:s') . '] ' . $message . PHP_EOL);
     }
 }

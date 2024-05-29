@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Campaign;
 
-use App\Helpers\CampaignLogger;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Campaign\CampaignStoreRequest;
 use App\Http\Requests\Campaign\CampaignUpdateRequest;
@@ -12,6 +11,7 @@ use App\Http\Resources\Campaign\CampaignShowResource;
 use App\Http\Resources\Mailbox\MailboxCampaignCreateResource;
 use App\Jobs\SetupCampaignJob;
 use App\Jobs\StopCampaignJob;
+use App\Logging\CampaignLogger;
 use App\Models\Campaign;
 use App\Models\CampaignMessage;
 use App\Models\CampaignStep;
@@ -24,7 +24,6 @@ use Carbon\Carbon;
 use DateTimeZone;
 use Exception;
 use F9Web\ApiResponseHelpers;
-use Google\Service\Gmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -283,6 +282,7 @@ class CampaignController extends Controller
             $campaign->update(['status' => 'started']);
             return $this->respondOk($campaign->name);
         } catch (Exception $error) {
+            CampaignLogger::log($campaign->id, 'Campaign not started');
             return $this->respondError($error->getMessage());
         }
     }
