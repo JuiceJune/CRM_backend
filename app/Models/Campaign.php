@@ -25,7 +25,10 @@ class Campaign extends Model
 
     protected static function logAction($campaignId, $message, $context = [])
     {
-        Log::channel('campaign')->withContext(['campaign_id' => $campaignId])->info($message, $context);
+        // Використовуйте tap для передачі campaign_id в конфігурацію логера
+        Log::channel('campaign')->tap(function ($logger) use ($campaignId) {
+            $logger->withContext(['campaign_id' => $campaignId]);
+        })->info($message, $context);
     }
 
     protected $fillable = [
