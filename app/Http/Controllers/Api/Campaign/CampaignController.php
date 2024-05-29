@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Campaign;
 
+use App\Helpers\CampaignLogger;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Campaign\CampaignStoreRequest;
 use App\Http\Requests\Campaign\CampaignUpdateRequest;
@@ -283,7 +284,7 @@ class CampaignController extends Controller
             return $this->respondOk($campaign->name);
         } catch (Exception $error) {
             $message = $error->getMessage();
-            $campaign->logAction($campaign->id, "Campaign {$campaign->id} Not started | Error: ${message}.");
+            CampaignLogger::log($campaign->id, 'info', "ERROR: ${message}.", ['campaign' => $campaign]);
             return $this->respondError($error->getMessage());
         }
     }
