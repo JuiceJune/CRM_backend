@@ -59,6 +59,13 @@ return [
             'days' => 14,
         ],
 
+        'campaign' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/campaigns/campaign.log'),
+            'level' => 'info',
+            'days' => 14,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],

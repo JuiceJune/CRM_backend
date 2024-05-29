@@ -5,10 +5,22 @@ namespace App\Models;
 use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class Campaign extends Model
 {
     use HasFactory, UuidTrait;
+
+    protected static function booted()
+    {
+        static::created(function ($campaign) {
+            $directory = 'logs/campaigns/' . $campaign->id;
+            Storage::makeDirectory($directory);
+
+            Log::channel('campaign')->withContext(['campaign_id' => $campaign->id])->info("Campaign {$campaign->id} created.", ['campaign' => $campaign]);
+        });
+    }
 
     protected $fillable = [
         'name',
