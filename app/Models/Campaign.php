@@ -15,11 +15,17 @@ class Campaign extends Model
     protected static function booted()
     {
         static::created(function ($campaign) {
+            Log::alert('FFF: ' . json_encode($campaign));
             $directory = 'logs/campaigns/' . $campaign->id;
             Storage::makeDirectory($directory);
 
-            Log::channel('campaign')->withContext(['campaign_id' => $campaign->id])->info("Campaign {$campaign->id} created.", ['campaign' => $campaign]);
+            self::logAction($campaign->id, "Campaign {$campaign->id} created.", ['campaign' => $campaign]);
         });
+    }
+
+    protected static function logAction($campaignId, $message, $context = [])
+    {
+        Log::channel('campaign')->withContext(['campaign_id' => $campaignId])->info($message, $context);
     }
 
     protected $fillable = [
