@@ -283,8 +283,6 @@ class CampaignController extends Controller
             $campaign->update(['status' => 'started']);
             return $this->respondOk($campaign->name);
         } catch (Exception $error) {
-            $message = $error->getMessage();
-            CampaignLogger::log($campaign->id, 'info', "ERROR: ${message}.", ['campaign' => $campaign]);
             return $this->respondError($error->getMessage());
         }
     }

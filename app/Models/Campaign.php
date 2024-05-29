@@ -2,35 +2,13 @@
 
 namespace App\Models;
 
-use App\Logging\CampaignLogger;
 use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class Campaign extends Model
 {
     use HasFactory, UuidTrait;
-
-    protected static function booted()
-    {
-        static::created(function ($campaign) {
-            self::logAction($campaign->id, "Campaign {$campaign->id} created.", ['campaign' => $campaign]);
-        });
-    }
-
-    protected static function logAction($campaignId, $message, $context = [])
-    {
-        $config = [
-            'driver' => 'custom',
-            'via' => CampaignLogger::class,
-            'campaign_id' => $campaignId,
-        ];
-
-        $logger = Log::build($config);
-        $logger->info($message, $context);
-    }
 
     protected $fillable = [
         'name',
