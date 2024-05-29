@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Logging\CampaignLogger;
 use App\Traits\UuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,10 +26,14 @@ class Campaign extends Model
 
     protected static function logAction($campaignId, $message, $context = [])
     {
-        // Використовуйте tap для передачі campaign_id в конфігурацію логера
-        Log::channel('campaign')->tap(function ($logger) use ($campaignId) {
-            $logger->withContext(['campaign_id' => $campaignId]);
-        })->info($message, $context);
+        $config = [
+            'driver' => 'custom',
+            'via' => CampaignLogger::class,
+            'campaign_id' => $campaignId,
+        ];
+
+        $logger = Log::build($config);
+        $logger->info($message, $context);
     }
 
     protected $fillable = [
