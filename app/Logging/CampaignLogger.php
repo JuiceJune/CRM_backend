@@ -2,6 +2,7 @@
 
 namespace App\Logging;
 
+use Illuminate\Support\Facades\Log;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -15,6 +16,8 @@ class CampaignLogger
      */
     public function __invoke(array $config)
     {
+        Log::alert('FFF_2: ' . json_encode($config));
+
         $campaignId = $config['campaign_id'] ?? 'default';
         $logPath = storage_path("logs/campaigns/{$campaignId}/campaign.log");
 
