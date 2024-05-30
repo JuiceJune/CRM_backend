@@ -282,7 +282,6 @@ class CampaignController extends Controller
             $campaign->update(['status' => 'started']);
             return $this->respondOk($campaign->name);
         } catch (Exception $error) {
-            CampaignLogger::log($campaign->id, 'Campaign not started');
             return $this->respondError($error->getMessage());
         }
     }
