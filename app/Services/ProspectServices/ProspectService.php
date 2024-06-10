@@ -34,31 +34,35 @@ class ProspectService
     public function changeStatus(string $status): int
     {
         try {
-            switch ($status) {
-                case 'active':
-                    break;
-                case 'inactive':
-                    return $this->setStatusInactive();
-                case "responded":
-                    return $this->setStatusResponded();
-                case "bounced":
-                    return $this->setStatusBounced();
-                case "unsubscribed":
-                    return $this->setStatusUnsubscribed();
-            }
-            return 0;
+            return match ($status) {
+                'active' => $this->setStatusActive(),
+                'inactive' => $this->setStatusInactive(),
+                "responded" => $this->setStatusResponded(),
+                "bounced" => $this->setStatusBounced(),
+                "unsubscribed" => $this->setStatusUnsubscribed(),
+                default => 0,
+            };
         } catch (Exception $exception) {
             Log::error('ProspectService ChangeStatus: ' . $exception->getMessage());
             return 0;
         }
     }
 
-    public function setStatusActive()
+    public function setStatusActive(): int
     {
+        DB::beginTransaction();
         try {
+            $this->prospect->update(["status" => "active"]);
+            CampaignProspect::query()->where('campaign_id', $this->campaign->id)
+                ->where('prospect_id', $this->prospect->id)->update(["status" => "active"]);
+            $this->prospect->campaignMessages()->whereIn('status', ['inactive'])->update(["status" => "pending"]);
 
+            DB::commit();
+            return 1;
         } catch (Exception $exception) {
             Log::error('ProspectService ChangeStatus: ' . $exception->getMessage());
+            DB::rollBack();
+            return 0;
         }
     }
 
@@ -102,7 +106,7 @@ class ProspectService
 
             $this->prospect->campaignMessages()
                 ->whereIn('status', ['pending', 'scheduled'])
-                ->delete();
+                ->update(['status', 'inactive']);
 
             DB::commit();
             return 1;
@@ -132,7 +136,7 @@ class ProspectService
 
             $this->prospect->campaignMessages()
                 ->whereIn('status', ['pending', 'scheduled'])
-                ->delete();
+                ->update(['status', 'inactive']);
 
             DB::commit();
             return 1;
@@ -162,7 +166,7 @@ class ProspectService
 
             $this->prospect->campaignMessages()
                 ->whereIn('status', ['pending', 'scheduled'])
-                ->delete();
+                ->update(['status', 'inactive']);
 
             DB::commit();
             return 1;
