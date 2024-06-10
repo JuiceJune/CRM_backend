@@ -128,9 +128,8 @@ class ProspectController extends Controller
         try {
             $validated = $request->validated();
             $campaign = $prospect->campaigns->first();
-            Log::alert('campaign: ' . json_encode($campaign));
 
-            if(isset($validated["status"])) {
+            if(isset($validated["status"]) && $campaign) {
                 $prospectService = new ProspectService($prospect, $campaign);
                 if(!$prospectService->changeStatus($validated["status"]))
                     return $this->respondError("Prospect wasn't updated");

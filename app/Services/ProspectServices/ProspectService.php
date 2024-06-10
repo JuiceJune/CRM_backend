@@ -31,7 +31,7 @@ class ProspectService
         $this->prospect = $prospect;
     }
 
-    public function changeStatus(string $status)
+    public function changeStatus(string $status): int
     {
         try {
             switch ($status) {
@@ -39,12 +39,17 @@ class ProspectService
                     break;
                 case 'inactive':
                     return $this->setStatusInactive();
-                    break;
-                case "opened":
-                    break;
+                case "responded":
+                    return $this->setStatusResponded();
+                case "bounced":
+                    return $this->setStatusBounced();
+                case "unsubscribed":
+                    return $this->setStatusUnsubscribed();
             }
+            return 0;
         } catch (Exception $exception) {
             Log::error('ProspectService ChangeStatus: ' . $exception->getMessage());
+            return 0;
         }
     }
 
@@ -73,6 +78,96 @@ class ProspectService
             return 1;
         } catch (Exception $exception) {
             Log::error('ProspectService setStatusInactive: ' . $exception->getMessage());
+            DB::rollBack();
+            return 0;
+        }
+    }
+
+    public function setStatusResponded(): int
+    {
+        DB::beginTransaction();
+        try {
+            $jobService = new CampaignRedisJobService();
+            $jobService->deleteProspectJobs($this->campaign, $this->prospect);
+
+            $this->prospect->update(["status" => "responded"]);
+            CampaignProspect::query()->where('campaign_id', $this->campaign->id)
+                ->where('prospect_id', $this->prospect->id)->update(["status" => "responded"]);
+            $lastMessage = $this->prospect->campaignMessages()
+                ->whereNotIn('status', ['pending', 'scheduled'])
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $lastMessage?->update(["status" => "responded"]);
+
+            $this->prospect->campaignMessages()
+                ->whereIn('status', ['pending', 'scheduled'])
+                ->delete();
+
+            DB::commit();
+            return 1;
+        } catch (Exception $exception) {
+            Log::error('ProspectService setStatusResponded: ' . $exception->getMessage());
+            DB::rollBack();
+            return 0;
+        }
+    }
+
+    public function setStatusBounced(): int
+    {
+        DB::beginTransaction();
+        try {
+            $jobService = new CampaignRedisJobService();
+            $jobService->deleteProspectJobs($this->campaign, $this->prospect);
+
+            $this->prospect->update(["status" => "bounced"]);
+            CampaignProspect::query()->where('campaign_id', $this->campaign->id)
+                ->where('prospect_id', $this->prospect->id)->update(["status" => "bounced"]);
+            $lastMessage = $this->prospect->campaignMessages()
+                ->whereNotIn('status', ['pending', 'scheduled'])
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $lastMessage?->update(["status" => "bounced"]);
+
+            $this->prospect->campaignMessages()
+                ->whereIn('status', ['pending', 'scheduled'])
+                ->delete();
+
+            DB::commit();
+            return 1;
+        } catch (Exception $exception) {
+            Log::error('ProspectService setStatusBounced: ' . $exception->getMessage());
+            DB::rollBack();
+            return 0;
+        }
+    }
+
+    public function setStatusUnsubscribed(): int
+    {
+        DB::beginTransaction();
+        try {
+            $jobService = new CampaignRedisJobService();
+            $jobService->deleteProspectJobs($this->campaign, $this->prospect);
+
+            $this->prospect->update(["status" => "unsubscribed"]);
+            CampaignProspect::query()->where('campaign_id', $this->campaign->id)
+                ->where('prospect_id', $this->prospect->id)->update(["status" => "unsubscribed"]);
+            $lastMessage = $this->prospect->campaignMessages()
+                ->whereNotIn('status', ['pending', 'scheduled'])
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $lastMessage?->update(["status" => "unsubscribed"]);
+
+            $this->prospect->campaignMessages()
+                ->whereIn('status', ['pending', 'scheduled'])
+                ->delete();
+
+            DB::commit();
+            return 1;
+        } catch (Exception $exception) {
+            Log::error('ProspectService setStatusUnsubscribed: ' . $exception->getMessage());
             DB::rollBack();
             return 0;
         }

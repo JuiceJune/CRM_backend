@@ -68,6 +68,6 @@ class Prospect extends Model
 
     public function sentMessages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(CampaignMessage::class)->whereNotIn('status', ['pending', 'scheduled']);
+        return $this->hasMany(CampaignMessage::class)->whereNotIn('status', ['pending', 'scheduled', 'inactive']);
     }
 }
