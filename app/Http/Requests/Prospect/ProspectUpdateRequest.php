@@ -22,11 +22,11 @@ class ProspectUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_id' => 'required|integer|exists:accounts,id',
-            'campaign_id' => 'required|integer|exists:campaigns,id',
-            'first_name' => 'required|string|max:100',
-            'last_name' => 'required|string|max:100',
-            'email' => 'required|string|max:100',
+            'account_id' => 'integer|exists:accounts,id',
+            'campaign_id' => 'integer|exists:campaigns,id',
+            'first_name' => 'string|max:100',
+            'last_name' => 'string|max:100',
+            'email' => 'string|max:100',
             'status' => 'string',
             'company' => 'string',
             'website' => 'string',

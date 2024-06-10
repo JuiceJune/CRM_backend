@@ -126,7 +126,7 @@ class ProspectController extends Controller
         try {
             $validated = $request->validated();
             $prospect->update($validated);
-            return response()->json($prospect);
+            return $this->respondOk("Prospect was successfully updated");
         } catch (Exception $error) {
             return $this->respondError($error->getMessage());
         }
