@@ -10,12 +10,14 @@ use App\Http\Resources\Prospect\ProspectResource;
 use App\Models\Campaign;
 use App\Models\CampaignMessage;
 use App\Models\Prospect;
+use App\Services\ProspectServices\ProspectService;
 use Carbon\Carbon;
 use Exception;
 use F9Web\ApiResponseHelpers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProspectController extends Controller
 {
@@ -125,6 +127,14 @@ class ProspectController extends Controller
     {
         try {
             $validated = $request->validated();
+            $campaign = $prospect->campaigns->first();
+            Log::alert('campaign: ' . json_encode($campaign));
+
+            if(isset($validated["status"])) {
+                $prospectService = new ProspectService($prospect, $campaign);
+                if(!$prospectService->changeStatus($validated["status"]))
+                    return $this->respondError("Prospect wasn't updated");
+            }
             $prospect->update($validated);
             return $this->respondOk("Prospect was successfully updated");
         } catch (Exception $error) {
