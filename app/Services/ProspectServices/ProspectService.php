@@ -106,7 +106,7 @@ class ProspectService
 
             $this->prospect->campaignMessages()
                 ->whereIn('status', ['pending', 'scheduled'])
-                ->update(['status', 'inactive']);
+                ->update(['status' => 'inactive']);
 
             DB::commit();
             return 1;
@@ -136,7 +136,7 @@ class ProspectService
 
             $this->prospect->campaignMessages()
                 ->whereIn('status', ['pending', 'scheduled'])
-                ->update(['status', 'inactive']);
+                ->update(['status' => 'inactive']);
 
             DB::commit();
             return 1;
@@ -166,7 +166,7 @@ class ProspectService
 
             $this->prospect->campaignMessages()
                 ->whereIn('status', ['pending', 'scheduled'])
-                ->update(['status', 'inactive']);
+                ->update(['status' => 'inactive']);
 
             DB::commit();
             return 1;
