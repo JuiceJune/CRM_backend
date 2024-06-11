@@ -340,16 +340,28 @@ class CampaignController extends Controller
         try {
             $reportInfo = $request->input('report-info');
 
-            $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
+            if (!empty($reportInfo)) {
+                $reportInfoObject = json_decode($reportInfo);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \InvalidArgumentException('Invalid JSON provided for report-info: ' . json_last_error_msg());
+                }
+            } else {
+                throw new \InvalidArgumentException('Empty report-info provided');
+            }
+
+            $reportGenerator = new ReportCampaignService($campaign, $reportInfoObject);
             $link = $reportGenerator->generate();
 
-            if ($link)
+            if ($link) {
                 return $this->respondOk($link);
-            else
+            } else {
                 throw new \Error('No report found');
-        } catch (Exception $error) {
+            }
+        } catch (\Exception $error) {
             Log::error('generateReport: ' . $error->getMessage());
             return $this->respondError($error->getMessage());
         }
     }
+
 }
