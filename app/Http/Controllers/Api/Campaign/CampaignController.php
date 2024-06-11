@@ -40,8 +40,19 @@ class CampaignController extends Controller
         try {
             $limit = $request->input('limit', 50);
             $offset = $request->input('offset', 0);
+            $my = $request->input('my', false);
 
-            $query = Campaign::query()->skip($offset)->take($limit);
+            $userId = auth()->id();
+
+            $query = Campaign::query();
+
+            if ($my) {
+                $query = $query->whereHas('project', function ($q) use ($userId) {
+                    $q->where('creator_id', $userId);
+                });
+            }
+
+            $query = $query->skip($offset)->take($limit);
 
             $campaigns = $query->get();
 
