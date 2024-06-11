@@ -122,6 +122,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
         Route::get('/{campaign:uuid}/start', [CampaignController::class, 'startCampaign']);
         Route::get('/{campaign:uuid}/stop', [CampaignController::class, 'stopCampaign']);
+        Route::get('/{campaign:uuid}/report', [CampaignController::class, 'generateReport']);
     });
 
 });

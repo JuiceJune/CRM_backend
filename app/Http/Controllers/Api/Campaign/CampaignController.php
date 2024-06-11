@@ -18,6 +18,7 @@ use App\Models\CampaignStepVersion;
 use App\Models\Mailbox;
 use App\Models\Project;
 use App\Services\CampaignMessageService\CampaignMessageService;
+use App\Services\CampaignServices\ReportCampaignService;
 use App\Services\MailboxServices\GmailService;
 use Carbon\Carbon;
 use DateTimeZone;
@@ -331,6 +332,24 @@ class CampaignController extends Controller
             }
         } catch (Exception $error) {
             Log::error('Unsubscribe: ' . $error->getMessage());
+        }
+    }
+
+    public function generateReport(Campaign $campaign, Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $reportInfo = $request->input('report-info');
+
+            $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
+            $link = $reportGenerator->generate();
+
+            if ($link)
+                return $this->respondOk($link);
+            else
+                throw new \Error('No report found');
+        } catch (Exception $error) {
+            Log::error('generateReport: ' . $error->getMessage());
+            return $this->respondError($error->getMessage());
         }
     }
 }
