@@ -9,8 +9,8 @@ use Exception;
 class ReportCampaignService {
 
     public Campaign $campaign;
-    public object $reportInfo;
-    public function __construct(Campaign $campaign, object $reportInfo)
+    public array $reportInfo;
+    public function __construct(Campaign $campaign, array $reportInfo)
     {
         $this->campaign = $campaign;
         $this->reportInfo = $reportInfo;
