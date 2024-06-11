@@ -16,7 +16,7 @@ class ReportCampaignService {
         $this->reportInfo = $reportInfo;
     }
 
-    public function generate(): int|string
+    public function generate()
     {
         try {
             $data = [
