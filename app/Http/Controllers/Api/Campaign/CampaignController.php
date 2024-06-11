@@ -27,6 +27,7 @@ use F9Web\ApiResponseHelpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CampaignController extends Controller
@@ -338,18 +339,26 @@ class CampaignController extends Controller
     public function generateReport(Campaign $campaign, Request $request)
     {
         try {
-            $reportInfo = $request->input('periodInfo');
-            Log::alert('$reportInfo: ' . json_encode($reportInfo));
+//            $reportInfo = $request->input('periodInfo');
+//            Log::alert('$reportInfo: ' . json_encode($reportInfo));
+//
+//            $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
+//            $file = $reportGenerator->generate();
+//
+//            if ($file) {
+//                $path = storage_path() . '/app/public/report.csv';
+//                return response()->download($path);
+//            } else {
+//                throw new \Error('No report found');
+//            }
+            $reportData = "Це приклад звіту.\nДругий рядок звіту.";
 
-            $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
-            $file = $reportGenerator->generate();
+            // Генерація файлу, наприклад, .txt
+            $fileName = 'report.txt';
+            Storage::disk('local')->put($fileName, $reportData);
 
-            if ($file) {
-                $path = storage_path() . '/app/public/report.csv';
-                return response()->download($path);
-            } else {
-                throw new \Error('No report found');
-            }
+            // Повернення файлу у відповідь
+            return response()->download(storage_path("app/{$fileName}"));
         } catch (\Exception $error) {
             Log::error('generateReport: ' . $error->getMessage());
             return $this->respondError($error->getMessage());
