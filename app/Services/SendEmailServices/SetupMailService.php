@@ -23,6 +23,11 @@ class SetupMailService
         try{
             Log::alert('Send Message Start');
 
+            $campaign = $this->campaignMessage->campaign;
+            if($campaign->status === 'stopped') {
+                throw new Error('Message not sent | Campaign Stopped');
+            }
+
             if($this->mailbox->email_provider === 'gmail') {
 
                 $gmailService = new GmailService();

@@ -35,7 +35,12 @@ class SetupCampaignService
     public function setup(): void
     {
         try {
-            Log::alert('Setup');
+            Log::alert('Setup[' . $this->campaign->name . ']');
+
+            if($this->campaign->status === 'stopped') {
+                Log::alert('Setup[' . $this->campaign->name . '] - STOPPED');
+                return;
+            }
 
             $stepsProspectsCount = $this->getAvailableProspectCountForEachStep();
             Log::alert(json_encode("Step prospects count"));
