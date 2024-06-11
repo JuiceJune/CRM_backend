@@ -338,19 +338,10 @@ class CampaignController extends Controller
     public function generateReport(Campaign $campaign, Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $reportInfo = $request->input('report-info');
+            $reportInfo = $request->input('periodInfo');
+            Log::alert('$reportInfo: ' . json_encode($reportInfo));
 
-            if (!empty($reportInfo)) {
-                $reportInfoObject = json_decode($reportInfo);
-
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new \InvalidArgumentException('Invalid JSON provided for report-info: ' . json_last_error_msg());
-                }
-            } else {
-                throw new \InvalidArgumentException('Empty report-info provided');
-            }
-
-            $reportGenerator = new ReportCampaignService($campaign, $reportInfoObject);
+            $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
             $link = $reportGenerator->generate();
 
             if ($link) {
