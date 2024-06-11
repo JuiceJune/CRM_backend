@@ -358,7 +358,9 @@ class CampaignController extends Controller
             Storage::disk('local')->put($fileName, $reportData);
 
             // Повернення файлу у відповідь
-            return response()->download(storage_path("app/{$fileName}"));
+            return response()->download(storage_path("app/{$fileName}"), $fileName, [
+                'Content-Type' => 'text/plain',
+            ]);
         } catch (\Exception $error) {
             Log::error('generateReport: ' . $error->getMessage());
             return $this->respondError($error->getMessage());
