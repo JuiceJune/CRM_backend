@@ -35,7 +35,7 @@ class ReportCampaignService {
 
             fclose($file);
 
-            return asset('storage/' . $fileName);
+            return $file;
         } catch (Exception $error) {
             Log::error('ReportCampaignService generate(): ' . $error->getMessage());
             return 0;

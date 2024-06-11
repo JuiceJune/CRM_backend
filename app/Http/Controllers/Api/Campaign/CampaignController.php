@@ -335,17 +335,18 @@ class CampaignController extends Controller
         }
     }
 
-    public function generateReport(Campaign $campaign, Request $request): \Illuminate\Http\JsonResponse
+    public function generateReport(Campaign $campaign, Request $request)
     {
         try {
             $reportInfo = $request->input('periodInfo');
             Log::alert('$reportInfo: ' . json_encode($reportInfo));
 
             $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
-            $link = $reportGenerator->generate();
+            $file = $reportGenerator->generate();
 
-            if ($link) {
-                return $this->respondOk($link);
+            if ($file) {
+                $path = storage_path() . '/app/public/report.csv';
+                return response()->download($path);
             } else {
                 throw new \Error('No report found');
             }
