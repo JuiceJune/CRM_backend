@@ -6,12 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Campaign\CampaignStoreRequest;
 use App\Http\Requests\Campaign\CampaignUpdateRequest;
 use App\Http\Resources\Campaign\CampaignEditResource;
-use App\Http\Resources\Campaign\CampaignResource;
 use App\Http\Resources\Campaign\CampaignShowResource;
+use App\Http\Resources\Campaign\CampaignsTableInProjectResource;
 use App\Http\Resources\Mailbox\MailboxCampaignCreateResource;
 use App\Jobs\SetupCampaignJob;
 use App\Jobs\StopCampaignJob;
-use App\Logging\CampaignLogger;
 use App\Models\Campaign;
 use App\Models\CampaignMessage;
 use App\Models\CampaignStep;
@@ -46,7 +45,7 @@ class CampaignController extends Controller
 
             $campaigns = $query->get();
 
-            return response()->json(CampaignResource::collection($campaigns));
+            return response()->json(CampaignsTableInProjectResource::collection($campaigns));
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
         }
