@@ -25,17 +25,17 @@ class ReportCampaignService {
                 ['Jane Doe', 'jane@example.com', 28],
             ];
 
-            $fileName = 'report.csv';
+            $callback = function() use ($data) {
+                $file = fopen('php://output', 'w');
 
-            $file = fopen(storage_path('app/public/' . $fileName), 'w');
+                foreach ($data as $row) {
+                    fputcsv($file, $row);
+                }
 
-            foreach ($data as $row) {
-                fputcsv($file, $row);
-            }
+                fclose($file);
+            };
 
-            fclose($file);
-
-            return $file;
+            return $callback;
         } catch (Exception $error) {
             Log::error('ReportCampaignService generate(): ' . $error->getMessage());
             return 0;

@@ -339,28 +339,20 @@ class CampaignController extends Controller
     public function generateReport(Campaign $campaign, Request $request)
     {
         try {
-//            $reportInfo = $request->input('periodInfo');
-//            Log::alert('$reportInfo: ' . json_encode($reportInfo));
-//
-//            $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
-//            $file = $reportGenerator->generate();
-//
-//            if ($file) {
-//                $path = storage_path() . '/app/public/report.csv';
-//                return response()->download($path);
-//            } else {
-//                throw new \Error('No report found');
-//            }
-            $reportData = "Це приклад звіту.\nДругий рядок звіту.";
+            $reportInfo = $request->input('periodInfo');
+            Log::alert('$reportInfo: ' . json_encode($reportInfo));
 
-            // Генерація файлу, наприклад, .txt
-            $fileName = 'report.txt';
-            Storage::disk('local')->put($fileName, $reportData);
+            $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
+            $callback = $reportGenerator->generate();
 
-            // Повернення файлу у відповідь
-            return response()->download(storage_path("app/{$fileName}"), $fileName, [
-                'Content-Type' => 'text/plain',
-            ]);
+            if ($callback) {
+                return response()->stream($callback, 200, [
+                    'Content-Type' => 'text/csv',
+                    'X-File-Name' => 'report1.csv'
+                ]);
+            } else {
+                throw new \Error('No report found');
+            }
         } catch (\Exception $error) {
             Log::error('generateReport: ' . $error->getMessage());
             return $this->respondError($error->getMessage());
