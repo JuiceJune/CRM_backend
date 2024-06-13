@@ -80,15 +80,35 @@ class ReportProjectService {
 
             foreach ($campaigns as $campaign) {
                 $campaignStatisticService = new StatisticCampaignService($campaign);
+
                 $sent = $campaignStatisticService->sentTime($this->from, $this->to);
                 $delivered = $campaignStatisticService->deliveredTime($this->from, $this->to);
                 $opened = $campaignStatisticService->openedTime($this->from, $this->to);
                 $responded = $campaignStatisticService->respondedTime($this->from, $this->to);
                 $bounced = $campaignStatisticService->bouncedTime($this->from, $this->to);
+
+                $bouncedRate = $sent > 0 ? ($bounced * 100 / $sent) : 0;
+                $openedRate = $delivered > 0 ? ($opened * 100 / $delivered) : 0;
+                $respondedRate = $delivered > 0 ? ($responded * 100 / $delivered) : 0;
+
                 $data[] = [
-                    $campaign->id, $campaign->name, $campaign->status, $campaign->mailbox->email ?? null, $sent,
-                    $bounced, $bounced * 100 / $sent, $opened, $opened * 100 / $delivered, 0, $bounced, $delivered,
-                    $responded, $responded * 100 / $delivered, 0, 0, 0
+                    $campaign->id,
+                    $campaign->name,
+                    $campaign->status,
+                    $campaign->mailbox->email ?? null,
+                    $sent,
+                    $bounced,
+                    $bouncedRate,
+                    $opened,
+                    $openedRate,
+                    0,
+                    $bounced,
+                    $delivered,
+                    $responded,
+                    $respondedRate,
+                    0,
+                    0,
+                    0
                 ];
             }
 
