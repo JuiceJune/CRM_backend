@@ -192,7 +192,7 @@ class ProjectController extends Controller
     public function generateReport(Project $project, Request $request)
     {
         try {
-            $reportInfo = $request->input('periodInfo');
+            $reportInfo = $request->input('reportInfo');
             Log::alert('$reportInfo: ' . json_encode($reportInfo));
 
             $reportGenerator = new ReportProjectService($project, $reportInfo);

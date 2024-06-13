@@ -58,12 +58,40 @@ class StatisticCampaignService
         }
     }
 
+    public function deliveredTime(DateTime $from, DateTime $to): int
+    {
+        try {
+            return $this->campaign->campaignMessages()
+                ->where('type', 'from me')
+                ->whereNotIn('status', ['pending', 'scheduled', 'bounced'])
+                ->whereBetween('sent_time', [$from, $to])
+                ->count();
+        } catch (\Exception $error) {
+            Log::error('DeliveredAllTime: ' . $error->getMessage());
+            return 0;
+        }
+    }
+
     public function invalidAllTime(): int
     {
         try {
             return $this->campaign->campaignMessages()
                 ->where('type', 'from me')
                 ->where('status', 'invalid')
+                ->count();
+        } catch (\Exception $error) {
+            Log::error('InvalidAllTime: ' . $error->getMessage());
+            return 0;
+        }
+    }
+
+    public function invalidTime(DateTime $from, DateTime $to): int
+    {
+        try {
+            return $this->campaign->campaignMessages()
+                ->where('type', 'from me')
+                ->where('status', 'invalid')
+                ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
             Log::error('InvalidAllTime: ' . $error->getMessage());
@@ -84,6 +112,20 @@ class StatisticCampaignService
         }
     }
 
+    public function bouncedTime(DateTime $from, DateTime $to): int
+    {
+        try {
+            return $this->campaign->campaignMessages()
+                ->where('type', 'from me')
+                ->where('status', 'bounced')
+                ->whereBetween('sent_time', [$from, $to])
+                ->count();
+        } catch (\Exception $error) {
+            Log::error('BouncedAllTime: ' . $error->getMessage());
+            return 0;
+        }
+    }
+
     public function openedAllTime(): int
     {
         try {
@@ -97,12 +139,40 @@ class StatisticCampaignService
         }
     }
 
+    public function openedTime(DateTime $from, DateTime $to): int
+    {
+        try {
+            return $this->campaign->campaignMessages()
+                ->where('type', 'from me')
+                ->whereNotIn('status', ['pending', 'scheduled', 'sent', 'bounced'])
+                ->whereBetween('sent_time', [$from, $to])
+                ->count();
+        } catch (\Exception $error) {
+            Log::error('OpenedAllTime: ' . $error->getMessage());
+            return 0;
+        }
+    }
+
     public function respondedAllTime(): int
     {
         try {
             return $this->campaign->campaignMessages()
                 ->where('type', 'from me')
                 ->where('status', 'replayed')
+                ->count();
+        } catch (\Exception $error) {
+            Log::error('RespondedAllTime: ' . $error->getMessage());
+            return 0;
+        }
+    }
+
+    public function respondedTime(DateTime $from, DateTime $to): int
+    {
+        try {
+            return $this->campaign->campaignMessages()
+                ->where('type', 'from me')
+                ->where('status', 'replayed')
+                ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
             Log::error('RespondedAllTime: ' . $error->getMessage());

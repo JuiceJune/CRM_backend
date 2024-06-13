@@ -24,20 +24,45 @@ class ReportProjectService {
         $this->project = $project;
         $this->reportInfo = $reportInfo;
 
-        switch ($this->reportInfo['period']['id']){
+        switch ($reportInfo['period']['id']){
             case 1:
+            default:
                 $from = new DateTime('now');
                 $to = new DateTime('now');
 
                 $this->from = $from->setTime(0, 0);
                 $this->to = $to->setTime(23, 59, 59);
-
-                Log::alert('From: ' . json_encode($this->from));
-                Log::alert('To: ' . json_encode($this->to));
                 break;
-            case 2:
+
+            case 2: // Вчора
+                $from = new DateTime('yesterday');
+                $to = new DateTime('yesterday');
+                $this->from = $from->setTime(0, 0);
+                $this->to = $to->setTime(23, 59, 59);
+                break;
+
+            case 3: // Останні 7 днів
+                $from = new DateTime('now');
+                $to = new DateTime('now');
+                $this->from = $from->modify('-6 days')->setTime(0, 0);
+                $this->to = $to->setTime(23, 59, 59);
+                break;
+
+            case 4: // Останні 30 днів
+                $from = new DateTime('now');
+                $to = new DateTime('now');
+                $this->from = $from->modify('-29 days')->setTime(0, 0);
+                $this->to = $to->setTime(23, 59, 59);
+                break;
+
+            case 5: // custom range
+                $this->from = new DateTime($reportInfo['from']);
+                $this->to = new DateTime($reportInfo['to']);
                 break;
         }
+
+        Log::alert('From: ' . json_encode($this->from));
+        Log::alert('To: ' . json_encode($this->to));
     }
 
     public function generate()
@@ -46,13 +71,25 @@ class ReportProjectService {
             $campaigns = $this->project->campaigns;
 
             $data = [
-                ['campaign_id', 'campaign', 'campaign_status', 'mailbox', 'sent'],
+                [
+                    'campaign_id', 'campaign', 'campaign_status', 'mailbox', 'contacted_prospects',
+                    'bounced', 'bounced_sent', 'opened', 'opened_rete', 'clicked', 'opt_out', 'delivered',
+                    'responded', 'responded_rate', 'interested_yes', 'interested_maybe', 'interested_no'
+                ],
             ];
 
             foreach ($campaigns as $campaign) {
                 $campaignStatisticService = new StatisticCampaignService($campaign);
                 $sent = $campaignStatisticService->sentTime($this->from, $this->to);
-                $data[] = [$campaign->id, $campaign->name, $campaign->status, $campaign->mailbox->email, $sent];
+                $delivered = $campaignStatisticService->deliveredTime($this->from, $this->to);
+                $opened = $campaignStatisticService->openedTime($this->from, $this->to);
+                $responded = $campaignStatisticService->respondedTime($this->from, $this->to);
+                $bounced = $campaignStatisticService->bouncedTime($this->from, $this->to);
+                $data[] = [
+                    $campaign->id, $campaign->name, $campaign->status, $campaign->mailbox->email ?? null, $sent,
+                    $bounced, $bounced * 100 / $sent, $opened, $opened * 100 / $delivered, 0, $bounced, $delivered,
+                    $responded, $responded * 100 / $delivered, 0, 0, 0
+                ];
             }
 
             $callback = function() use ($data) {
