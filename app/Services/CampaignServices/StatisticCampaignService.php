@@ -4,6 +4,7 @@ namespace App\Services\CampaignServices;
 
 use App\Models\Campaign;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Support\Facades\Log;
 
 class StatisticCampaignService
@@ -23,6 +24,20 @@ class StatisticCampaignService
             return $this->campaign->campaignMessages()
                 ->where('type', 'from me')
                 ->whereNotIn('status', ['pending', 'scheduled'])
+                ->count();
+        } catch (\Exception $error) {
+            Log::error('SentAllTime: ' . $error->getMessage());
+            return 0;
+        }
+    }
+
+    public function sentTime(DateTime $from, DateTime $to): int
+    {
+        try {
+            return $this->campaign->campaignMessages()
+                ->where('type', 'from me')
+                ->whereNotIn('status', ['pending', 'scheduled'])
+                ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
             Log::error('SentAllTime: ' . $error->getMessage());

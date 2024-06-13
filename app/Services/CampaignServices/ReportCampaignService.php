@@ -2,6 +2,9 @@
 
 namespace App\Services\CampaignServices;
 
+use DateInterval;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Support\Facades\Log;
 use App\Models\Campaign;
 use Exception;
@@ -10,19 +13,47 @@ class ReportCampaignService {
 
     public Campaign $campaign;
     public array $reportInfo;
+
+    public DateTime $from;
+    public DateTime $to;
+
+    /**
+     * @throws Exception
+     */
     public function __construct(Campaign $campaign, array $reportInfo)
     {
         $this->campaign = $campaign;
         $this->reportInfo = $reportInfo;
+        $timezone = new DateTimeZone($this->campaign->timezone);
+
+        switch ($this->reportInfo['period']['id']){
+            case 1:
+                $from = new DateTime('now', $timezone);
+                $to = new DateTime('now', $timezone);
+
+                $this->from = $from->setTime(0, 0);
+                $this->to = $to->setTime(23, 59, 59);
+
+                Log::alert('From: ' . json_encode($this->from));
+                Log::alert('To: ' . json_encode($this->to));
+                break;
+            case 2:
+                break;
+        }
     }
 
     public function generate()
     {
         try {
+
+            $campaignStatisticService = new StatisticCampaignService($this->campaign);
+            $sent = $campaignStatisticService->sentTime($this->from, $this->to);
+
+            Log::alert('Sent: ' . $sent);
+
             $data = [
-                ['Name', 'Email', 'Age'],
-                ['John Doe', 'john@example.com', 25],
-                ['Jane Doe', 'jane@example.com', 28],
+                ['campaign_id', 'campaign', 'campaign_status', 'mailbox', 'sent'],
+                [$this->campaign->id, $this->campaign->name, $this->campaign->status, $this->campaign->mailbox->email, $sent],
             ];
 
             $callback = function() use ($data) {
