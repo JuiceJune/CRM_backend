@@ -12,14 +12,18 @@ use App\Http\Resources\Project\ProjectResource;
 use App\Http\Resources\Project\ProjectsAllResource;
 use App\Http\Resources\Project\ProjectStoreResource;
 use App\Http\Resources\User\UserCreateResource;
+use App\Models\Campaign;
 use App\Models\Client;
 use App\Models\User;
 use App\Models\Mailbox;
 use App\Models\Project;
+use App\Services\CampaignServices\ReportCampaignService;
+use App\Services\ProjectServices\ReportProjectService;
 use F9Web\ApiResponseHelpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class ProjectController extends Controller
 {
@@ -181,6 +185,29 @@ class ProjectController extends Controller
             return $this->respondOk($project->name);
         } catch (Exception $error) {
             DB::rollBack();
+            return $this->respondError($error->getMessage());
+        }
+    }
+
+    public function generateReport(Project $project, Request $request)
+    {
+        try {
+            $reportInfo = $request->input('periodInfo');
+            Log::alert('$reportInfo: ' . json_encode($reportInfo));
+
+            $reportGenerator = new ReportProjectService($project, $reportInfo);
+            $callback = $reportGenerator->generate();
+
+            if ($callback) {
+                return response()->stream($callback, 200, [
+                    'Content-Type' => 'text/csv',
+                    'X-File-Name' => 'report1.csv'
+                ]);
+            } else {
+                throw new \Error('No report found');
+            }
+        } catch (\Exception $error) {
+            Log::error('generateReport: ' . $error->getMessage());
             return $this->respondError($error->getMessage());
         }
     }

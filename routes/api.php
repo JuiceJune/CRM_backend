@@ -98,6 +98,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/{project:uuid}/edit', [ProjectController::class, 'edit']);
         Route::put('/{project:uuid}', [ProjectController::class, 'update']);
         Route::delete('/{project:uuid}', [ProjectController::class, 'destroy']);
+        Route::post('/{project:uuid}', [ProjectController::class, 'generateReport']);
     });
 
     Route::group(['prefix' => 'prospects'], function () {
