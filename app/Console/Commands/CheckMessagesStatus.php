@@ -31,7 +31,7 @@ class CheckMessagesStatus extends Command
             Log::channel('dev-check-message-status')->alert('=======================CHECK MESSAGES STATUS START=======================');
 
             $allSentMessages = CampaignMessage::where('type', 'from me')
-                ->whereNotIn('status', ['bounced', 'unsubscribe', 'replayed'])->get();
+                ->whereNotIn('status', ['bounced', 'unsubscribe', 'replayed', 'pending'])->get();
 
             $gmailService = new GmailService();
 

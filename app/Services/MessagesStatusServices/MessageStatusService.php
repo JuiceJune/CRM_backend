@@ -13,7 +13,7 @@ class MessageStatusService
 {
     protected CampaignMessage $campaignMessage;
     protected MailboxService $mailboxService;
-    protected Mailbox $mailbox;
+    protected ?Mailbox $mailbox;
 
     public function __construct(CampaignMessage $campaignMessage, MailboxService $mailboxService)
     {
@@ -144,6 +144,13 @@ class MessageStatusService
     public function checkMessageStatus(): array
     {
         try {
+            if ($this->mailbox === null) {
+                return [
+                    'status' => 'error',
+                    'data' => 'Campaign mailbox does not exist'
+                ];
+            }
+
             $campaignMessageService = new CampaignMessageService($this->campaignMessage);
 
             $threadResponse = $this->mailboxService->getThread($this->mailbox['token'], $this->campaignMessage['thread_id']);
