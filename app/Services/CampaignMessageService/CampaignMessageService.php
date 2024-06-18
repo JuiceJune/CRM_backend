@@ -157,12 +157,12 @@ class CampaignMessageService
         }
     }
 
-    public function replayed($message): void
+    public function responded($message): void
     {
         DB::beginTransaction();
         try {
-            $this->campaignMessage->update(['status' => 'replayed']);
-            $this->campaignProspect->update(['status' => 'replayed']);
+            $this->campaignMessage->update(['status' => 'responded']);
+            $this->campaignProspect->update(['status' => 'responded']);
 
             $dateTime = Carbon::createFromTimestampMs($message->internalDate)->setTimezone($this->campaign->timezone);
 
@@ -195,7 +195,7 @@ class CampaignMessageService
 
             DB::commit();
         } catch (Exception $error) {
-            Log::channel('dev-check-message-status')->error('Replayed: ' . $error->getMessage());
+            Log::channel('dev-check-message-status')->error('Responded: ' . $error->getMessage());
             DB::rollBack();
         }
     }

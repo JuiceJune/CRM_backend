@@ -123,19 +123,19 @@ class GmailService implements MailboxService
             $prospect = $campaignMessage->prospect;
 
             $campaignStep = $campaignMessage->campaignStep;
-            $replayedThreadId = null;
-            $replayedMessageStringId = null;
+            $respondedThreadId = null;
+            $respondedMessageStringId = null;
             if($campaignStep['reply_to_exist_thread']['reply'] && $campaignStep['reply_to_exist_thread']['step']) {
                 $campaign = $campaignMessage->campaign;
-                $replayedStep = $campaign->step($campaignStep['reply_to_exist_thread']['step']);
-                $replayedCampaignMessage = CampaignMessage::where('campaign_id', $campaign->id)
-                    ->where('campaign_step_id', $replayedStep->id)
+                $respondedStep = $campaign->step($campaignStep['reply_to_exist_thread']['step']);
+                $respondedCampaignMessage = CampaignMessage::where('campaign_id', $campaign->id)
+                    ->where('campaign_step_id', $respondedStep->id)
                     ->where('prospect_id', $prospect->id)
                     ->where('type', 'from me')
                     ->first();
-                if($replayedCampaignMessage) {
-                    $replayedThreadId = $replayedCampaignMessage['thread_id'];
-                    $replayedMessageStringId = $replayedCampaignMessage['message_string_id'];
+                if($respondedCampaignMessage) {
+                    $respondedThreadId = $respondedCampaignMessage['thread_id'];
+                    $respondedMessageStringId = $respondedCampaignMessage['message_string_id'];
                 } else {
                     throw new Error('Not found message to followup');
                 }
@@ -156,7 +156,7 @@ class GmailService implements MailboxService
             $signature = str_replace('{{UNSUBSCRIBE}}', "{$frontendUrl}/unsubscribe/{$campaignMessage['uuid']}", $signature);
 
             $messageObj = $this->generateMessage($senderName, $senderEmail, $prospect['email'], $subject, $message,
-                $signature, $campaignMessage['uuid'], $replayedThreadId, $replayedMessageStringId);
+                $signature, $campaignMessage['uuid'], $respondedThreadId, $respondedMessageStringId);
 
             if(!$messageObj) {
                 throw new Error('Generate message problem');

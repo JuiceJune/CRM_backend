@@ -158,7 +158,7 @@ class StatisticCampaignService
         try {
             return $this->campaign->campaignMessages()
                 ->where('type', 'from me')
-                ->where('status', 'replayed')
+                ->where('status', 'responded')
                 ->count();
         } catch (\Exception $error) {
             Log::channel('dev-campaign-statistic')->error('RespondedAllTime: ' . $error->getMessage());
@@ -171,7 +171,7 @@ class StatisticCampaignService
         try {
             return $this->campaign->campaignMessages()
                 ->where('type', 'from me')
-                ->where('status', 'replayed')
+                ->where('status', 'responded')
                 ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {

@@ -311,7 +311,7 @@ class CampaignController extends Controller
     public function openEmail(CampaignMessage $campaignMessage, Request $request)
     {
         try {
-            if(!in_array($campaignMessage['status'], ['unsubscribe', 'bounced', 'replayed', 'opened'])) {
+            if(!in_array($campaignMessage['status'], ['unsubscribe', 'bounced', 'responded', 'opened'])) {
                 $campaignMessageService = new CampaignMessageService($campaignMessage);
                 $campaignMessageService->opened($request->ip());
             }

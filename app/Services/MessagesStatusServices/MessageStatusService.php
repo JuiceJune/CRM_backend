@@ -81,7 +81,7 @@ class MessageStatusService
     protected function checkPreviousMessages($previousMessages): array {
     try {
         foreach($previousMessages as $previousMessage) {
-            if($previousMessage['status'] != 'replayed' && $previousMessage['status'] != 'unsubscribe' && $previousMessage['status'] != 'bounced') {
+            if($previousMessage['status'] != 'responded' && $previousMessage['status'] != 'unsubscribe' && $previousMessage['status'] != 'bounced') {
 
                 $campaignMessageService = new CampaignMessageService($previousMessage);
 
@@ -108,10 +108,10 @@ class MessageStatusService
                         foreach ($messages as $messageKey => $message) {
                             foreach ($message->payload->headers as $header) {
                                 if ($header->name === 'From' && !str_contains($header->value, $this->mailbox->email)) {
-                                    $campaignMessageService->replayed($message);
+                                    $campaignMessageService->responded($message);
                                     return [
                                         'status' => 'not-send',
-                                        'data' => 'Replayed'
+                                        'data' => 'Responded'
                                     ];
                                 }
                             }
@@ -123,7 +123,7 @@ class MessageStatusService
             } else {
                 return [
                     "status" => "not-send",
-                    "data" => "replayed|unsubscribed|bounced"
+                    "data" => "responded|unsubscribed|bounced"
                 ];
             }
         }
@@ -175,10 +175,10 @@ class MessageStatusService
                     foreach ($messages as $messageKey => $message) {
                         foreach ($message->payload->headers as $header) {
                             if ($header->name === 'From' && !str_contains($header->value, $this->mailbox->email)) {
-                                $campaignMessageService->replayed($message);
+                                $campaignMessageService->responded($message);
                                 return [
                                     'status' => 'success',
-                                    'data' => 'Replayed'
+                                    'data' => 'Responded'
                                 ];
                             }
                         }

@@ -83,7 +83,7 @@ class StatisticVersionService
         try {
             return $this->version->messages()
                 ->where('type', 'from me')
-                ->where('status', 'replayed')
+                ->where('status', 'responded')
                 ->count();
         } catch (\Exception $error) {
             Log::error('RespondedAllTime: ' . $error->getMessage());

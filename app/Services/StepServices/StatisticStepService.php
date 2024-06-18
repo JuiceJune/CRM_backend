@@ -83,7 +83,7 @@ class StatisticStepService
         try {
             return $this->step->messages()
                 ->where('type', 'from me')
-                ->where('status', 'replayed')
+                ->where('status', 'responded')
                 ->count();
         } catch (\Exception $error) {
             Log::error('RespondedAllTime: ' . $error->getMessage());
