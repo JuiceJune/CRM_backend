@@ -53,7 +53,7 @@ class SetupMailService
         } catch (\Exception $error) {
             Log::channel('dev-sent-message')->error("Setup Mail Service: " . $error->getMessage());
         } finally {
-            Log::channel('dev-sent-message')->alert("Send Message ID[{$this->campaignMessage->id}]====================END");
+            Log::channel('dev-sent-message')->alert("Send Message ID[{$this->campaignMessage->id}]====================END\n");
         }
     }
 }

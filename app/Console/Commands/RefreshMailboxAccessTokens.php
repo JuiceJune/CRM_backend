@@ -28,6 +28,8 @@ class RefreshMailboxAccessTokens extends Command
     public function handle()
     {
         try {
+            Log::channel('dev-user-token-update')->alert('=======================REFRESH TOKENs START=======================');
+
             $mailboxes = Mailbox::all();
             foreach ($mailboxes as $mailbox) {
                 if($mailbox->email_provider === 'gmail') {
@@ -47,6 +49,8 @@ class RefreshMailboxAccessTokens extends Command
             }
         } catch (Exception $error) {
             Log::channel('dev-user-token-update')->error('Refresh Token: ' . $error->getMessage());
+        } finally {
+            Log::channel('dev-user-token-updatedev-user-token-update')->alert('=======================REFRESH TOKENs END=======================');
         }
     }
 }

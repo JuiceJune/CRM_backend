@@ -21,9 +21,13 @@ class StopCampaignService {
     public function stopCampaign(): void
     {
         try {
+            Log::channel('dev-campaign-process')->alert('STOP[' . $this->campaign->name . ']===============START');
+
             $this->campaignJobService->deleteCampaignJobs($this->campaign);
         } catch (Exception $error) {
             Log::channel('dev-campaign-process')->error('StopCampaign: ' . $error->getMessage());
+        } finally {
+            Log::channel('dev-campaign-process')->alert('STOP[' . $this->campaign->name . "]===============END\n");
         }
     }
 }

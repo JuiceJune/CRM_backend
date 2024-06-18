@@ -49,7 +49,7 @@ class CheckMessagesStatus extends Command
         } catch (Exception $error) {
             Log::channel('dev-check-message-status')->error('Command: messages:check-status: ' . $error->getMessage());
         } finally {
-            Log::channel('dev-check-message-status')->alert('=======================CHECK MESSAGES STATUS END=======================');
+            Log::channel('dev-check-message-status')->alert("=======================CHECK MESSAGES STATUS END=======================\n");
         }
     }
 }

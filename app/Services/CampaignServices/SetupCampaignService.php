@@ -35,7 +35,7 @@ class SetupCampaignService
     public function setup(): void
     {
         try {
-            Log::channel('dev-campaign-process')->alert('Setup[' . $this->campaign->name . ']');
+            Log::channel('dev-campaign-process')->alert('Setup[' . $this->campaign->name . ']===============START');
 
             if($this->campaign->status === 'stopped') {
                 Log::channel('dev-campaign-process')->alert('Setup[' . $this->campaign->name . '] - STOPPED');
@@ -64,6 +64,7 @@ class SetupCampaignService
             Log::error(json_encode($error));
         } finally {
             $this->scheduleCampaignSetup();
+            Log::channel('dev-campaign-process')->alert('Setup[' . $this->campaign->name . "]===============END\n");
         }
     }
 
