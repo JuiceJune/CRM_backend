@@ -50,7 +50,7 @@ class RefreshMailboxAccessTokens extends Command
         } catch (Exception $error) {
             Log::channel('dev-user-token-update')->error('Refresh Token: ' . $error->getMessage());
         } finally {
-            Log::channel('dev-user-token-updatedev-user-token-update')->alert('=======================REFRESH TOKENs END=======================');
+            Log::channel('dev-user-token-update')->alert('=======================REFRESH TOKENs END=======================');
         }
     }
 }
