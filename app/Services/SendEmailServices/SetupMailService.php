@@ -21,7 +21,7 @@ class SetupMailService
     public function setup(): void
     {
         try{
-            Log::channel('dev-sent-message')->alert('Send Message Start');
+            Log::channel('dev-sent-message')->alert("Send Message ID[{$this->campaignMessage->id}]====================START");
 
             $campaign = $this->campaignMessage->campaign;
             if($campaign->status === 'stopped') {
@@ -44,10 +44,16 @@ class SetupMailService
                     }
 
                     $campaignMessageService->sent($response, $gmailService);
+                    Log::channel('dev-sent-message')->alert("Message sent. From: {$response['from']}. To: {$response['to']}. Subject: {$response['subject']}");
+                    Log::channel('dev-sent-message')->alert("Message: {$response['message']}");
+                } else {
+                    Log::channel('dev-sent-message')->alert("Message can not be sent. Due status checker result.");
                 }
             }
         } catch (\Exception $error) {
             Log::channel('dev-sent-message')->error("Setup Mail Service: " . $error->getMessage());
+        } finally {
+            Log::channel('dev-sent-message')->alert("Send Message ID[{$this->campaignMessage->id}]====================END");
         }
     }
 }

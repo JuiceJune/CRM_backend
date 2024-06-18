@@ -93,7 +93,7 @@ class GmailService implements MailboxService
 
             return $gmailMessage;
         } catch (Exception $error) {
-            Log::channel('dev-mailbox')->error('GenerateMessage: ' . $error->getMessage());
+            Log::channel('dev-sent-message')->error('GenerateMessage: ' . $error->getMessage());
             return null;
         }
     }
@@ -242,7 +242,6 @@ class GmailService implements MailboxService
             $this->initializeClient($token);
             $gmail = new Gmail($this->client);
             $res = $gmail->users_messages->get('me', $messageId);
-            Log::channel('dev-mailbox')->alert('Message: ' . json_encode($res));
             return $res;
         } catch(Exception $e) {
             Log::channel('dev-mailbox')->error('GetMessage: ' . $e->getMessage());

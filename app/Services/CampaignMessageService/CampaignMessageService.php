@@ -271,12 +271,12 @@ class CampaignMessageService
             $statusCheckResponse = $checkMessageStatus->checkAllMessageHistory();
 
             if($statusCheckResponse['status'] === 'error' || $statusCheckResponse['status'] === 'not-send') {
-                Log::channel('dev-check-message-status')->alert('Message has not be sent: ' . $statusCheckResponse['data']);
+                Log::channel('dev-sent-message')->alert('Message has not be sent: ' . $statusCheckResponse['data']);
                 return 0;
             }
             return 1;
         } catch (Exception $error) {
-            Log::channel('dev-check-message-status')->error("CampaignMessageService -> CheckMessageStatus: " . $error->getMessage());
+            Log::channel('dev-sent-message')->error("CampaignMessageService -> CheckMessageStatus: " . $error->getMessage());
             return 0;
         }
     }
