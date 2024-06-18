@@ -26,7 +26,7 @@ class StatisticCampaignService
                 ->whereNotIn('status', ['pending', 'scheduled'])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('SentAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('SentAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -40,7 +40,7 @@ class StatisticCampaignService
                 ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('SentAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('SentAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -53,7 +53,7 @@ class StatisticCampaignService
                 ->whereNotIn('status', ['pending', 'scheduled', 'bounced'])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('DeliveredAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('DeliveredAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -67,7 +67,7 @@ class StatisticCampaignService
                 ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('DeliveredAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('DeliveredAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -80,7 +80,7 @@ class StatisticCampaignService
                 ->where('status', 'invalid')
                 ->count();
         } catch (\Exception $error) {
-            Log::error('InvalidAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('InvalidAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -94,7 +94,7 @@ class StatisticCampaignService
                 ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('InvalidAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('InvalidAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -107,7 +107,7 @@ class StatisticCampaignService
                 ->where('status', 'bounced')
                 ->count();
         } catch (\Exception $error) {
-            Log::error('BouncedAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('BouncedAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -121,7 +121,7 @@ class StatisticCampaignService
                 ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('BouncedAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('BouncedAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -134,7 +134,7 @@ class StatisticCampaignService
                 ->whereNotIn('status', ['pending', 'scheduled', 'sent', 'bounced'])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('OpenedAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('OpenedAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -148,7 +148,7 @@ class StatisticCampaignService
                 ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('OpenedAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('OpenedAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -161,7 +161,7 @@ class StatisticCampaignService
                 ->where('status', 'replayed')
                 ->count();
         } catch (\Exception $error) {
-            Log::error('RespondedAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('RespondedAllTime: ' . $error->getMessage());
             return 0;
         }
     }
@@ -175,7 +175,7 @@ class StatisticCampaignService
                 ->whereBetween('sent_time', [$from, $to])
                 ->count();
         } catch (\Exception $error) {
-            Log::error('RespondedAllTime: ' . $error->getMessage());
+            Log::channel('dev-campaign-statistic')->error('RespondedAllTime: ' . $error->getMessage());
             return 0;
         }
     }

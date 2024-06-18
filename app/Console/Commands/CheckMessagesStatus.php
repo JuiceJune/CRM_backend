@@ -28,7 +28,7 @@ class CheckMessagesStatus extends Command
     public function handle()
     {
         try {
-            Log::alert('=======================CHECK MESSAGES STATUS START=======================');
+            Log::channel('dev-check-message-status')->alert('=======================CHECK MESSAGES STATUS START=======================');
 
             $allSentMessages = CampaignMessage::where('type', 'from me')
                 ->whereNotIn('status', ['bounced', 'unsubscribe', 'replayed'])->get();
@@ -41,15 +41,15 @@ class CheckMessagesStatus extends Command
                 $res = $messageStatusService->checkMessageStatus();
 
                 if($res['status'] === 'success') {
-                    Log::alert('CampaignMessage: ' . $sentMessage['id'] . " | Status success: " . $res['data']);
+                    Log::channel('dev-check-message-status')->alert('CampaignMessage: ' . $sentMessage['id'] . " | Status success: " . $res['data']);
                 } else {
-                    Log::error('CampaignMessage: ' . $sentMessage['id'] . " | Status Error: " . $res['data']);
+                    Log::channel('dev-check-message-status')->error('CampaignMessage: ' . $sentMessage['id'] . " | Status Error: " . $res['data']);
                 }
             }
         } catch (Exception $error) {
-            Log::error('Command: messages:check-status: ' . $error->getMessage());
+            Log::channel('dev-check-message-status')->error('Command: messages:check-status: ' . $error->getMessage());
         } finally {
-            Log::alert('=======================CHECK MESSAGES STATUS END=======================');
+            Log::channel('dev-check-message-status')->alert('=======================CHECK MESSAGES STATUS END=======================');
         }
     }
 }

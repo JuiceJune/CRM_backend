@@ -41,12 +41,12 @@ class RefreshMailboxAccessTokens extends Command
                             'scopes' => $response['scope'],
                             'last_token_refresh' => Carbon::createFromTimestamp($response['created']),
                         ]);
-                        Log::alert("Token for mailbox [{$mailbox->email}] refreshed successfully");
+                        Log::channel('dev-user-token-update')->alert("Token for mailbox [{$mailbox->email}] refreshed successfully");
                     }
                 }
             }
         } catch (Exception $error) {
-            Log::error('Refresh Token: ' . $error->getMessage());
+            Log::channel('dev-user-token-update')->error('Refresh Token: ' . $error->getMessage());
         }
     }
 }

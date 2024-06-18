@@ -23,7 +23,7 @@ class StopCampaignService {
         try {
             $this->campaignJobService->deleteCampaignJobs($this->campaign);
         } catch (Exception $error) {
-            Log::error('StopCampaign: ' . $error->getMessage());
+            Log::channel('dev-campaign-process')->error('StopCampaign: ' . $error->getMessage());
         }
     }
 }

@@ -56,7 +56,7 @@ class GmailService implements MailboxService
             $client->setAccessToken($token);
             $this->setClient($client);
         } catch (Exception $error) {
-            Log::error('Initialize Client | Google | Token: ' . $token . ' | Error: ' . $error->getMessage());
+            Log::channel('dev-mailbox')->error('Initialize Client | Google | Token: ' . $token . ' | Error: ' . $error->getMessage());
         }
     }
 
@@ -93,7 +93,7 @@ class GmailService implements MailboxService
 
             return $gmailMessage;
         } catch (Exception $error) {
-            Log::error('GenerateMessage: ' . $error->getMessage());
+            Log::channel('dev-mailbox')->error('GenerateMessage: ' . $error->getMessage());
             return null;
         }
     }
@@ -112,7 +112,7 @@ class GmailService implements MailboxService
                 $subject,
             ];
         } catch (Exception $error) {
-            Log::error('SendMessage: ' . $error->getMessage());
+            Log::channel('dev-mailbox')->error('SendMessage: ' . $error->getMessage());
             return null;
         }
     }
@@ -179,7 +179,7 @@ class GmailService implements MailboxService
                 'token' => $token
             ];
         } catch (Exception $error) {
-            Log::error('SendMessage: ' . $error->getMessage());
+            Log::channel('dev-sent-message')->error('SendMessage: ' . $error->getMessage());
             return null;
         }
     }
@@ -214,7 +214,7 @@ class GmailService implements MailboxService
                 'data' => 'success'
             ];
         } catch (Exception $error) {
-            Log::error('SendTestMessage: ' . $error->getMessage());
+            Log::channel('dev-campaign-process')->error('SendTestMessage: ' . $error->getMessage());
             return [
                 'status' => 'error',
                 'data' => $error->getMessage(),
@@ -230,9 +230,9 @@ class GmailService implements MailboxService
             $res = $gmail->users_history->listUsersHistory('me', [
                 'startHistoryId' => $historyId
             ]);
-            Log::alert('History: ' . json_encode($res));
+            Log::channel('dev-mailbox')->alert('History: ' . json_encode($res));
         } catch(Exception $e) {
-            Log::error('GetHistory: ' . $e->getMessage());
+            Log::channel('dev-mailbox')->error('GetHistory: ' . $e->getMessage());
         }
     }
 
@@ -242,10 +242,10 @@ class GmailService implements MailboxService
             $this->initializeClient($token);
             $gmail = new Gmail($this->client);
             $res = $gmail->users_messages->get('me', $messageId);
-            Log::alert('Message: ' . json_encode($res));
+            Log::channel('dev-mailbox')->alert('Message: ' . json_encode($res));
             return $res;
         } catch(Exception $e) {
-            Log::error('GetMessage: ' . $e->getMessage());
+            Log::channel('dev-mailbox')->error('GetMessage: ' . $e->getMessage());
             return null;
         }
     }
@@ -264,7 +264,7 @@ class GmailService implements MailboxService
             }
             return $message_id;
         } catch(Exception $e) {
-            Log::error('GetMessageStringId: ' . $e->getMessage());
+            Log::channel('dev-mailbox')->error('GetMessageStringId: ' . $e->getMessage());
             return null;
         }
     }
@@ -280,7 +280,7 @@ class GmailService implements MailboxService
                 'data' => $res
             ];
         } catch(Exception $e) {
-            Log::error('GetThread: ' . $e->getMessage());
+            Log::channel('dev-mailbox')->error('GetThread: ' . $e->getMessage());
             return [
                 'status' => 'error',
                 'data' => $e->getMessage()
@@ -298,7 +298,7 @@ class GmailService implements MailboxService
             return $this->client->getAccessToken();
 
         } catch (Exception $error) {
-            Log::error('RefreshToken: ' . $error->getMessage());
+            Log::channel('dev-user-token-update')->error('RefreshToken: ' . $error->getMessage());
             return null;
         }
     }

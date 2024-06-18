@@ -34,8 +34,8 @@ class ReportCampaignService {
                 $this->from = $from->setTime(0, 0);
                 $this->to = $to->setTime(23, 59, 59);
 
-                Log::alert('From: ' . json_encode($this->from));
-                Log::alert('To: ' . json_encode($this->to));
+                Log::channel('dev-campaign-report')->alert('From: ' . json_encode($this->from));
+                Log::channel('dev-campaign-report')->alert('To: ' . json_encode($this->to));
                 break;
             case 2:
                 break;
@@ -49,7 +49,7 @@ class ReportCampaignService {
             $campaignStatisticService = new StatisticCampaignService($this->campaign);
             $sent = $campaignStatisticService->sentTime($this->from, $this->to);
 
-            Log::alert('Sent: ' . $sent);
+            Log::channel('dev-campaign-report')->alert('Sent: ' . $sent);
 
             $data = [
                 ['campaign_id', 'campaign', 'campaign_status', 'mailbox', 'sent'],
@@ -68,7 +68,7 @@ class ReportCampaignService {
 
             return $callback;
         } catch (Exception $error) {
-            Log::error('ReportCampaignService generate(): ' . $error->getMessage());
+            Log::channel('dev-campaign-report')->error('ReportCampaignService generate(): ' . $error->getMessage());
             return 0;
         }
     }

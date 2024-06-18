@@ -81,7 +81,7 @@ class CampaignMessageService
             $this->setupNextMessage();
 
         } catch (Exception $error) {
-            Log::error("CampaignMessageService->sent(): " . $error->getMessage());
+            Log::channel('dev-sent-message')->error("CampaignMessageService->sent(): " . $error->getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ class CampaignMessageService
                 $this->campaignProspect->update(['status' => 'end', 'step' => $this->campaignStep->step + 1]);
             }
         } catch (Exception $error) {
-            Log::error("CampaignMessageService->setupNextMessage(): " . $error->getMessage());
+            Log::channel('dev-check-message-status')->error("CampaignMessageService->setupNextMessage(): " . $error->getMessage());
         }
     }
 
@@ -131,7 +131,7 @@ class CampaignMessageService
                 'ip' => $ip
             ]);
         } catch (Exception $error) {
-            Log::error('Opened: ' . $error->getMessage());
+            Log::channel('dev-check-message-status')->error('Opened: ' . $error->getMessage());
         }
     }
 
@@ -152,7 +152,7 @@ class CampaignMessageService
 
             DB::commit();
         } catch (Exception $error) {
-            Log::error('Unsubscribe: ' . $error->getMessage());
+            Log::channel('dev-check-message-status')->error('Unsubscribe: ' . $error->getMessage());
             DB::rollBack();
         }
     }
@@ -195,7 +195,7 @@ class CampaignMessageService
 
             DB::commit();
         } catch (Exception $error) {
-            Log::error('Replayed: ' . $error->getMessage());
+            Log::channel('dev-check-message-status')->error('Replayed: ' . $error->getMessage());
             DB::rollBack();
         }
     }
@@ -244,7 +244,7 @@ class CampaignMessageService
 
             DB::commit();
         } catch (Exception $error) {
-            Log::error('Bounced: ' . $error->getMessage());
+            Log::channel('dev-check-message-status')->error('Bounced: ' . $error->getMessage());
             DB::rollBack();
         }
     }
@@ -260,7 +260,7 @@ class CampaignMessageService
             $campaignJobService = new CampaignRedisJobService();
             $campaignJobService->deleteProspectJobs($this->campaign, $this->prospect);
         } catch (Exception $error) {
-            Log::error("CampaignMessageService->deleteNextMessages(): " . $error->getMessage());
+            Log::channel('dev-check-message-status')->error("CampaignMessageService->deleteNextMessages(): " . $error->getMessage());
         }
     }
 
@@ -271,12 +271,12 @@ class CampaignMessageService
             $statusCheckResponse = $checkMessageStatus->checkAllMessageHistory();
 
             if($statusCheckResponse['status'] === 'error' || $statusCheckResponse['status'] === 'not-send') {
-                Log::alert('Message has not be sent: ' . $statusCheckResponse['data']);
+                Log::channel('dev-check-message-status')->alert('Message has not be sent: ' . $statusCheckResponse['data']);
                 return 0;
             }
             return 1;
         } catch (Exception $error) {
-            Log::error("CampaignMessageService -> CheckMessageStatus: " . $error->getMessage());
+            Log::channel('dev-check-message-status')->error("CampaignMessageService -> CheckMessageStatus: " . $error->getMessage());
             return 0;
         }
     }

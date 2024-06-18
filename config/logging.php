@@ -51,17 +51,76 @@ return [
     */
 
     'channels' => [
-        'development' => [
+        'dev-sent-message' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/development_logs/laravel.log'),
+            'path' => storage_path('logs/dev/sent-messages/laravel.log'),
             'tap' => [App\Logging\CustomizeFormatter::class],
             'level' => 'debug',
             'days' => 14,
         ],
 
-        'campaign' => [
-            'driver' => 'custom',
-            'via' => App\Logging\CampaignLogger::class,
+        'dev-check-message-status' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dev/message-statuses/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
+        'dev-user-token-update' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dev/user-tokens/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
+        'dev-campaign-process' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dev/campaigns/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
+        'dev-campaign-statistic' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dev/campaign-stats/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
+        'dev-campaign-report' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dev/campaign-reports/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
+        'dev-project-report' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dev/project-reports/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
+        'dev-mailbox' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dev/mailboxes/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
+        'dev-prospects' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/dev/prospects/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+            'level' => 'debug',
+            'days' => 14,
         ],
 
         'stack' => [

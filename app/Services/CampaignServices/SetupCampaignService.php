@@ -35,16 +35,16 @@ class SetupCampaignService
     public function setup(): void
     {
         try {
-            Log::alert('Setup[' . $this->campaign->name . ']');
+            Log::channel('dev-campaign-process')->alert('Setup[' . $this->campaign->name . ']');
 
             if($this->campaign->status === 'stopped') {
-                Log::alert('Setup[' . $this->campaign->name . '] - STOPPED');
+                Log::channel('dev-campaign-process')->alert('Setup[' . $this->campaign->name . '] - STOPPED');
                 return;
             }
 
             $stepsProspectsCount = $this->getAvailableProspectCountForEachStep();
-            Log::alert(json_encode("Step prospects count"));
-            Log::alert(json_encode($stepsProspectsCount));
+            Log::channel('dev-campaign-process')->alert(json_encode("Step prospects count"));
+            Log::channel('dev-campaign-process')->alert(json_encode($stepsProspectsCount));
 
             $stepsAmount = count($stepsProspectsCount); // Amount of available steps
 
@@ -53,8 +53,8 @@ class SetupCampaignService
             }
 
             $this->priorityPercentArray = $this->priorityConfig[$stepsAmount - 1]; // Get Percents
-            Log::alert('Priority config array');
-            Log::alert(json_encode($this->priorityPercentArray));
+            Log::channel('dev-campaign-process')->alert('Priority config array');
+            Log::channel('dev-campaign-process')->alert(json_encode($this->priorityPercentArray));
 
             foreach (array_reverse($stepsProspectsCount) as $key => $stepProspectsCount) { // Loop of steps Form END to START 10..1
                 $this->setupStep($key, $stepProspectsCount);
@@ -73,8 +73,8 @@ class SetupCampaignService
             $stepNumber = $stepProspectsCount["step"]; // Get number of step 1..10
             $step = $this->campaign->step($stepNumber); // Get step object
 
-            Log::alert("Step: " . $stepNumber);
-            Log::alert(json_encode($step));
+            Log::channel('dev-campaign-process')->alert("Step: " . $stepNumber);
+            Log::channel('dev-campaign-process')->alert(json_encode($step));
 
             $dayNumber = $this->dateTime->dayOfWeek; // Get Number of day 0..6
             $dayShortName = $this->getShortDayOfWeek($dayNumber); // Get Short version of day name (Monday - Mon)
@@ -92,20 +92,20 @@ class SetupCampaignService
             }
 
             $stepSendLimit = $this->getConfigurationStepSendLimit($step, $startEndDate['start'], $startEndDate['end']); // Get send limit by this info [true, "08:00", "15:00"] and period
-            Log::alert('Step Send limit: ' . json_encode($stepSendLimit));
+            Log::channel('dev-campaign-process')->alert('Step Send limit: ' . json_encode($stepSendLimit));
 
             $prospectsQuantity = $stepProspectsCount["count"]; // get amount of prospects available for this step
-            Log::alert('Amount of prospects available for this step: ' . $prospectsQuantity);
+            Log::channel('dev-campaign-process')->alert('Amount of prospects available for this step: ' . $prospectsQuantity);
 
             $percent = $this->priorityPercentArray[count($this->priorityPercentArray) - $key - 1]; // Get percent max limit for this step
-            Log::alert('Get percent max limit for this step: ' . $percent);
+            Log::channel('dev-campaign-process')->alert('Get percent max limit for this step: ' . $percent);
 
 
             $campaignPercentStepLimit = $this->sendLimit * $percent / 100; // Get max limit for this step in numbers
-            Log::alert('Get max limit for this step in numbers: ' . $campaignPercentStepLimit);
+            Log::channel('dev-campaign-process')->alert('Get max limit for this step in numbers: ' . $campaignPercentStepLimit);
 
             $currentLimit = $campaignPercentStepLimit;
-            Log::alert('Current limit: ' . $currentLimit);
+            Log::channel('dev-campaign-process')->alert('Current limit: ' . $currentLimit);
 
 
             if ($currentLimit > $stepSendLimit) { // If Campaign Send limit is bigger than stepSendLimit -> set currentLimit = stepSendLimit
@@ -126,29 +126,29 @@ class SetupCampaignService
                 $currentLimit += $minValue;
             }
 
-            Log::alert('currentLimit: ' . $currentLimit);
+            Log::channel('dev-campaign-process')->alert('currentLimit: ' . $currentLimit);
 
             $campaignMessages = $this->getPendingCampaignMessagesByStep($step, $currentLimit); // Get prospects
-            Log::alert('ProspectMessages: ' . count($campaignMessages));
-            Log::alert('ProspectMessages: ' . json_encode($campaignMessages));
+            Log::channel('dev-campaign-process')->alert('ProspectMessages: ' . count($campaignMessages));
+            Log::channel('dev-campaign-process')->alert('ProspectMessages: ' . json_encode($campaignMessages));
 
             $version = $step->version('A'); // get Version
 
             $this->dateTime = $startEndDate['start']; // start point of dateTime
-            Log::alert('Start point of dateTime: ' . $this->dateTime);
+            Log::channel('dev-campaign-process')->alert('Start point of dateTime: ' . $this->dateTime);
 
             $period = $step->period; // get period between messages
-            Log::alert('Period: ' . $period);
+            Log::channel('dev-campaign-process')->alert('Period: ' . $period);
 
             foreach ($campaignMessages as $campaignMessage) {
-                Log::alert('Message: ');
-                Log::alert(json_encode($campaignMessage));
+                Log::channel('dev-campaign-process')->alert('Message: ');
+                Log::channel('dev-campaign-process')->alert(json_encode($campaignMessage));
 
                 $this->scheduleMail($campaignMessage);
                 $this->dateTime->addSeconds($period);
             }
         } catch (\Exception $error) {
-            Log::error(json_encode($error));
+            Log::channel('dev-campaign-process')->error(json_encode($error));
         }
     }
 
@@ -196,7 +196,7 @@ class SetupCampaignService
             $timeEnd = Carbon::parse($stepSendingInfoForToday[2])->format("H:i"); // Get end time
             return $this->getStartAndEndTimeDateForSending($date, $timeStart, $timeEnd);
         } catch (\Exception $error) {
-            Log::error(json_encode($error));
+            Log::channel('dev-campaign-process')->error(json_encode($error));
             return null;
         }
     }
@@ -221,7 +221,7 @@ class SetupCampaignService
                 return null;
             }
         } catch (\Exception $error) {
-            Log::error(json_encode($error));
+            Log::channel('dev-campaign-process')->error(json_encode($error));
             return null;
         }
     }
@@ -235,7 +235,7 @@ class SetupCampaignService
 
             return floor($todayStepSendLimit);
         } catch (\Exception $error) {
-            Log::error(json_encode($error));
+            Log::channel('dev-campaign-process')->error(json_encode($error));
             return null;
         }
     }
@@ -266,9 +266,9 @@ class SetupCampaignService
                 'status' => 'scheduled'
             ]);
 
-            Log::alert('Schedule email | Time: ' . $this->dateTime . " | JobId: " . $jobId . " | Message: " . json_encode($campaignMessage));
+            Log::channel('dev-campaign-process')->alert('Schedule email | Time: ' . $this->dateTime . " | JobId: " . $jobId . " | Message: " . json_encode($campaignMessage));
         } catch (\Exception $error) {
-            Log::error("ScheduleMail: " . $error->getMessage());
+            Log::channel('dev-campaign-process')->error("ScheduleMail: " . $error->getMessage());
         }
     }
 
@@ -287,9 +287,9 @@ class SetupCampaignService
                 "date_time" => $setupTime
             ]);
 
-            Log::alert('Schedule next campaign setup (tomorrow): ' . $setupTime . " | Job: " . $jobId);
+            Log::channel('dev-campaign-process')->alert('Schedule next campaign setup (tomorrow): ' . $setupTime . " | Job: " . $jobId);
         } catch (\Exception $error) {
-            Log::error('scheduleCampaignSetup: ' . $error->getMessage());
+            Log::channel('dev-campaign-process')->error('scheduleCampaignSetup: ' . $error->getMessage());
         }
     }
 }

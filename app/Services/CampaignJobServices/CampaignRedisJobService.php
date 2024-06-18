@@ -16,27 +16,27 @@ class CampaignRedisJobService
             $jobIds = RedisJob::where("campaign_id", $campaign->id)
                 ->where('prospect_id', $prospect->id)
                 ->pluck('redis_job_id');
-            Log::alert('JobIds 1:' . json_encode($jobIds));
+            Log::channel('dev-campaign-process')->alert('JobIds 1:' . json_encode($jobIds));
 
             $redisHorizon = Redis::connection('horizon');
 
             if(count($jobIds) > 0) {
                 $removedIds = $redisHorizon->command('del', $jobIds->toArray());
-                Log::alert('RemovedIds: ' . $removedIds);
+                Log::channel('dev-campaign-process')->alert('RemovedIds: ' . $removedIds);
 
                 $removedPendingJobIds = $redisHorizon->command('ZREM', ['pending_jobs', $jobIds->toArray()]);
-                Log::alert('RemovedPendingJobs: ' . $removedPendingJobIds);
+                Log::channel('dev-campaign-process')->alert('RemovedPendingJobs: ' . $removedPendingJobIds);
 
                 $removedRecentJobIds = $redisHorizon->command('ZREM', ['recent_jobs', $jobIds->toArray()]);
-                Log::alert('RemovedRecentJobs: ' . $removedRecentJobIds);
+                Log::channel('dev-campaign-process')->alert('RemovedRecentJobs: ' . $removedRecentJobIds);
 
                 $removedQueuesCampaignDelayedJobIds = $this->deleteJobsByIds('default','queues:campaign:delayed', $jobIds->toArray());
-                Log::alert('RemovedQueuesCampaignDelayedJobs: ' . $removedQueuesCampaignDelayedJobIds);
+                Log::channel('dev-campaign-process')->alert('RemovedQueuesCampaignDelayedJobs: ' . $removedQueuesCampaignDelayedJobIds);
             }
 
             RedisJob::whereIn('redis_job_id', $jobIds)->delete();
         } catch (Exception $error) {
-            Log::error('DeleteQueueElements: ' . $error->getMessage());
+            Log::channel('dev-campaign-process')->error('DeleteQueueElements: ' . $error->getMessage());
         }
     }
     public function deleteCampaignJobs($campaign): void
@@ -44,29 +44,29 @@ class CampaignRedisJobService
         try {
             $jobIds = RedisJob::where("campaign_id", $campaign->id)
                 ->pluck('redis_job_id');
-            Log::alert('JobIds:' . json_encode($jobIds));
+            Log::channel('dev-campaign-process')->alert('JobIds:' . json_encode($jobIds));
 
             $redisHorizon = Redis::connection('horizon');
 
             if(count($jobIds) > 0) {
                 $removedIds = $redisHorizon->command('del', $jobIds->toArray());
-                Log::alert('RemovedIds: ' . $removedIds);
+                Log::channel('dev-campaign-process')->alert('RemovedIds: ' . $removedIds);
 
                 $removedPendingJobIds = $redisHorizon->command('ZREM', ['pending_jobs', $jobIds->toArray()]);
-                Log::alert('RemovedPendingJobs: ' . $removedPendingJobIds);
+                Log::channel('dev-campaign-process')->alert('RemovedPendingJobs: ' . $removedPendingJobIds);
 
                 $removedRecentJobIds = $redisHorizon->command('ZREM', ['recent_jobs', $jobIds->toArray()]);
-                Log::alert('RemovedRecentJobs: ' . $removedRecentJobIds);
+                Log::channel('dev-campaign-process')->alert('RemovedRecentJobs: ' . $removedRecentJobIds);
 
                 $removedQueuesCampaignDelayedJobIds = $this->deleteJobsByIds('default','queues:campaign:delayed', $jobIds->toArray());
-                Log::alert('RemovedQueuesCampaignDelayedJobs: ' . $removedQueuesCampaignDelayedJobIds);
+                Log::channel('dev-campaign-process')->alert('RemovedQueuesCampaignDelayedJobs: ' . $removedQueuesCampaignDelayedJobIds);
             }
 
             CampaignMessage::where('status', 'scheduled')->where('campaign_id', $campaign->id)->update(['status' => 'pending']);
 
             RedisJob::whereIn('redis_job_id', $jobIds)->delete();
         } catch (Exception $error) {
-            Log::error('DeleteQueueElements: ' . $error->getMessage());
+            Log::channel('dev-campaign-process')->error('DeleteQueueElements: ' . $error->getMessage());
         }
     }
     private function deleteJobsByIds($connection, $element, $ids) {

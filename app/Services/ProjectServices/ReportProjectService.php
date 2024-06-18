@@ -5,8 +5,9 @@ namespace App\Services\ProjectServices;
 use App\Models\Project;
 use App\Services\CampaignServices\StatisticCampaignService;
 use DateTime;
-use Illuminate\Support\Facades\Log;
+use DateTimeZone;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class ReportProjectService {
 
@@ -56,13 +57,18 @@ class ReportProjectService {
                 break;
 
             case 5: // custom range
+                $utcTimezone = new DateTimeZone('UTC');
+
                 $this->from = new DateTime($reportInfo['from']);
+                $this->from->setTimezone($utcTimezone);
+
                 $this->to = new DateTime($reportInfo['to']);
+                $this->to->setTimezone($utcTimezone);
                 break;
         }
 
-        Log::alert('From: ' . json_encode($this->from));
-        Log::alert('To: ' . json_encode($this->to));
+        Log::channel('dev-project-report')->alert('From: ' . json_encode($this->from));
+        Log::channel('dev-project-report')->alert('To: ' . json_encode($this->to));
     }
 
     public function generate()
@@ -123,7 +129,7 @@ class ReportProjectService {
             };
             return $callback;
         } catch (Exception $error) {
-            Log::error('ReportProjectService generate(): ' . $error->getMessage());
+            Log::channel('dev-project-report')->error('ReportProjectService generate(): ' . $error->getMessage());
             return 0;
         }
     }

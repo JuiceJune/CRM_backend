@@ -70,7 +70,7 @@ class MessageStatusService
             return $this->checkPreviousMessages($previousMessages);
 
         } catch (Exception $error) {
-            Log::error("checkAllMessageHistory: " . $error->getMessage());
+            Log::channel('dev-sent-message')->error("checkAllMessageHistory: " . $error->getMessage());
             return [
                 'status' => 'error',
                 'data' => $error->getMessage()
@@ -89,7 +89,7 @@ class MessageStatusService
 
                 if ($threadResponse['status'] === 'success') {
                     $messages = $threadResponse['data']->messages;
-                    Log::alert('checkPreviousMessages Messages: ' . json_encode($messages));
+                    Log::channel('dev-sent-message')->alert('checkPreviousMessages Messages: ' . json_encode($messages));
 
                     if (count($messages) > 1) {
 
@@ -133,7 +133,7 @@ class MessageStatusService
             "data" => "send"
         ];
     } catch (Exception $error) {
-        Log::error("CheckMessageStatus->checkPreviousMessages: " . $error->getMessage());
+        Log::channel('dev-sent-message')->error("CheckMessageStatus->checkPreviousMessages: " . $error->getMessage());
         return [
             'status' => 'error',
             'data' => $error->getMessage()
@@ -185,7 +185,7 @@ class MessageStatusService
                 "data" => "Empty"
             ];
         } catch (Exception $error) {
-            Log::error("CheckMessageStatus->checkMessageStatus: " . $error->getMessage());
+            Log::channel('dev-sent-message')->error("CheckMessageStatus->checkMessageStatus: " . $error->getMessage());
             return [
                 'status' => 'error',
                 'data' => $error->getMessage()

@@ -27,7 +27,6 @@ use F9Web\ApiResponseHelpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CampaignController extends Controller
@@ -252,8 +251,6 @@ class CampaignController extends Controller
         }
     }
 
-    //TODO create services for all these staff
-
     /**
      * Send test email.
      */
@@ -291,6 +288,7 @@ class CampaignController extends Controller
                 throw new \Error('Mailbox is not define');
             }
             SetupCampaignJob::dispatch($campaign);
+
             $campaign->update(['status' => 'started']);
             return $this->respondOk($campaign->name);
         } catch (Exception $error) {
@@ -302,6 +300,7 @@ class CampaignController extends Controller
     {
         try {
             StopCampaignJob::dispatch($campaign);
+
             $campaign->update(['status' => 'stopped']);
             return $this->respondOk($campaign->name);
         } catch (Exception $error) {
@@ -317,7 +316,7 @@ class CampaignController extends Controller
                 $campaignMessageService->opened($request->ip());
             }
         } catch (Exception $error) {
-            Log::error('OpenEmail: ' . $error->getMessage());
+            Log::channel('dev-campaign-process')->error('OpenEmail: ' . $error->getMessage());
         } finally {
             $pixel = base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
             return response($pixel)->header('Content-Type', 'image/gif');
@@ -332,7 +331,7 @@ class CampaignController extends Controller
                 $campaignMessageService->unsubscribe($request->ip());
             }
         } catch (Exception $error) {
-            Log::error('Unsubscribe: ' . $error->getMessage());
+            Log::channel('dev-campaign-process')->error('Unsubscribe: ' . $error->getMessage());
         }
     }
 
@@ -340,7 +339,7 @@ class CampaignController extends Controller
     {
         try {
             $reportInfo = $request->input('periodInfo');
-            Log::alert('$reportInfo: ' . json_encode($reportInfo));
+            Log::channel('dev-campaign-process')->alert('$reportInfo: ' . json_encode($reportInfo));
 
             $reportGenerator = new ReportCampaignService($campaign, $reportInfo);
             $callback = $reportGenerator->generate();
@@ -354,7 +353,7 @@ class CampaignController extends Controller
                 throw new \Error('No report found');
             }
         } catch (\Exception $error) {
-            Log::error('generateReport: ' . $error->getMessage());
+            Log::channel('dev-campaign-process')->error('generateReport: ' . $error->getMessage());
             return $this->respondError($error->getMessage());
         }
     }

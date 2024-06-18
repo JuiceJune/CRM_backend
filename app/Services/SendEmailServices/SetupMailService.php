@@ -21,7 +21,7 @@ class SetupMailService
     public function setup(): void
     {
         try{
-            Log::alert('Send Message Start');
+            Log::channel('dev-sent-message')->alert('Send Message Start');
 
             $campaign = $this->campaignMessage->campaign;
             if($campaign->status === 'stopped') {
@@ -47,7 +47,7 @@ class SetupMailService
                 }
             }
         } catch (\Exception $error) {
-            Log::error("Setup Mail Service: " . $error->getMessage());
+            Log::channel('dev-sent-message')->error("Setup Mail Service: " . $error->getMessage());
         }
     }
 }

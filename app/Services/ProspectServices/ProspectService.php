@@ -43,7 +43,7 @@ class ProspectService
                 default => 0,
             };
         } catch (Exception $exception) {
-            Log::error('ProspectService ChangeStatus: ' . $exception->getMessage());
+            Log::channel('dev-prospects')->error('ProspectService ChangeStatus: ' . $exception->getMessage());
             return 0;
         }
     }
@@ -60,7 +60,7 @@ class ProspectService
             DB::commit();
             return 1;
         } catch (Exception $exception) {
-            Log::error('ProspectService ChangeStatus: ' . $exception->getMessage());
+            Log::channel('dev-prospects')->error('ProspectService ChangeStatus: ' . $exception->getMessage());
             DB::rollBack();
             return 0;
         }
@@ -81,7 +81,7 @@ class ProspectService
             DB::commit();
             return 1;
         } catch (Exception $exception) {
-            Log::error('ProspectService setStatusInactive: ' . $exception->getMessage());
+            Log::channel('dev-prospects')->error('ProspectService setStatusInactive: ' . $exception->getMessage());
             DB::rollBack();
             return 0;
         }
@@ -111,7 +111,7 @@ class ProspectService
             DB::commit();
             return 1;
         } catch (Exception $exception) {
-            Log::error('ProspectService setStatusResponded: ' . $exception->getMessage());
+            Log::channel('dev-prospects')->error('ProspectService setStatusResponded: ' . $exception->getMessage());
             DB::rollBack();
             return 0;
         }
@@ -141,7 +141,7 @@ class ProspectService
             DB::commit();
             return 1;
         } catch (Exception $exception) {
-            Log::error('ProspectService setStatusBounced: ' . $exception->getMessage());
+            Log::channel('dev-prospects')->error('ProspectService setStatusBounced: ' . $exception->getMessage());
             DB::rollBack();
             return 0;
         }
@@ -171,7 +171,7 @@ class ProspectService
             DB::commit();
             return 1;
         } catch (Exception $exception) {
-            Log::error('ProspectService setStatusUnsubscribed: ' . $exception->getMessage());
+            Log::channel('dev-prospects')->error('ProspectService setStatusUnsubscribed: ' . $exception->getMessage());
             DB::rollBack();
             return 0;
         }
