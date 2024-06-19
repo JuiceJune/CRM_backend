@@ -228,13 +228,12 @@ class ProspectController extends Controller
                     $handle = fopen($filePath, 'r');
 
                     if ($handle !== false) {
-                        $headers = fgetcsv($handle);
-
+                        $headers = Prospect::getFillable();
                         $examples = [];
 
                         // Зчитування перших 5 рядків для прикладу
                         for ($i = 0; $i < 3 && ($data = fgetcsv($handle)) !== false; $i++) {
-                            $examples[] = array_combine($headers, $data);
+                            $examples[] = $data;
                         }
 
 //                        while (($data = fgetcsv($handle)) !== false) {
