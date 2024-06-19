@@ -276,7 +276,7 @@ class SetupCampaignService
     private function scheduleCampaignSetup(): void
     {
         try {
-            $setupTime = Carbon::now($this->campaign->timezone)->addDay()->setTime(0, 1);
+            $setupTime = Carbon::now($this->campaign->timezone)->addDay()->setTime(0, 1, 1, 1);
             $jobId = app(Dispatcher::class)->dispatch((new SetupCampaignJob($this->campaign))->delay($setupTime));
 
             RedisJob::create([
