@@ -17,7 +17,6 @@ use F9Web\ApiResponseHelpers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ProspectController extends Controller
 {
@@ -35,6 +34,7 @@ class ProspectController extends Controller
             $sortField = $request->input('sortField');
             $sortOrder = $request->input('sortOrder');
             $filters = $request->input('filters');
+            $globalFilter = $request->input('globalFilter');
 
             $query = $campaign_id
                 ? Campaign::query()->where('uuid', $campaign_id)->firstOrFail()->prospects()
@@ -43,10 +43,34 @@ class ProspectController extends Controller
             // Apply filters
             if ($filters) {
                 foreach ($filters as $key => $filter) {
-                    if ($filter['value']) {
-                        $query->where($key, $filter['value'], $filter['matchMode']);
+                    if (!empty($filter['value']) && !empty($filter['matchMode'])) {
+                        switch ($filter['matchMode']) {
+                            case 'CONTAINS':
+                                $query->where($key, 'like', '%' . $filter['value'] . '%');
+                                break;
+                            case 'STARTS_WITH':
+                                $query->where($key, 'like', $filter['value'] . '%');
+                                break;
+                            case 'ENDS_WITH':
+                                $query->where($key, 'like', '%' . $filter['value']);
+                                break;
+                            // Add other match modes if needed
+                            default:
+                                $query->where($key, $filter['value']);
+                                break;
+                        }
                     }
                 }
+            }
+
+            if ($globalFilter) {
+                $query->where(function($query) use ($globalFilter) {
+                    $query->where('email', 'like', '%' . $globalFilter . '%')
+                        ->orWhere('status', 'like', '%' . $globalFilter . '%')
+                        ->orWhere('first_name', 'like', '%' . $globalFilter . '%')
+                        ->orWhere('last_name', 'like', '%' . $globalFilter . '%');
+                    // Add other fields if needed
+                });
             }
 
             // Apply sorting
