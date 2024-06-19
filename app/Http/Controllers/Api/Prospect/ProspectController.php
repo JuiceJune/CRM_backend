@@ -32,10 +32,27 @@ class ProspectController extends Controller
             $campaign_id = $request->input('campaign_id');
             $limit = $request->input('limit', 10);
             $page = $request->input('page', 1);
+            $sortField = $request->input('sortField');
+            $sortOrder = $request->input('sortOrder');
+            $filters = $request->input('filters');
 
             $query = $campaign_id
                 ? Campaign::query()->where('uuid', $campaign_id)->firstOrFail()->prospects()
                 : Prospect::query();
+
+            // Apply filters
+            if ($filters) {
+                foreach ($filters as $key => $filter) {
+                    if ($filter['value']) {
+                        $query->where($key, $filter['value'], $filter['matchMode']);
+                    }
+                }
+            }
+
+            // Apply sorting
+            if ($sortField && $sortOrder) {
+                $query->orderBy($sortField, $sortOrder);
+            }
 
             $prospects = $query->paginate($limit, ['*'], 'page', $page);
 
