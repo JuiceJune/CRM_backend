@@ -45,16 +45,24 @@ class ProspectController extends Controller
                 foreach ($filters as $key => $filter) {
                     if (!empty($filter['value']) && !empty($filter['matchMode'])) {
                         switch ($filter['matchMode']) {
-                            case 'CONTAINS':
+                            case 'contains':
                                 $query->where($key, 'like', '%' . $filter['value'] . '%');
                                 break;
-                            case 'STARTS_WITH':
+                            case 'notContains':
+                                $query->whereNot($key, 'like', '%' . $filter['value'] . '%');
+                                break;
+                            case 'startsWith':
                                 $query->where($key, 'like', $filter['value'] . '%');
                                 break;
-                            case 'ENDS_WITH':
+                            case 'endsWith':
                                 $query->where($key, 'like', '%' . $filter['value']);
                                 break;
-                            // Add other match modes if needed
+                            case 'equals':
+                                $query->where($key, "=", $filter['value']);
+                                break;
+                            case 'notEquals':
+                                $query->where($key, "!=", $filter['value']);
+                                break;
                             default:
                                 $query->where($key, $filter['value']);
                                 break;
