@@ -65,11 +65,10 @@ class ProspectController extends Controller
 
             if ($globalFilter) {
                 $query->where(function($query) use ($globalFilter) {
-                    $query->where('email', 'like', '%' . $globalFilter . '%')
-                        ->orWhere('status', 'like', '%' . $globalFilter . '%')
-                        ->orWhere('first_name', 'like', '%' . $globalFilter . '%')
-                        ->orWhere('last_name', 'like', '%' . $globalFilter . '%');
-                    // Add other fields if needed
+                    $query->where('prospects.email', 'like', '%' . $globalFilter . '%')
+                        ->orWhere('prospects.status', 'like', '%' . $globalFilter . '%')
+                        ->orWhere('prospects.first_name', 'like', '%' . $globalFilter . '%')
+                        ->orWhere('prospects.last_name', 'like', '%' . $globalFilter . '%');
                 });
             }
 
