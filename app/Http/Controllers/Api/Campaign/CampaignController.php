@@ -313,7 +313,25 @@ class CampaignController extends Controller
         try {
             if(!in_array($campaignMessage['status'], ['unsubscribe', 'bounced', 'responded', 'opened'])) {
                 $campaignMessageService = new CampaignMessageService($campaignMessage);
-                $campaignMessageService->opened($request->ip());
+
+                $campaign = $campaignMessage->campaign;
+                $project = $campaign->project;
+                $creator = $project->creator;
+
+                $members = $project->users;
+                $ipAddress = $request->ip();
+
+                $duplicateIpFound = false;
+                foreach ($members as $member) {
+                    if ($member->ip === $ipAddress) {
+                        $duplicateIpFound = true;
+                        break;
+                    }
+                }
+
+                if (!$duplicateIpFound && $creator->ip !== $ipAddress) {
+                    $campaignMessageService->opened($ipAddress);
+                }
             }
         } catch (Exception $error) {
             Log::channel('dev-campaign-process')->error('OpenEmail: ' . $error->getMessage());
