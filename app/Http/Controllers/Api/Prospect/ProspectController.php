@@ -230,31 +230,45 @@ class ProspectController extends Controller
                     if ($handle !== false) {
                         $headers = fgetcsv($handle);
 
-                        while (($data = fgetcsv($handle)) !== false) {
-                            $prospectData = [];
+                        $examples = [];
 
-                            foreach ($headers as $index => $header) {
-                                $prospectData[$header] = $data[$index];
-                            }
-
-                            $prospectData['account_id'] = $account_id;
-                            $prospect = Prospect::create($prospectData);
-                            $campaign->prospects()->attach($prospect->id, ['account_id' => $account_id]);
-
-                            CampaignMessage::query()->create([
-                                'account_id' => $account_id,
-                                'campaign_id' => $campaign->id,
-                                'campaign_step_id' => $firstStep->id,
-                                'campaign_step_version_id' => $version->id,
-                                'prospect_id' => $prospect->id,
-                                'available_at' => $dateInTimeZone,
-                            ]);
+                        // Зчитування перших 5 рядків для прикладу
+                        for ($i = 0; $i < 3 && ($data = fgetcsv($handle)) !== false; $i++) {
+                            $examples[] = array_combine($headers, $data);
                         }
 
-                        fclose($handle);
-                    }
+//                        while (($data = fgetcsv($handle)) !== false) {
+//                            $prospectData = [];
+//
+//                            foreach ($headers as $index => $header) {
+//                                $prospectData[$header] = $data[$index];
+//                            }
+//
+//                            $prospectData['account_id'] = $account_id;
+//                            $prospect = Prospect::create($prospectData);
+//                            $campaign->prospects()->attach($prospect->id, ['account_id' => $account_id]);
+//
+//                            CampaignMessage::query()->create([
+//                                'account_id' => $account_id,
+//                                'campaign_id' => $campaign->id,
+//                                'campaign_step_id' => $firstStep->id,
+//                                'campaign_step_version_id' => $version->id,
+//                                'prospect_id' => $prospect->id,
+//                                'available_at' => $dateInTimeZone,
+//                            ]);
+//                        }
 
-                    return $this->respondOk('Prospects uploaded successfully');
+                        fclose($handle);
+
+                        return response()->json([
+                            'success' => true,
+                            'headers' => $headers,
+                            'examples' => $examples,
+                        ]);
+                    } else {
+                        return $this->respondError('Unable to open CSV file');
+                    }
+//                    return $this->respondOk('Prospects uploaded successfully');
                 } else {
                     return $this->respondError('Invalid file format. Please upload a CSV file');
                 }
