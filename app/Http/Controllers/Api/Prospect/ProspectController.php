@@ -229,7 +229,9 @@ class ProspectController extends Controller
 
                     if ($handle !== false) {
                         $headers = (new \App\Models\Prospect)->getFillable();
-                        $headers = collect($headers)->except(["account_id", "date_added", "tags"])->all();
+                        $fieldsToExclude = ["account_id", "date_added", "tags"];
+                        $headers = array_diff($headers, $fieldsToExclude);
+
                         $examples = [];
 
                         // Зчитування перших 5 рядків для прикладу
