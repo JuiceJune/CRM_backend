@@ -233,6 +233,14 @@ class ProspectController extends Controller
                         $headers = array_diff($headers, $fieldsToExclude);
                         $headers = array_values($headers);
 
+                        $headersWithIdAndName = [];
+                        foreach ($headers as $index => $fieldName) {
+                            $headersWithIdAndName[] = [
+                                'id' => $index + 1, // +1 для отримання порядкового номеру, якщо ви хочете почати з 1
+                                'name' => $fieldName,
+                            ];
+                        }
+
                         $examples = [];
 
                         // Зчитування перших 5 рядків для прикладу
@@ -265,7 +273,7 @@ class ProspectController extends Controller
 
                         return response()->json([
                             'success' => true,
-                            'headers' => $headers,
+                            'headers' => $headersWithIdAndName,
                             'examples' => $examples,
                         ]);
                     } else {
