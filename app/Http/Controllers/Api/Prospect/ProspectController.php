@@ -231,6 +231,7 @@ class ProspectController extends Controller
                         $headers = (new \App\Models\Prospect)->getFillable();
                         $fieldsToExclude = ["account_id", "date_added", "tags"];
                         $headers = array_diff($headers, $fieldsToExclude);
+                        $headers = array_values($headers);
 
                         $examples = [];
 
