@@ -228,7 +228,7 @@ class ProspectController extends Controller
                     $handle = fopen($filePath, 'r');
 
                     if ($handle !== false) {
-                        $headers = Prospect::getFillable();
+                        $headers = (new \App\Models\Prospect)->getFillable();
                         $examples = [];
 
                         // Зчитування перших 5 рядків для прикладу
