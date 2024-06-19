@@ -27,6 +27,13 @@ class AuthController extends Controller
 
             /** @var User $user */
             $user = Auth::user();
+
+            $ipAddress = $request->ip();
+
+            if ($user->ip !== $ipAddress) {
+                $user->update(['ip' => $ipAddress]);
+            }
+
             $token = $user->createToken($user->name.'-AuthToken')->plainTextToken;
 
             return $this->respondWithSuccess([
