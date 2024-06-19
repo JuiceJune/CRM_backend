@@ -30,16 +30,16 @@ class ProspectController extends Controller
     {
         try {
             $campaign_id = $request->input('campaign_id');
-            $limit = $request->input('limit', 100);
-            $offset = $request->input('offset', 0);
+            $limit = $request->input('limit', 10);
+            $page = $request->input('page', 1);
 
             $query = $campaign_id
                 ? Campaign::query()->where('uuid', $campaign_id)->firstOrFail()->prospects()
                 : Prospect::query();
 
-            $prospects = $query->skip($offset)->take($limit)->get();
+            $prospects = $query->paginate($limit, ['*'], 'page', $page);
 
-            return response()->json(ProspectCampaignResource::collection($prospects));
+            return response()->json(ProspectCampaignResource::collection($prospects)->response()->getData(true));
         } catch (Exception $error) {
             return $this->respondError($error->getMessage());
         }
