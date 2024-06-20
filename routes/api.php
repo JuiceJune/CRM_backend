@@ -109,6 +109,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::put('/{prospect:uuid}', [ProspectController::class, 'update']);
         Route::delete('/{prospect:uuid}', [ProspectController::class, 'destroy']);
         Route::post('/csv-upload', [ProspectController::class, 'csvUpload']);
+        Route::post('/csv-save', [ProspectController::class, 'csvProspectsSave']);
     });
 
     Route::group(['prefix' => 'campaigns'], function () {

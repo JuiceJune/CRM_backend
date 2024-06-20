@@ -205,21 +205,6 @@ class ProspectController extends Controller
     public function csvUpload(Request $request): JsonResponse
     {
         try {
-            $campaignUuid = $request->input('campaign_id');
-            $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
-
-            $user = $request->user();
-            $account_id = $user->account_id;
-
-            if (!$campaign) {
-                $this->respondNotFound('Campaign not found');
-            }
-
-            $firstStep = $campaign->step(1);
-            $version = $firstStep->version('A');
-            $timezone = $campaign->timezone;
-            $dateInTimeZone = Carbon::now($timezone);
-
             if ($request->hasFile('csv_file')) {
                 $file = $request->file('csv_file');
 
@@ -240,27 +225,6 @@ class ProspectController extends Controller
                             $prospects[] = $data;
                         }
 
-//                        while (($data = fgetcsv($handle)) !== false) {
-//                            $prospectData = [];
-//
-//                            foreach ($headers as $index => $header) {
-//                                $prospectData[$header] = $data[$index];
-//                            }
-//
-//                            $prospectData['account_id'] = $account_id;
-//                            $prospect = Prospect::create($prospectData);
-//                            $campaign->prospects()->attach($prospect->id, ['account_id' => $account_id]);
-//
-//                            CampaignMessage::query()->create([
-//                                'account_id' => $account_id,
-//                                'campaign_id' => $campaign->id,
-//                                'campaign_step_id' => $firstStep->id,
-//                                'campaign_step_version_id' => $version->id,
-//                                'prospect_id' => $prospect->id,
-//                                'available_at' => $dateInTimeZone,
-//                            ]);
-//                        }
-
                         fclose($handle);
 
                         return response()->json([
@@ -271,13 +235,60 @@ class ProspectController extends Controller
                     } else {
                         return $this->respondError('Unable to open CSV file');
                     }
-//                    return $this->respondOk('Prospects uploaded successfully');
                 } else {
                     return $this->respondError('Invalid file format. Please upload a CSV file');
                 }
             } else {
                 return $this->respondError('No file uploaded');
             }
+        } catch (Exception $error) {
+            return $this->respondError($error->getMessage());
+        }
+    }
+
+    public function csvProspectsSave(Request $request): JsonResponse
+    {
+        try {
+            $campaignUuid = $request->input('campaign_id');
+            $prospects = $request->input('prospects');
+            $headers = $request->input('headers');
+
+            $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
+
+            $user = $request->user();
+            $account_id = $user->account_id;
+
+            if (!$campaign) {
+                $this->respondNotFound('Campaign not found');
+            }
+
+            $firstStep = $campaign->step(1);
+            $version = $firstStep->version('A');
+            $timezone = $campaign->timezone;
+            $dateInTimeZone = Carbon::now($timezone);
+
+            foreach ($prospects as $prospect) {
+                $formattedProspect = [];
+                foreach ($headers as $index => $header) {
+                    if($header !== 'none') {
+                        $formattedProspect[$header] = $prospect[$index];
+                    }
+                }
+                $formattedProspect['account_id'] = $account_id;
+
+                $createdProspect = Prospect::create($formattedProspect);
+                $campaign->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
+
+                CampaignMessage::query()->create([
+                    'account_id' => $account_id,
+                    'campaign_id' => $campaign->id,
+                    'campaign_step_id' => $firstStep->id,
+                    'campaign_step_version_id' => $version->id,
+                    'prospect_id' => $createdProspect->id,
+                    'available_at' => $dateInTimeZone,
+                ]);
+            }
+            return $this->respondOk('Prospects were successfully saved');
         } catch (Exception $error) {
             return $this->respondError($error->getMessage());
         }
