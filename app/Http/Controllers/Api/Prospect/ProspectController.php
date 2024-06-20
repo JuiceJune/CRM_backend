@@ -232,6 +232,7 @@ class ProspectController extends Controller
                         $fieldsToExclude = ["account_id", "date_added", "tags"];
                         $headers = array_diff($headers, $fieldsToExclude);
                         $headers = array_values($headers);
+                        $headers[] = 'none';
 
                         $prospects = [];
 
