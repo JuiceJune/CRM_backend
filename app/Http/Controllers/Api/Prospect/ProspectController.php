@@ -248,6 +248,7 @@ class ProspectController extends Controller
 
     public function csvProspectsSave(Request $request): JsonResponse
     {
+        DB::beginTransaction();
         try {
             $campaignUuid = $request->input('campaign_id');
             $prospects = $request->input('prospects');
@@ -272,10 +273,17 @@ class ProspectController extends Controller
             $missingHeaders = array_diff($expectedHeaders, $headers);
 
             if (!empty($missingHeaders)) {
-                throw new Exception('first_name, last_name, email: required');
+                throw new Exception(implode(', ', $missingHeaders) . ' are required headers');
             }
 
             foreach ($prospects as $prospect) {
+
+                foreach ($expectedHeaders as $header) {
+                    if (!array_key_exists($header, $prospect) || empty($prospect[$header])) {
+                        throw new Exception("$header is missing or empty for a prospect");
+                    }
+                }
+
                 $formattedProspect = [];
                 foreach ($headers as $index => $header) {
                     if($header !== 'none') {
@@ -296,8 +304,11 @@ class ProspectController extends Controller
                     'available_at' => $dateInTimeZone,
                 ]);
             }
+
+            DB::commit();
             return $this->respondOk('Prospects were successfully saved');
         } catch (Exception $error) {
+            DB::rollBack();
             return $this->respondError($error->getMessage());
         }
     }
