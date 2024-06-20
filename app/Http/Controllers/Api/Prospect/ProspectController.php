@@ -214,7 +214,7 @@ class ProspectController extends Controller
 
                     if ($handle !== false) {
                         $headers = (new \App\Models\Prospect)->getFillable();
-                        $fieldsToExclude = ["account_id", "date_added", "tags"];
+                        $fieldsToExclude = ["account_id", "date_added", "tags", 'status'];
                         $headers = array_diff($headers, $fieldsToExclude);
                         $headers = array_values($headers);
                         array_unshift($headers, 'none');
@@ -278,18 +278,19 @@ class ProspectController extends Controller
 
             foreach ($prospects as $prospect) {
 
-                foreach ($expectedHeaders as $header) {
-                    if (!array_key_exists($header, $prospect) || empty($prospect[$header])) {
-                        throw new Exception("$header is missing or empty for a prospect");
-                    }
-                }
-
                 $formattedProspect = [];
                 foreach ($headers as $index => $header) {
                     if($header !== 'none') {
                         $formattedProspect[$header] = $prospect[$index];
                     }
                 }
+
+                foreach ($expectedHeaders as $header) {
+                    if (!array_key_exists($header, $formattedProspect) || empty($formattedProspect[$header])) {
+                        throw new Exception("$header is missing or empty for a prospect");
+                    }
+                }
+
                 $formattedProspect['account_id'] = $account_id;
 
                 $createdProspect = Prospect::create($formattedProspect);
