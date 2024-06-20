@@ -233,11 +233,10 @@ class ProspectController extends Controller
                         $headers = array_diff($headers, $fieldsToExclude);
                         $headers = array_values($headers);
 
-                        $examples = [];
+                        $prospects = [];
 
-                        // Зчитування перших 5 рядків для прикладу
-                        for ($i = 0; $i < 3 && ($data = fgetcsv($handle)) !== false; $i++) {
-                            $examples[] = $data;
+                        for ($i = 0; ($data = fgetcsv($handle)) !== false; $i++) {
+                            $prospects[] = $data;
                         }
 
 //                        while (($data = fgetcsv($handle)) !== false) {
@@ -265,8 +264,8 @@ class ProspectController extends Controller
 
                         return response()->json([
                             'success' => true,
-                            'headers' => $headersWithIdAndName,
-                            'examples' => $examples,
+                            'headers' => $headers,
+                            'prospects' => $prospects,
                         ]);
                     } else {
                         return $this->respondError('Unable to open CSV file');
