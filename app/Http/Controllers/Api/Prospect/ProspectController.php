@@ -267,6 +267,14 @@ class ProspectController extends Controller
             $timezone = $campaign->timezone;
             $dateInTimeZone = Carbon::now($timezone);
 
+            $expectedHeaders = ['first_name', 'last_name', 'email'];
+
+            $missingHeaders = array_diff($expectedHeaders, $headers);
+
+            if (!empty($missingHeaders)) {
+                throw new Exception('first_name, last_name, email: required');
+            }
+
             foreach ($prospects as $prospect) {
                 $formattedProspect = [];
                 foreach ($headers as $index => $header) {
