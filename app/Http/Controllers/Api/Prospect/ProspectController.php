@@ -309,6 +309,7 @@ class ProspectController extends Controller
 
                 $createdProspect = Prospect::create($formattedProspect);
                 $campaign->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
+                $project->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
 
                 $successProspects[] = $createdProspect;
 
