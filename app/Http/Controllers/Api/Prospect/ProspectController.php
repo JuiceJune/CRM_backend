@@ -276,7 +276,7 @@ class ProspectController extends Controller
 
             $expectedHeader = 'email';
 
-            if (!array_key_exists($expectedHeader, $headers)) {
+            if (!in_array($expectedHeader, $headers)) {
                 throw new Exception('Email is required header');
             }
 
