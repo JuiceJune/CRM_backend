@@ -180,6 +180,20 @@ class ProspectController extends Controller
         try {
             $validated = $request->validated();
             $campaign = $prospect->campaigns->first();
+            $project = $campaign->project;
+
+            if (isset($validated['email'])) {
+                $duplicateProspect = Prospect::where('email', $validated['email'])
+                    ->whereHas('projects', function ($query) use ($project) {
+                        $query->where('project_id', $project->id);
+                    })
+                    ->where('id', '!=', $prospect->id)
+                    ->first();
+
+                if ($duplicateProspect) {
+                    return $this->respondError("A prospect with this email already exists in the same project.");
+                }
+            }
 
             if(isset($validated["status"]) && $campaign) {
                 $prospectService = new ProspectService($prospect, $campaign);
