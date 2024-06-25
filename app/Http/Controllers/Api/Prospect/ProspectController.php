@@ -87,7 +87,11 @@ class ProspectController extends Controller
 
             $prospects = $query->paginate($limit, ['*'], 'page', $page);
 
-            return response()->json(ProspectCampaignResource::collection($prospects)->response()->getData(true));
+            if($campaign_id) {
+                return response()->json(ProspectCampaignResource::collection($prospects)->response()->getData(true));
+            } else {
+                return response()->json(ProspectCampaignResource::collection($prospects)->response()->getData(true));
+            }
         } catch (Exception $error) {
             return $this->respondError($error->getMessage());
         }
@@ -263,18 +267,22 @@ class ProspectController extends Controller
                 $this->respondNotFound('Campaign not found');
             }
 
+            $project = $campaign->project;
+
             $firstStep = $campaign->step(1);
             $version = $firstStep->version('A');
             $timezone = $campaign->timezone;
             $dateInTimeZone = Carbon::now($timezone);
 
-            $expectedHeaders = ['first_name', 'last_name', 'email'];
+            $expectedHeader = 'email';
 
-            $missingHeaders = array_diff($expectedHeaders, $headers);
-
-            if (!empty($missingHeaders)) {
-                throw new Exception(implode(', ', $missingHeaders) . ' are required headers');
+            if (!array_key_exists($expectedHeader, $headers)) {
+                throw new Exception('Email is required header');
             }
+
+            $errorProspects = [];
+            $duplicateProspects = [];
+            $successProspects = [];
 
             foreach ($prospects as $prospect) {
 
@@ -285,16 +293,24 @@ class ProspectController extends Controller
                     }
                 }
 
-                foreach ($expectedHeaders as $header) {
-                    if (!array_key_exists($header, $formattedProspect) || empty($formattedProspect[$header])) {
-                        throw new Exception("$header is missing or empty for a prospect");
-                    }
+                if (!array_key_exists($expectedHeader, $formattedProspect) || empty($formattedProspect[$expectedHeader])) {
+                    $errorProspects[] = $formattedProspect;
+                    continue;
                 }
 
                 $formattedProspect['account_id'] = $account_id;
 
+                $prospect = Prospect::where('email', $formattedProspect['email'])->first();
+
+                if ($prospect && $prospect->existsInProject($project->id)) {
+                    $duplicateProspects[] = $prospect;
+                    continue;
+                }
+
                 $createdProspect = Prospect::create($formattedProspect);
                 $campaign->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
+
+                $successProspects[] = $createdProspect;
 
                 CampaignMessage::query()->create([
                     'account_id' => $account_id,
@@ -307,7 +323,11 @@ class ProspectController extends Controller
             }
 
             DB::commit();
-            return $this->respondOk('Prospects were successfully saved');
+            return $this->respondWithSuccess([
+                'successProspects' => ProspectResource::collection($successProspects),
+                'errorProspects' => $errorProspects,
+                'duplicateProspects' => ProspectResource::collection($duplicateProspects),
+            ]);
         } catch (Exception $error) {
             DB::rollBack();
             return $this->respondError($error->getMessage());
