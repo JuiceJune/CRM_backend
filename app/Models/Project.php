@@ -59,5 +59,8 @@ class Project extends Model
         })->get();
     }
 
-
+    public function prospects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Prospect::class, 'projects_prospects', 'project_id', 'prospect_id');
+    }
 }
