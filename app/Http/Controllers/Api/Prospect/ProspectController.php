@@ -299,6 +299,7 @@ class ProspectController extends Controller
                 }
 
                 $formattedProspect['account_id'] = $account_id;
+                $formattedProspect['status'] = 'active';
 
                 $prospect = Prospect::where('email', $formattedProspect['email'])->first();
 
