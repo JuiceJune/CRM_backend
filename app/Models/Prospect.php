@@ -61,6 +61,11 @@ class Prospect extends Model
             ->withPivot('step', 'status');
     }
 
+    public function projects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'projects_prospects', 'prospect_id', 'project_id');
+    }
+
     public function campaignMessages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(CampaignMessage::class);
@@ -69,5 +74,10 @@ class Prospect extends Model
     public function sentMessages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(CampaignMessage::class)->whereNotIn('status', ['pending', 'scheduled', 'inactive']);
+    }
+
+    public function existsInProject($projectId): bool
+    {
+        return $this->projects()->where('project_id', $projectId)->exists();
     }
 }
