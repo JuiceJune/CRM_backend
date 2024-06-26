@@ -349,4 +349,29 @@ class ProspectController extends Controller
             return $this->respondError($error->getMessage());
         }
     }
+
+    public function uniqueCheck(Request $request): JsonResponse
+    {
+        try {
+            $campaignUuid = $request->input('campaign_id');
+            $email = $request->input('email');
+
+            $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
+            $project = $campaign->project;
+
+            $duplicateProspect = Prospect::where('email', $email)
+                ->whereHas('projects', function ($query) use ($project) {
+                    $query->where('project_id', $project->id);
+                })
+                ->first();
+
+            if ($duplicateProspect) {
+                return $this->respondError("A prospect with this email already exists in the same project.");
+            } else {
+                return $this->respondOk("Unique prospect");
+            }
+        } catch (Exception $error) {
+            return $this->respondError($error->getMessage());
+        }
+    }
 }
