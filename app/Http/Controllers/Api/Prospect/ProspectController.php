@@ -141,6 +141,7 @@ class ProspectController extends Controller
                 }
 
                 $prospect['account_id'] = $account_id;
+                $prospect['status'] = $prospect['status'] ?: 'active';
                 $createdProspect = Prospect::create($prospect);
                 $campaign->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
                 $project->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
