@@ -130,8 +130,13 @@ class ProspectController extends Controller
             $timezone = $campaign->timezone;
             $dateInTimeZone = Carbon::now($timezone);
 
+            $duplicateProspects = [];
+            $successProspects = [];
+
             foreach ($prospects as $prospect) {
-                if ($prospect && $prospect->existsInProject($project->id)) {
+                $prospectFind = Prospect::where('email', $prospect['email'])->first();
+                if ($prospectFind && $prospectFind->existsInProject($project->id)) {
+                    $duplicateProspects[] = $prospect;
                     continue;
                 }
 
@@ -148,10 +153,15 @@ class ProspectController extends Controller
                     'prospect_id' => $createdProspect->id,
                     'available_at' => $dateInTimeZone,
                 ]);
+
+                $successProspects[] = $createdProspect;
             }
 
             DB::commit();
-            return $this->respondOk("Prospects were successfully created");
+            return $this->respondWithSuccess([
+                'successProspects' => ProspectResource::collection($successProspects),
+                'duplicateProspects' => ProspectResource::collection($duplicateProspects),
+            ]);
         } catch (Exception $error) {
             DB::rollBack();
             return $this->respondError($error->getMessage());
