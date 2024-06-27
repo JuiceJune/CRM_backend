@@ -122,17 +122,23 @@ class ProspectController extends Controller
 
             $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
 
+            $project = $campaign->project;
+
             $firstStep = $campaign->step(1);
             $version = $firstStep->version('A');
 
             $timezone = $campaign->timezone;
             $dateInTimeZone = Carbon::now($timezone);
 
-
             foreach ($prospects as $prospect) {
+                if ($prospect && $prospect->existsInProject($project->id)) {
+                    continue;
+                }
+
                 $prospect['account_id'] = $account_id;
                 $createdProspect = Prospect::create($prospect);
                 $campaign->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
+                $project->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
 
                 CampaignMessage::query()->create([
                     'account_id' => $account_id,
