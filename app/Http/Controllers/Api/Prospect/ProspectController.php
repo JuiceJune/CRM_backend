@@ -161,6 +161,7 @@ class ProspectController extends Controller
             DB::commit();
             return $this->respondWithSuccess([
                 'successProspects' => ProspectResource::collection($successProspects),
+                'errorProspects' => [],
                 'duplicateProspects' => ProspectResource::collection($duplicateProspects),
             ]);
         } catch (Exception $error) {
