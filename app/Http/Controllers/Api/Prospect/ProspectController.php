@@ -129,7 +129,7 @@ class ProspectController extends Controller
             return $this->respondWithSuccess([
                 'successProspects' => ProspectResource::collection($results['successProspects']),
                 'errorProspects' => [],
-                'duplicateProspects' => ProspectResource::collection($results['duplicateProspects']),
+                'duplicateProspects' => $results['duplicateProspects'],
             ]);
         } catch (Exception $error) {
             DB::rollBack();
