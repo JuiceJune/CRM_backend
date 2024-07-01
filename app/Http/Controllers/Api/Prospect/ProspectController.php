@@ -123,7 +123,7 @@ class ProspectController extends Controller
 
             $storeProspectService = new StoreProspectService();
 
-            $results = $storeProspectService->processProspects($prospects, $campaign, $accountId);
+            $results = $storeProspectService->storeProspects($prospects, $campaign, $accountId);
 
             DB::commit();
             return $this->respondWithSuccess([
