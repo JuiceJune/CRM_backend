@@ -11,6 +11,7 @@ use App\Models\Campaign;
 use App\Models\CampaignMessage;
 use App\Models\Prospect;
 use App\Services\ProspectServices\ProspectService;
+use App\Services\ProspectServices\StoreProspectService;
 use Carbon\Carbon;
 use Exception;
 use F9Web\ApiResponseHelpers;
@@ -113,56 +114,22 @@ class ProspectController extends Controller
         DB::beginTransaction();
         try {
             $validated = $request->validated();
-
             $user = $request->user();
-            $account_id = $user->account_id;
-
+            $accountId = $user->account_id;
             $prospects = $validated['prospects'];
             $campaignUuid = $validated['campaign_id'];
 
             $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
 
-            $project = $campaign->project;
+            $storeProspectService = new StoreProspectService();
 
-            $firstStep = $campaign->step(1);
-            $version = $firstStep->version('A');
-
-            $timezone = $campaign->timezone;
-            $dateInTimeZone = Carbon::now($timezone);
-
-            $duplicateProspects = [];
-            $successProspects = [];
-
-            foreach ($prospects as $prospect) {
-                $prospectFind = Prospect::where('email', $prospect['email'])->first();
-                if ($prospectFind && $prospectFind->existsInProject($project->id)) {
-                    $duplicateProspects[] = $prospect;
-                    continue;
-                }
-
-                $prospect['account_id'] = $account_id;
-                $prospect['status'] = $prospect['status'] ?: 'active';
-                $createdProspect = Prospect::create($prospect);
-                $campaign->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
-                $project->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
-
-                CampaignMessage::query()->create([
-                    'account_id' => $account_id,
-                    'campaign_id' => $campaign->id,
-                    'campaign_step_id' => $firstStep->id,
-                    'campaign_step_version_id' => $version->id,
-                    'prospect_id' => $createdProspect->id,
-                    'available_at' => $dateInTimeZone,
-                ]);
-
-                $successProspects[] = $createdProspect;
-            }
+            $results = $storeProspectService->processProspects($prospects, $campaign, $accountId);
 
             DB::commit();
             return $this->respondWithSuccess([
-                'successProspects' => ProspectResource::collection($successProspects),
+                'successProspects' => ProspectResource::collection($results['successProspects']),
                 'errorProspects' => [],
-                'duplicateProspects' => ProspectResource::collection($duplicateProspects),
+                'duplicateProspects' => ProspectResource::collection($results['duplicateProspects']),
             ]);
         } catch (Exception $error) {
             DB::rollBack();
