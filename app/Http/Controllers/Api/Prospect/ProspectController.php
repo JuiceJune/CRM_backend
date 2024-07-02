@@ -122,7 +122,6 @@ class ProspectController extends Controller
             $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
 
             $storeProspectService = new StoreProspectService();
-
             $results = $storeProspectService->storeProspects($prospects, $campaign, $accountId);
 
             DB::commit();
@@ -260,74 +259,16 @@ class ProspectController extends Controller
             $campaign = Campaign::where('uuid', $campaignUuid)->firstOrFail();
 
             $user = $request->user();
-            $account_id = $user->account_id;
+            $accountId = $user->account_id;
 
-            if (!$campaign) {
-                $this->respondNotFound('Campaign not found');
-            }
-
-            $project = $campaign->project;
-
-            $firstStep = $campaign->step(1);
-            $version = $firstStep->version('A');
-            $timezone = $campaign->timezone;
-            $dateInTimeZone = Carbon::now($timezone);
-
-            $expectedHeader = 'email';
-
-            if (!in_array($expectedHeader, $headers)) {
-                throw new Exception('Email is required header');
-            }
-
-            $errorProspects = [];
-            $duplicateProspects = [];
-            $successProspects = [];
-
-            foreach ($prospects as $prospect) {
-
-                $formattedProspect = [];
-                foreach ($headers as $index => $header) {
-                    if($header !== 'none') {
-                        $formattedProspect[$header] = $prospect[$index];
-                    }
-                }
-
-                if (!array_key_exists($expectedHeader, $formattedProspect) || empty($formattedProspect[$expectedHeader])) {
-                    $errorProspects[] = $formattedProspect;
-                    continue;
-                }
-
-                $formattedProspect['account_id'] = $account_id;
-                $formattedProspect['status'] = 'active';
-
-                $prospect = Prospect::where('email', $formattedProspect['email'])->first();
-
-                if ($prospect && $prospect->existsInProject($project->id)) {
-                    $duplicateProspects[] = $prospect;
-                    continue;
-                }
-
-                $createdProspect = Prospect::create($formattedProspect);
-                $campaign->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
-                $project->prospects()->attach($createdProspect->id, ['account_id' => $account_id]);
-
-                $successProspects[] = $createdProspect;
-
-                CampaignMessage::query()->create([
-                    'account_id' => $account_id,
-                    'campaign_id' => $campaign->id,
-                    'campaign_step_id' => $firstStep->id,
-                    'campaign_step_version_id' => $version->id,
-                    'prospect_id' => $createdProspect->id,
-                    'available_at' => $dateInTimeZone,
-                ]);
-            }
+            $storeProspectService = new StoreProspectService();
+            $results = $storeProspectService->storeProspectsWithHeaders($prospects, $headers, $campaign, $accountId);
 
             DB::commit();
             return $this->respondWithSuccess([
-                'successProspects' => ProspectResource::collection($successProspects),
-                'errorProspects' => $errorProspects,
-                'duplicateProspects' => ProspectResource::collection($duplicateProspects),
+                'successProspects' => ProspectResource::collection($results['successProspects']),
+                'errorProspects' => $results['errorProspects'],
+                'duplicateProspects' => $results['duplicateProspects'],
             ]);
         } catch (Exception $error) {
             DB::rollBack();

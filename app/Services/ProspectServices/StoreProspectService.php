@@ -7,10 +7,67 @@ use App\Models\CampaignMessage;
 use App\Models\Project;
 use App\Models\Prospect;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class StoreProspectService
 {
+    public function storeProspectsWithHeaders(array $prospects, array $headers, Campaign $campaign, int $accountId): array
+    {
+        try {
+            $firstStep = $campaign->step(1);
+            $version = $firstStep->version('A');
+            $timezone = $campaign->timezone;
+            $dateInTimeZone = Carbon::now($timezone);
+            $project = $campaign->project;
+
+            $errorProspects = [];
+            $duplicateProspects = [];
+            $successProspects = [];
+
+            $expectedHeader = 'email';
+            if (!in_array($expectedHeader, $headers)) {
+                throw new Exception('Email is required header');
+            }
+
+            foreach ($prospects as $prospect) {
+                $formattedProspect = [];
+                foreach ($headers as $index => $header) {
+                    if($header !== 'none') {
+                        $formattedProspect[$header] = $prospect[$index];
+                    }
+                }
+
+                if (!array_key_exists($expectedHeader, $formattedProspect) || empty($formattedProspect[$expectedHeader])) {
+                    $errorProspects[] = $formattedProspect;
+                    continue;
+                }
+
+                $formattedProspect['account_id'] = $accountId;
+                $formattedProspect['status'] = 'active';
+
+                if ($this->isDuplicate($formattedProspect, $project->id, $accountId)) {
+                    $duplicateProspects[] = $formattedProspect;
+                    continue;
+                }
+
+                $createdProspect = $this->createProspect($formattedProspect, $accountId);
+                $this->attachProspectToCampaignAndProject($campaign, $project, $createdProspect, $accountId);
+                $this->createCampaignMessage($campaign, $firstStep, $version, $createdProspect, $accountId, $dateInTimeZone);
+
+                $successProspects[] = $createdProspect;
+            }
+
+            return [
+                'successProspects' => $successProspects,
+                'duplicateProspects' => $duplicateProspects,
+                'errorProspects' => $errorProspects,
+            ];
+        } catch (\Exception $exception) {
+            Log::error("storeProspects | " . $exception->getMessage());
+            throw new \Error($exception->getMessage());
+        }
+    }
     public function storeProspects(array $prospects, Campaign $campaign, int $accountId): array
     {
         try {
