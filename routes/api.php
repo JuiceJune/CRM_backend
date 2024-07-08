@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Position\PositionController;
 use App\Http\Controllers\Api\Project\ProjectController;
 use App\Http\Controllers\Api\Prospect\ProspectController;
 use App\Http\Controllers\Api\Role\RoleController;
+use App\Http\Controllers\Api\ScheduledEmail\ScheduledEmail;
 use App\Http\Controllers\Api\User\AuthController;
 use App\Http\Controllers\Api\User\UserController;
 use Illuminate\Support\Facades\Route;
@@ -128,4 +129,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('/{campaign:uuid}/report', [CampaignController::class, 'generateReport']);
     });
 
+    Route::group(['prefix' => 'scheduled-emails'], function () {
+        Route::get('/', [ScheduledEmail::class, 'index']);
+    });
 });
