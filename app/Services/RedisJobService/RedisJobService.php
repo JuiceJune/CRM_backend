@@ -30,10 +30,25 @@ class RedisJobService
     public function getJob(string $id): ?array
     {
         try {
-            $job = $this->redisHorizon->get("outnash:" . $id);
+            $job = [];
+
+            $job['id'] = $id;
+            $job['jobName'] = $this->redisHorizon->hget($id, 'name');
+            $job['jobCreatedAt'] = $this->redisHorizon->hget($id, 'created_at');
+            $job['payload'] = $this->redisHorizon->hget($id, 'payload');
+            $job['status'] = $this->redisHorizon->hget($id, 'status');
+            $job['updatedAt'] = $this->redisHorizon->hget($id, 'updated_at');
+            $job['connection'] = $this->redisHorizon->hget($id, 'connection');
+            $job['queue'] = $this->redisHorizon->hget($id, 'queue');
+            $job['completedAt'] = $this->redisHorizon->hget($id, 'completed_at');
+            $job['reservedAt'] = $this->redisHorizon->hget($id, 'reserved_at');
+
+            $decodedPayload = json_decode($job['payload'], true);
+            $job['payload'] = $decodedPayload;
+
             Log::channel('dev-campaign-process')->alert('Job: ' . json_encode($job));
 
-            return null;
+            return $job;
         } catch (Exception $e) {
             Log::channel('dev-campaign-process')->error('Error fetching Redis job: ' . $e->getMessage());
             return null;

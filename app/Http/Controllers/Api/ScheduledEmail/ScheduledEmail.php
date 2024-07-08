@@ -40,7 +40,7 @@ class ScheduledEmail extends Controller
             $redisJobs = [];
 
             foreach ($campaignRedisJobs as $campaignRedisJob) {
-                $redisJobService->getJob($campaignRedisJob['redis_job_id']);
+                $redisJobs[] = $redisJobService->getJob($campaignRedisJob['redis_job_id']);
             }
 
             return $this->respondWithSuccess([
