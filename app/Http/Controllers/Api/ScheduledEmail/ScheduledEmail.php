@@ -28,6 +28,7 @@ class ScheduledEmail extends Controller
             $campaignRedisJobs = RedisJob::query()
                 ->where('account_id', $accountId)
                 ->where('campaign_id', $campaign['id'])
+                ->where('type', 'campaign-email-send')
                 ->get();
 
             if(!$campaignRedisJobs || count($campaignRedisJobs) == 0) {
