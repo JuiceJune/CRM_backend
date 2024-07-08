@@ -19,16 +19,15 @@ class ScheduledEmail extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): \Illuminate\Http\JsonResponse
+    public function index(Request $request, Campaign $campaign): \Illuminate\Http\JsonResponse
     {
         try {
-            $campaignId = $request->input('campaign_id');
             $user = $request->user();
             $accountId = $user->account_id;
 
             $campaignRedisJobs = RedisJob::query()
                 ->where('account_id', $accountId)
-                ->where('campaign_id', $campaignId)
+                ->where('campaign_id', $campaign['id'])
                 ->get();
 
             if(!$campaignRedisJobs || count($campaignRedisJobs) == 0) {

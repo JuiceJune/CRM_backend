@@ -130,6 +130,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::group(['prefix' => 'scheduled-emails'], function () {
-        Route::get('/', [ScheduledEmail::class, 'index']);
+        Route::get('/{campaign:uuid}', [ScheduledEmail::class, 'index']);
     });
 });
