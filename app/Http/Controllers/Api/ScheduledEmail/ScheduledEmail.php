@@ -7,6 +7,7 @@ use App\Http\Requests\Campaign\CampaignStoreRequest;
 use App\Http\Requests\Campaign\CampaignUpdateRequest;
 use App\Http\Resources\Campaign\CampaignShowResource;
 use App\Models\Campaign;
+use App\Models\CampaignMessage;
 use App\Models\RedisJob;
 use App\Services\RedisJobService\RedisJobService;
 use F9Web\ApiResponseHelpers;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 class ScheduledEmail extends Controller
 {
     use ApiResponseHelpers;
+
     /**
      * Display a listing of the resource.
      */
@@ -31,21 +33,35 @@ class ScheduledEmail extends Controller
                 ->where('type', 'campaign-email-send')
                 ->get();
 
-            if(!$campaignRedisJobs || count($campaignRedisJobs) == 0) {
+            if (!$campaignRedisJobs || count($campaignRedisJobs) == 0) {
                 return $this->respondWithSuccess([
                     'jobs' => null,
                 ]);
             }
 
             $redisJobService = new RedisJobService();
-            $redisJobs = [];
+            $scheduledEmails = [];
 
             foreach ($campaignRedisJobs as $campaignRedisJob) {
-                $redisJobs[] = $redisJobService->getJob($campaignRedisJob['redis_job_id']);
+                $job = $redisJobService->getJob($campaignRedisJob['redis_job_id']);
+
+                $campaignMessageId = $job["payload"]["data"]["command"]["campaignMessage"]["id"];
+
+                $campaignMessage = CampaignMessage::query()->find($campaignMessageId);
+
+                $scheduledEmails[] = [
+                    "id" => $job['id'],
+                    "jobCreated" => $job["jobCreatedAt"],
+                    "status" => $job["status"],
+                    "delay" => $job["payload"]["data"]["command"]["delay"],
+                    "email" => $campaignMessage->prospect["email"],
+                    "step" => $campaignMessage->campaignStep['step'],
+                    "version" => $campaignMessage->campaignStepVersion['version']
+                ];
             }
 
             return $this->respondWithSuccess([
-                'jobs' => $redisJobs,
+                'jobs' => $scheduledEmails,
             ]);
         } catch (\Exception $error) {
             return $this->respondError($error->getMessage());

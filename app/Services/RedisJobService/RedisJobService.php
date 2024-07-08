@@ -44,7 +44,7 @@ class RedisJobService
             $job['reservedAt'] = $this->redisHorizon->hget($id, 'reserved_at');
 
             $job['payload'] = json_decode($job['payload'], true);
-            $job['payload']['data']['command'] = json_decode($job['payload']['data']['command'], true);
+            $job['payload']['data']['command'] = unserialize($job['payload']['data']['command']);
 
             Log::channel('dev-campaign-process')->alert('Job: ' . json_encode($job));
 
