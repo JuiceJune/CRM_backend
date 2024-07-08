@@ -31,11 +31,11 @@ class RedisJobService
     {
         try {
             $job = $this->redisHorizon->get("outnash:" . $id);
-            Log::alert('Job: ' . json_encode($job));
+            Log::channel('dev-campaign-process')->alert('Job: ' . json_encode($job));
 
             return null;
         } catch (Exception $e) {
-            Log::error('Error fetching Redis job: ' . $e->getMessage());
+            Log::channel('dev-campaign-process')->error('Error fetching Redis job: ' . $e->getMessage());
             return null;
         }
     }
