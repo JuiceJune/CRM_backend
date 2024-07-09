@@ -45,15 +45,14 @@ class ScheduledEmail extends Controller
             foreach ($campaignRedisJobs as $campaignRedisJob) {
                 $job = $redisJobService->getJob($campaignRedisJob['redis_job_id']);
 
-                $campaignMessageId = $job["payload"]["data"]["command"]["campaignMessage"]["id"];
-
+                $campaignMessageId = $job["payload"]["data"]["command"]->campaignMessage["id"];
                 $campaignMessage = CampaignMessage::query()->find($campaignMessageId);
 
                 $scheduledEmails[] = [
                     "id" => $job['id'],
                     "jobCreated" => $job["jobCreatedAt"],
                     "status" => $job["status"],
-                    "delay" => $job["payload"]["data"]["command"]["delay"],
+                    "delay" => $job["payload"]["data"]["command"]->delay,
                     "email" => $campaignMessage->prospect["email"],
                     "step" => $campaignMessage->campaignStep['step'],
                     "version" => $campaignMessage->campaignStepVersion['version']
